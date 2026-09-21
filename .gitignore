@@ -1,0 +1,12 @@
+node_modules/
+dist/
+models/
+data/raw/
+.work/
+.runtime/
+release/
+*.gguf
+*.safetensors
+android/app/build/
+ios/App/Pods/
+.env

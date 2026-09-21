@@ -12,4 +12,6 @@
 
 - Internal track: release `1 (1.0.0)` published ("Available to internal testers"); the track shows the temporary app name until the first review completes. Play flagged one warning only (no native debug symbols in the bundle).
 - Testers: email lists `EchoMind Internal Testers`, `L & N license testers`, `L & N phone testers`; join link https://play.google.com/apps/internaltest/4701677916092886102
-- Next: promote release 1 to Production with all countries, then send the whole app for review from Publishing overview.
+- Production: release `1 (1.0.0)` promoted from internal, 172 countries/regions added, saved.
+- Advertising ID declaration: does not use the advertising ID (Play's quick check required it).
+- 2026-09-21 23:40: **Submit 10 changes for review → Send changes for review** confirmed; Publishing overview shows "Changes in review" (Play forwards them once its quick checks finish). This is the first, paid production submission; the internal track stays available to the tester lists meanwhile.

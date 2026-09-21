@@ -7,3 +7,8 @@
 - Store listing (en-US): name, 80-character short description, full description from `store/google-play/metadata.md`, icon `store/assets/play-icon-512.png`, feature graphic `store/assets/feature-graphic-1024x500.png`, seven phone screenshots from `store/screenshots/play-phone-en/`.
 - Pricing: USD 0.99 applied to all countries/regions (local prices converted by Play), tax category Digital app sales.
 - Bundle 1 (1.0.0) SHA-256 `bf4bc97346de215ba75f9c040a554680dc857d2964fde3d31e22af7a79d01b09` uploaded to internal testing (see below for the result).
+
+## 2026-09-21 — internal testing release 1 (1.0.0) published
+
+- Internal track: release `1 (1.0.0)` published ("Available to internal testers"); the track shows the temporary app name until the first review completes. Play flagged one warning only (no native debug symbols in the bundle).
+- Next: promote release 1 to Production with all countries, then send the whole app for review from Publishing overview.

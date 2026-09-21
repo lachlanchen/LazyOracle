@@ -128,3 +128,118 @@
   .tarot-card.large .tarot-card-flip { width: 110px; height: 178px; }
   .tarot-card.small .tarot-card-flip { width: 68px; height: 110px; }
 }
+
+/* Shared facts */
+.facts { display: grid; grid-template-columns: 96px 1fr; gap: 6px 12px; margin: 14px 0 0; }
+.facts dt { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); font-weight: 700; padding-top: 3px; }
+.facts dd { margin: 0; font-family: var(--serif); font-size: 17px; line-height: 1.35; }
+.facts dd.classical { font-size: 19px; color: var(--gold); }
+.facts-title { display: block; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); font-weight: 700; margin: 14px 0 6px; }
+.link-button { border: 0; background: transparent; color: var(--ink-mute); text-decoration: underline; font-size: 13px; cursor: pointer; padding: 10px 0 0; }
+.field-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 10px; }
+.field-row .field { margin-bottom: 10px; }
+.field select { width: 100%; border: 1px solid var(--line); background: rgba(0,0,0,.25); color: var(--ink); border-radius: 14px; padding: 12px 14px; font-family: var(--serif); font-size: 17px; }
+.field input:disabled { opacity: .4; }
+.panel h3.sub { font-family: var(--display); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); margin: 18px 0 8px; }
+.chart-panel .hint, .ask-panel .hint { color: var(--ink-mute); font-size: 12px; font-style: italic; font-family: var(--serif); margin: 6px 0 0; }
+
+/* I Ching */
+.hexagram-pair { display: flex; align-items: center; justify-content: center; gap: 18px; padding: 8px 0 4px; }
+.hexagram-block { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.hexagram { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.hexagram figcaption { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-mute); font-weight: 700; }
+.hexagram-lines { display: flex; flex-direction: column; gap: 9px; }
+.hexagram.small .hexagram-lines { gap: 6px; }
+.hex-line { position: relative; display: flex; gap: 14px; width: 120px; height: 12px; opacity: 0; transform: scaleX(.2); transition: opacity .35s ease, transform .45s cubic-bezier(.2,.7,.2,1); }
+.hexagram.small .hex-line { width: 76px; height: 8px; gap: 9px; }
+.hex-line.visible { opacity: 1; transform: scaleX(1); }
+.hex-line span { flex: 1; border-radius: 3px; background: linear-gradient(180deg, #e9cf82, var(--gold) 60%, #a37f2c); box-shadow: 0 2px 6px rgba(0,0,0,.35); }
+.hex-line.changing span { background: linear-gradient(180deg, #ffd9c9, var(--rose) 60%, #a0503f); }
+.change-mark { position: absolute; right: -22px; top: -4px; font-style: normal; font-size: 14px; color: var(--rose); }
+.hexagram.small .change-mark { right: -16px; top: -6px; font-size: 11px; }
+.hexagram-name { text-align: center; display: flex; flex-direction: column; gap: 2px; }
+.hexagram-name b { font-family: var(--display); font-size: 18px; letter-spacing: .04em; }
+.hexagram-name span { font-family: var(--serif); font-size: 13px; color: var(--ink-soft); }
+.hexagram-arrow { color: var(--gold); font-size: 26px; }
+
+/* BaZi */
+.pillars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.pillar { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 4px 8px; border-radius: 14px; border: 1px solid var(--line); background: rgba(0,0,0,.22); }
+.pillar.day { border-color: var(--gold-line); background: var(--gold-soft); }
+.pillar-title { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-mute); font-weight: 700; }
+.pillar-god { font-size: 10px; color: var(--ink-soft); min-height: 14px; text-align: center; }
+.pillar-char { font-family: var(--display); font-size: 34px; line-height: 1.1; font-weight: 600; }
+.pillar-char.wood { color: #8fd18f; } .pillar-char.fire { color: #ff8f7a; } .pillar-char.earth { color: #d9b45a; } .pillar-char.metal { color: #e6e6f0; } .pillar-char.water { color: #7fb8ff; }
+.pillar-hidden { font-size: 11px; color: var(--ink-mute); letter-spacing: .1em; }
+.pillar-nayin { font-size: 10px; color: var(--ink-mute); }
+.element-bars { display: grid; gap: 6px; margin-top: 14px; }
+.element-bar { display: grid; grid-template-columns: 52px 1fr 20px; align-items: center; gap: 8px; font-size: 12px; }
+.element-track { height: 8px; border-radius: 4px; background: rgba(255,255,255,.08); overflow: hidden; }
+.element-fill { display: block; height: 100%; border-radius: 4px; background: var(--gold); transition: width .6s ease; }
+.element-bar.wood .element-fill { background: #8fd18f; } .element-bar.fire .element-fill { background: #ff8f7a; } .element-bar.earth .element-fill { background: #d9b45a; } .element-bar.metal .element-fill { background: #e6e6f0; } .element-bar.water .element-fill { background: #7fb8ff; }
+.element-count { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink-soft); }
+.luck-cycles ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.luck-cycles li { display: flex; flex-direction: column; align-items: center; padding: 8px 2px; border-radius: 10px; border: 1px solid var(--line); }
+.luck-cycles li.current { border-color: var(--gold-line); background: var(--gold-soft); }
+.luck-cycles b { font-family: var(--display); font-size: 15px; }
+.luck-cycles small { font-size: 10px; color: var(--ink-mute); }
+
+/* Astrology */
+.natal-wheel { width: 100%; max-width: 340px; display: block; margin: 0 auto; }
+.wheel-ring { fill: none; stroke: var(--gold-line); stroke-width: 1; }
+.wheel-ring.faint { stroke: var(--line); }
+.wheel-tick { stroke: var(--gold-line); stroke-width: 1; }
+.wheel-tick.faint { stroke: var(--line); }
+.wheel-axis { stroke: var(--rose); stroke-width: 1; stroke-dasharray: 3 3; }
+.axis-label { fill: var(--rose); font-size: 9px; letter-spacing: .1em; font-weight: 700; }
+.sign-glyph { font-size: 15px; fill: var(--ink-soft); }
+.sign-glyph.fire { fill: #ff9f8a; } .sign-glyph.earth { fill: #d9b45a; } .sign-glyph.air { fill: #cfd6ff; } .sign-glyph.water { fill: #86c1ff; }
+.house-number { font-size: 8px; fill: var(--ink-mute); }
+.planet-glyph { font-size: 17px; fill: var(--ink); }
+.placements { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 4px; }
+.placements li { display: grid; grid-template-columns: 24px 74px 1fr auto; gap: 8px; align-items: baseline; font-size: 14px; }
+.placements .glyph { color: var(--gold); font-size: 16px; }
+.placements .sign { font-family: var(--serif); font-size: 16px; }
+.placements .house { color: var(--ink-mute); font-size: 12px; }
+.aspect-list p { margin: 0; font-size: 14px; color: var(--ink-soft); line-height: 1.5; }
+
+/* Feng Shui */
+.bagua-rose { width: 100%; max-width: 320px; display: block; margin: 0 auto; }
+.sector path { stroke: var(--night); stroke-width: 2; }
+.sector.good path { fill: rgba(217,180,90,.35); }
+.sector.bad path { fill: rgba(226,139,122,.18); }
+.sector-label { font-size: 12px; fill: var(--ink); font-weight: 700; }
+.sector-dir { font-size: 11px; fill: var(--ink-mute); letter-spacing: .06em; }
+.rose-needle { fill: var(--rose); }
+.rose-pin { fill: var(--gold); }
+.compass-status { text-align: center; margin-top: 8px; }
+.heading-readout { font-family: var(--serif); font-size: 16px; color: var(--ink-soft); margin: 6px 0 0; }
+
+/* Palm */
+.palm-preview { position: relative; margin-top: 12px; border-radius: 16px; overflow: hidden; background: #000; }
+.palm-preview img { width: 100%; display: block; }
+.palm-overlay { position: absolute; inset: 0; width: 100%; height: 100%; }
+.palm-overlay line { stroke: var(--gold); stroke-width: .006; stroke-linecap: round; }
+.palm-overlay circle { fill: var(--rose); }
+.palm-status { position: absolute; left: 0; right: 0; bottom: 0; margin: 0; padding: 10px; text-align: center; background: rgba(11,13,31,.7); font-family: var(--serif); font-style: italic; }
+.palm-screen .button-row .primary-button { flex: 1.4; }
+
+/* Books */
+.book-panel { display: flex; justify-content: center; padding: 22px 12px; }
+.book { display: flex; width: 100%; max-width: 380px; aspect-ratio: 3 / 2; perspective: 1200px; }
+.book-page { flex: 1; background: linear-gradient(90deg, var(--parchment-2), var(--parchment)); border: 1px solid rgba(122,92,28,.4); box-shadow: 0 14px 30px rgba(0,0,0,.45); }
+.book-page.left { border-radius: 10px 2px 2px 10px; transform-origin: right center; transform: rotateY(-8deg); }
+.book-page.right { border-radius: 2px 10px 10px 2px; transform-origin: left center; transform: rotateY(90deg); transition: transform .8s cubic-bezier(.2,.7,.2,1); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 18px; box-sizing: border-box; color: #2a2340; text-align: center; }
+.book-panel.opened .book-page.right { transform: rotateY(8deg); }
+.page-number { font-family: var(--display); font-size: 10px; letter-spacing: .18em; color: #7a5c1c; margin-bottom: 10px; }
+.page-text { font-family: var(--serif); font-size: clamp(18px, 5vw, 24px); line-height: 1.3; margin: 0; }
+
+/* Settings models */
+.model-list { list-style: none; margin: 0 0 6px; padding: 0; display: grid; gap: 8px; }
+.model-list li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--line); background: rgba(0,0,0,.22); }
+.model-list li.active { border-color: var(--gold-line); }
+.model-list b { display: block; font-size: 15px; }
+.model-list small { display: block; color: var(--ink-mute); font-size: 12px; margin-top: 2px; }
+.model-list .progress { display: block; height: 6px; border-radius: 3px; background: rgba(255,255,255,.08); margin-top: 8px; overflow: hidden; width: 160px; }
+.model-list .progress span { display: block; height: 100%; background: var(--gold); transition: width .3s; }
+.about { color: var(--ink-mute); font-size: 12px; }

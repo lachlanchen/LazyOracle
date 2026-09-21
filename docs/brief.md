@@ -71,3 +71,9 @@ narrative reading, cited to the structured facts
 
 - Display name: "LazyOracle" is the repo; the store name can be shorter (proposed: **Tianji · 天机**, "heaven's secret", with LazyOracle as the developer line). Confirm or pick another.
 - Whether palmistry needs a camera at all in v1 or can start from a guided sketch.
+
+## 8. Progress log
+
+- **2026-09-21, milestone 1 done (commit series up to this note).** Shell scaffolded from L & N (Vite + React 19 + TypeScript, vite-plugin-pwa, Capacitor config `art.lazying.lazyoracle`, same lint/test/build gates). Celestial theme: night gradient with a drifting starfield, gold accents, Cinzel for headings, Cormorant Garamond for reading text (Latin subsets bundled, OFL), system CJK for Chinese. Tarot end to end on the PWA: 78-card deck with English and Chinese keywords (`src/engines/tarot/deck.ts`), three spreads, mulberry32 seeded shuffle so every draw is reproducible from its seed (shown on the reading panel), flip-to-reveal cards, structured card facts, then a reading. Readings come from an OpenAI-compatible endpoint when the user enables one in Settings (tested with the workstation's Ollama `qwen3:4b-q4_K_M`, streaming, `<think>` blocks hidden) and otherwise from a deterministic composition of the card meanings, which is also the baseline the model must agree with. Interface copy in en, zh-Hans, zh-Hant and yue; engine data is written once in Simplified and converted for the Traditional and Cantonese interfaces with a generated character table (`tools/gen-hant.py` → `src/lib/hant.ts`). Screenshots in `docs/screenshots/`.
+- **Observed:** Qwen3-4B narrates well in English and Simplified Chinese; in Traditional Chinese it mixes scripts and occasionally leaks an English token (`-move`). That is the first target for the LoRA in section 3, together with a "Traditional characters only" instruction.
+- **Next:** milestone 2, BaZi and I Ching engines with golden tests and visuals.

@@ -7,6 +7,8 @@ interface TarotCardProps {
   language: 'en' | 'zh'
   /** Position label under the card. */
   label?: string
+  /** Name in the interface script; defaults to the card's text for `language`. */
+  displayName?: string
   onReveal?: () => void
   size?: 'small' | 'large'
   /** The crossing card in a Celtic cross lies on its side. */
@@ -86,15 +88,16 @@ function MajorSigil({ element }: { element: Card['element'] }) {
   }
 }
 
-export function TarotCard({ card, orientation, revealed, language, label, onReveal, size = 'large', crossed, testId }: TarotCardProps) {
+export function TarotCard({ card, orientation, revealed, language, label, displayName, onReveal, size = 'large', crossed, testId }: TarotCardProps) {
   const text = card.text[language]
+  const name = displayName ?? text.name
   const classes = ['tarot-card', size, revealed ? 'revealed' : 'hidden', orientation, crossed ? 'crossed' : ''].filter(Boolean).join(' ')
   return (
     <figure className={classes} data-testid={testId}>
       <button
         type="button"
         className="tarot-card-flip"
-        aria-label={revealed ? `${text.name}, ${orientation}` : 'Turn card'}
+        aria-label={revealed ? `${name}, ${orientation}` : 'Turn card'}
         aria-pressed={revealed}
         onClick={onReveal}
       >
@@ -114,7 +117,7 @@ export function TarotCard({ card, orientation, revealed, language, label, onReve
           <svg viewBox="0 0 64 64" className="face-glyph" aria-hidden="true">
             {card.arcana === 'major' ? <MajorSigil element={card.element} /> : <SuitGlyph suit={card.suit!} />}
           </svg>
-          <span className="face-name">{text.name}</span>
+          <span className="face-name">{name}</span>
           <span className="face-label bottom">{card.label}</span>
         </span>
       </button>

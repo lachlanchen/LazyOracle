@@ -1,5 +1,11 @@
 import type { TarotDraw } from '../engines/tarot/types'
 import type { ReadingLanguage } from '../types'
+import { toHant } from './hant'
+
+/** Card and position text in the script of the interface: Simplified, Traditional, or English. */
+export function scriptText(text: string, language: ReadingLanguage): string {
+  return language === 'zh-Hant' || language === 'yue' ? toHant(text) : text
+}
 
 /**
  * Everything the model is allowed to know about a draw. The model narrates
@@ -27,13 +33,13 @@ export function tarotContext(draw: TarotDraw, language: ReadingLanguage): TarotC
     practice: 'tarot',
     language,
     question: draw.question,
-    spread: draw.spread.name[textLanguage],
+    spread: scriptText(draw.spread.name[textLanguage], language),
     cards: draw.cards.map((item) => ({
-      position: item.position.name[textLanguage],
-      positionAsks: item.position.question[textLanguage],
-      card: item.card.text[textLanguage].name,
+      position: scriptText(item.position.name[textLanguage], language),
+      positionAsks: scriptText(item.position.question[textLanguage], language),
+      card: scriptText(item.card.text[textLanguage].name, language),
       orientation: item.orientation,
-      keywords: item.card.text[textLanguage][item.orientation],
+      keywords: item.card.text[textLanguage][item.orientation].map((word) => scriptText(word, language)),
       element: item.card.element,
     })),
   }
@@ -92,5 +98,5 @@ export function offlineReading(context: TarotContext): string {
     lines.push(copy.card(item.position, item.card, item.orientation === 'reversed' ? copy.reversed : '', item.keywords.join(joiner), item.positionAsks))
   }
   lines.push(copy.advice)
-  return lines.join('\n\n')
+  return scriptText(lines.join('\n\n'), context.language)
 }

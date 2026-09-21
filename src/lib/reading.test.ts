@@ -26,6 +26,12 @@ describe('reading context', () => {
     expect(context.cards[0].card).toBe(draw.cards[0].card.text.zh.name)
   })
 
+  it('shows Traditional characters for the Traditional and Cantonese interfaces', () => {
+    const context = tarotContext(draw, 'zh-Hant')
+    expect(context.spread).toBe('過去 · 現在 · 未來')
+    expect(offlineReading(tarotContext(draw, 'yue'))).not.toMatch(/[圣权币过对宝剑]/)
+  })
+
   it('composes an offline reading that names every card and its orientation', () => {
     const context = tarotContext(draw, 'en')
     const text = offlineReading(context)

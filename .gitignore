@@ -1,6 +1,9 @@
 node_modules/
 dist/
-models/
+dev-dist/
+models/*
+!models/DOWNLOADS.md
+!models/download.sh
 data/raw/
 .work/
 .runtime/
@@ -10,3 +13,4 @@ release/
 android/app/build/
 ios/App/Pods/
 .env
+*.tsbuildinfo

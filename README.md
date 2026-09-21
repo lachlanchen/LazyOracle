@@ -17,3 +17,5 @@ npm run check      # lint, tests, production build
 To get narrative readings on the desktop, open Settings, enable the endpoint and point it at a local Ollama (`http://127.0.0.1:11434/v1`, model `qwen3:4b-q4_K_M`) or your LazyEdge workstation route. Sibling of [L & N](https://github.com/lachlanchen/L-And-N), which supplies the app shell and the publishing pipeline.
 
 Price: US$0.99 (CNY 8 / HKD 8) on the App Store and Google Play; the PWA is free.
+
+[TestFlight public beta](https://testflight.apple.com/join/JZJM3PFb) · [Google Play internal test](https://play.google.com/apps/internaltest/4701677916092886102) · Android APK: `LazyOracle-1.0.0-build1.apk` on the site once oracle.lazying.art is live · App Store and Google Play listings: in review.

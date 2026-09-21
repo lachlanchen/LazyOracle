@@ -3,7 +3,7 @@ version: 1.0.0
 web:
   host: sshem-admin (Aliyun 47.84.190.118); Caddy site /etc/lazyedge/lazyoracle.caddy (HTTP phase installed; HTTPS block in store/lazyoracle.caddy waits for the certificate)
   domain: oracle.lazying.art
-  dns: currently points at 179.236.105.35 (Huanayun edge, no sudo access); must point at 47.84.190.118 before the certificate can be issued
+  dns: points at 179.236.105.35 (Huanayun). Let's Encrypt cannot validate there (HTTP-01, TLS-ALPN and certbot standalone all fail although 80/443 answer locally; provider-side filtering of foreign validators). Huanayun Caddy left as an HTTP-only redirect. The site must move to 47.84.190.118 (Aliyun), where it is staged; then certbot webroot + the https block in store/lazyoracle.caddy
   release_root: /opt/lazyoracle-web/releases/<sha>, current symlink switched by tools/deploy-web.sh
   apk: /opt/lazyoracle-web/current/dist/downloads/LazyOracle-1.0.0-build1.apk
 android:
@@ -23,4 +23,6 @@ ios:
   build: 1
   ipa_sha256: b0a8ead096ac58683e55661038b598dc72f2ef0364dca2bfb939f62838ac4d83
   mac: ~/Projects/LazyOracle/release/build1.sh + upload1.sh on echomind-kvm-macos
-  blocker: the App Store Connect app record does not exist yet; creating it needs the account holder's Apple ID sign-in in noVNC
+  app_id: 6814663937
+  testflight: build 1 in internal group; public link https://testflight.apple.com/join/JZJM3PFb (beta review waiting)
+  app_store: version 1.0.0 submitted 2026-09-22, review submission dfc3a1fa-8043-49a9-a77b-281e8a58e1b0 WAITING_FOR_REVIEW, tier US$0.99, automatic release

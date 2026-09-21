@@ -47,7 +47,7 @@ export function hexagramByNumber(number: number): Hexagram {
 /** Three-coin method: each coin is 3 (heads) or 2 (tails); the sum 6–9 is the line. */
 function castCoinLine(next: () => number): CastLine {
   const coins: [boolean, boolean, boolean] = [next() < 0.5, next() < 0.5, next() < 0.5]
-  const value = coins.reduce((sum, heads) => sum + (heads ? 3 : 2), 0) as LineValue
+  const value = coins.reduce<number>((sum, heads) => sum + (heads ? 3 : 2), 0) as LineValue
   return { value, yang: value % 2 === 1, changing: value === 6 || value === 9, coins }
 }
 

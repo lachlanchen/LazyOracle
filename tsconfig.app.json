@@ -6,6 +6,8 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "types": ["vite/client"],
+    "baseUrl": ".",
+    "paths": { "@wllama/wllama": ["./node_modules/@wllama/wllama/esm/index.d.ts"] },
     "skipLibCheck": true,
 
     /* Bundler mode */

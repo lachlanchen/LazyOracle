@@ -132,7 +132,7 @@
 /* Shared facts */
 .facts { display: grid; grid-template-columns: 96px 1fr; gap: 6px 12px; margin: 14px 0 0; }
 .facts dt { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); font-weight: 700; padding-top: 3px; }
-.facts dd { margin: 0; font-family: var(--serif); font-size: 17px; line-height: 1.35; }
+.facts dd { margin: 0; font-family: var(--serif); font-size: 17px; line-height: 1.35; grid-column: 2; }
 .facts dd.classical { font-size: 19px; color: var(--gold); }
 .facts-title { display: block; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); font-weight: 700; margin: 14px 0 6px; }
 .link-button { border: 0; background: transparent; color: var(--ink-mute); text-decoration: underline; font-size: 13px; cursor: pointer; padding: 10px 0 0; }

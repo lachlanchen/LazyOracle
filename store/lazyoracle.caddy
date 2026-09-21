@@ -1,0 +1,41 @@
+# oracle.lazying.art — LazyOracle PWA, static files only. Phase 1 (before the
+# certificate exists) serves the ACME challenge and the site over HTTP; phase 2
+# adds the HTTPS block below once certbot has issued the certificate.
+http://oracle.lazying.art {
+    handle /.well-known/acme-challenge/* {
+        root * /var/www/letsencrypt
+        file_server
+    }
+    handle {
+        redir https://{host}{uri} 308
+    }
+}
+
+https://oracle.lazying.art {
+    import lazyedge_common
+    header -Alt-Svc
+    tls /etc/letsencrypt/live/oracle.lazying.art/fullchain.pem /etc/letsencrypt/live/oracle.lazying.art/privkey.pem
+
+    header {
+        Content-Security-Policy "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' 'wasm-unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; media-src 'self' blob:; connect-src 'self' https://huggingface.co https://*.hf.co https://hf-mirror.com https://*.hf-mirror.com http://127.0.0.1:* http://localhost:*; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'"
+        Permissions-Policy "camera=(self), microphone=(), geolocation=(), magnetometer=(self), accelerometer=(self), gyroscope=(self)"
+        Referrer-Policy "no-referrer"
+        Strict-Transport-Security "max-age=31536000"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+    }
+
+    handle /.well-known/acme-challenge/* {
+        root * /var/www/letsencrypt
+        file_server
+    }
+
+    @versioned_assets path /assets/*
+    header @versioned_assets Cache-Control "public, max-age=31536000, immutable"
+    @big_static path /wllama/* /mediapipe/* /models/* /fonts/*
+    header @big_static Cache-Control "public, max-age=2592000"
+
+    root * /opt/lazyoracle-web/current/dist
+    try_files {path} {path}/index.html /index.html
+    file_server
+}

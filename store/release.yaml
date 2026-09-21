@@ -1,10 +1,11 @@
 app: LazyOracle
 version: 1.0.0
 web:
-  host: sshem-admin (Aliyun 47.84.190.118); Caddy site /etc/lazyedge/lazyoracle.caddy (HTTP phase installed; HTTPS block in store/lazyoracle.caddy waits for the certificate)
+  host: sshem-admin (Aliyun 47.84.190.118); Caddy site /etc/lazyedge/lazyoracle.caddy (HTTP + HTTPS, certificate from certbot webroot, group certread like the other sites)
   domain: oracle.lazying.art
-  dns: points at 179.236.105.35 (Huanayun). Let's Encrypt cannot validate there (HTTP-01, TLS-ALPN and certbot standalone all fail although 80/443 answer locally; provider-side filtering of foreign validators). Huanayun Caddy left as an HTTP-only redirect. The site must move to 47.84.190.118 (Aliyun), where it is staged; then certbot webroot + the https block in store/lazyoracle.caddy
+  dns: 47.84.190.118 (Aliyun) since 2026-09-22; the Huanayun edge keeps an HTTP-only redirect and is unused
   release_root: /opt/lazyoracle-web/releases/<sha>, current symlink switched by tools/deploy-web.sh
+  live_release: 22f3bbac249a32258e0b1ad530f4a96071c12dd282ba21aae26d6097987a5a7b (source 147a9bb, index-CFzpinSd.js), https://oracle.lazying.art live 2026-09-22
   apk: /opt/lazyoracle-web/current/dist/downloads/LazyOracle-1.0.0-build1.apk
 android:
   package: art.lazying.lazyoracle

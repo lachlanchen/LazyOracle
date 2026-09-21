@@ -16,6 +16,13 @@ interface TarotScreenProps {
 
 type ReadingState = { source: 'none' } | { source: 'offline'; text: string } | { source: 'model'; text: string; done: boolean }
 
+/** Renders the little markdown a model tends to emit: **bold** and line breaks. Nothing else. */
+function renderInline(text: string) {
+  return text.split(/(\*\*[^*]+\*\*)/).map((part, index) =>
+    part.startsWith('**') && part.endsWith('**') ? <strong key={index}>{part.slice(2, -2)}</strong> : <span key={index}>{part.replace(/^#+\s*/, '')}</span>,
+  )
+}
+
 export function TarotScreen({ copy, language }: TarotScreenProps) {
   const [question, setQuestion] = useState('')
   const [spreadId, setSpreadId] = useState<Spread['id']>('three')
@@ -197,7 +204,7 @@ export function TarotScreen({ copy, language }: TarotScreenProps) {
           ) : (
             <div className="reading-text">
               {reading.text.split(/\n{2,}/).map((paragraph, index) => (
-                <p key={index}>{paragraph}</p>
+                <p key={index}>{renderInline(paragraph)}</p>
               ))}
             </div>
           )}

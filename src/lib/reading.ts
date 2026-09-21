@@ -69,7 +69,6 @@ const OFFLINE_COPY = {
     card: (position: string, card: string, orientation: string, keywords: string, asks: string) =>
       `${position}: ${card}${orientation ? ` (${orientation})` : ''}. ${asks} Its keywords are ${keywords}.`,
     advice: 'Read the cards together: notice which keywords repeat and which pull against each other. That tension is where your question lives. Take one small, concrete step in the direction the last card points.',
-    note: 'This reading was composed from the card meanings alone. Connect a model in Settings for a narrative reading.',
   },
   zh: {
     theme: (spread: string) => `这是一次「${spread}」牌阵的解读。`,
@@ -77,7 +76,6 @@ const OFFLINE_COPY = {
     card: (position: string, card: string, orientation: string, keywords: string, asks: string) =>
       `${position}：${card}${orientation ? `（${orientation}）` : ''}。${asks} 关键词：${keywords}。`,
     advice: '把几张牌放在一起看：留意哪些关键词重复出现，哪些互相拉扯，那正是问题所在。朝最后一张牌指向的方向，迈出一个具体的小步。',
-    note: '本解读仅由牌义组合而成。在设置中连接模型后，可以获得叙事式解读。',
   },
 }
 
@@ -94,6 +92,5 @@ export function offlineReading(context: TarotContext): string {
     lines.push(copy.card(item.position, item.card, item.orientation === 'reversed' ? copy.reversed : '', item.keywords.join(joiner), item.positionAsks))
   }
   lines.push(copy.advice)
-  lines.push(copy.note)
   return lines.join('\n\n')
 }

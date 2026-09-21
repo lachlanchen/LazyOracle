@@ -68,8 +68,8 @@
 /* Spread stage */
 .spread-panel { padding: 14px 10px 16px; }
 .spread-stage { position: relative; width: 100%; aspect-ratio: 4 / 3; }
-.spread-stage.one { aspect-ratio: 4 / 3; }
-.spread-stage.three { aspect-ratio: 5 / 3; }
+.spread-stage.one { aspect-ratio: 3 / 2; }
+.spread-stage.three { aspect-ratio: 5 / 2.7; }
 .spread-stage.celtic { aspect-ratio: 5 / 5.6; }
 .spread-slot { position: absolute; transform: translate(-50%, -50%); }
 

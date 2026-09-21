@@ -3,8 +3,6 @@ import type { Practice, ReadingLanguage } from './types'
 export const languageLabels: Record<ReadingLanguage, string> = {
   en: 'English',
   'zh-Hans': '简体中文',
-  'zh-Hant': '繁體中文',
-  yue: '廣東話',
 }
 
 export interface UICopy {
@@ -166,116 +164,6 @@ const copies: Record<ReadingLanguage, UICopy> = {
     },
     nav: { home: '首页', settings: '设置', back: '返回' },
   },
-  'zh-Hant': {
-    appName: 'LazyOracle',
-    tagline: '牌、星與卦，都在你自己的裝置上推算與解讀。',
-    practices: {
-      tarot: { name: '塔羅', blurb: '七十八張牌，三種牌陣，一個誠實的問題。' },
-      bazi: { name: '八字', blurb: '由出生時刻排出四柱。' },
-      iching: { name: '周易', blurb: '擲幣起卦，細讀變爻。' },
-      astrology: { name: '星座', blurb: '你的本命盤與今日星空。' },
-      fengshui: { name: '風水', blurb: '家宅八方。' },
-      palm: { name: '手相', blurb: '掌中的紋路。' },
-      answers: { name: '答案之書', blurb: '發問，翻開，閱讀。' },
-    },
-    comingSoon: '即將推出',
-    home: { eyebrow: '選擇一種方式', title: '你想問什麼？', privacy: '一切都在這台裝置上計算。你的問題和出生資料不會被上傳。' },
-    tarot: {
-      eyebrow: '塔羅',
-      title: '向牌發問',
-      questionLabel: '你的問題',
-      questionPlaceholder: '心中默念一個問題，或留空做一次整體解讀',
-      spreadLabel: '牌陣',
-      draw: '洗牌並抽牌',
-      drawAgain: '再抽一次',
-      revealAll: '全部翻開',
-      reading: '解讀',
-      thinking: '正在解讀……',
-      offlineNote: '本解讀由牌義組合而成。在設定中連接模型後可獲得敘事式解讀。',
-      upright: '正位',
-      reversed: '逆位',
-      seed: '牌局',
-      tapToReveal: '點擊牌面翻開',
-      share: '複製解讀',
-      copied: '已複製',
-    },
-    settings: {
-      title: '設定',
-      language: '語言',
-      model: '解讀模型',
-      modelBody: '解讀預設在本機由牌義組合而成。若想獲得敘事式解讀，可以連接一個語言模型：裝置內模型（原生應用，即將推出），或相容 OpenAI 介面的端點，例如你自己的 LazyEdge 工作站或桌面上的 Ollama。',
-      endpointEnabled: '使用端點生成解讀',
-      endpointUrl: '端點位址',
-      endpointToken: '權杖（可選）',
-      modelName: '模型',
-      test: '測試連線',
-      testing: '測試中……',
-      testOk: '模型已回應。',
-      testFailed: '端點沒有回應。',
-      save: '儲存',
-      saved: '已儲存',
-      disclaimerTitle: '僅供思考與娛樂',
-      disclaimer: 'LazyOracle 是一位陪你思考的夥伴。它的解讀不是健康、金錢、法律或安全方面的建議，也不預測事件。',
-      privacyTitle: '隱私',
-      privacy: '抽牌與排盤都在本裝置完成。除非你在上方啟用端點，否則不會向任何地方傳送資料；啟用後也只傳送結構化的牌局和你的問題。',
-    },
-    nav: { home: '首頁', settings: '設定', back: '返回' },
-  },
-  yue: {
-    appName: 'LazyOracle',
-    tagline: '牌、星同卦，全部喺你自己部機上面計同解。',
-    practices: {
-      tarot: { name: '塔羅', blurb: '七十八張牌，三種牌陣，一個老實嘅問題。' },
-      bazi: { name: '八字', blurb: '由出生時辰排出四柱。' },
-      iching: { name: '周易', blurb: '擲幣起卦，細讀變爻。' },
-      astrology: { name: '星座', blurb: '你嘅本命盤同今日星空。' },
-      fengshui: { name: '風水', blurb: '屋企八方。' },
-      palm: { name: '手相', blurb: '手掌上嘅紋。' },
-      answers: { name: '答案之書', blurb: '問，揭開，睇。' },
-    },
-    comingSoon: '快將推出',
-    home: { eyebrow: '揀一種方式', title: '你想問乜嘢？', privacy: '所有嘢都喺呢部機計。你嘅問題同出生資料唔會上傳。' },
-    tarot: {
-      eyebrow: '塔羅',
-      title: '問下啲牌',
-      questionLabel: '你嘅問題',
-      questionPlaceholder: '心入面諗住一個問題，或者留空做一次整體解讀',
-      spreadLabel: '牌陣',
-      draw: '洗牌抽牌',
-      drawAgain: '再抽一次',
-      revealAll: '全部揭開',
-      reading: '解讀',
-      thinking: '解緊牌……',
-      offlineNote: '呢個解讀係由牌義砌出嚟。喺設定連接模型之後可以有敘事式解讀。',
-      upright: '正位',
-      reversed: '逆位',
-      seed: '牌局',
-      tapToReveal: '撳張牌揭開',
-      share: '複製解讀',
-      copied: '複製咗',
-    },
-    settings: {
-      title: '設定',
-      language: '語言',
-      model: '解讀模型',
-      modelBody: '解讀預設喺本機由牌義砌成。想要敘事式解讀，可以連接一個語言模型：機內模型（原生應用，快將推出），或者相容 OpenAI 介面嘅端點，例如你自己嘅 LazyEdge 工作站或桌面 Ollama。',
-      endpointEnabled: '用端點生成解讀',
-      endpointUrl: '端點位址',
-      endpointToken: '權杖（可選）',
-      modelName: '模型',
-      test: '測試連線',
-      testing: '測試緊……',
-      testOk: '模型回應咗。',
-      testFailed: '端點冇回應。',
-      save: '儲存',
-      saved: '儲存咗',
-      disclaimerTitle: '淨係供思考同娛樂',
-      disclaimer: 'LazyOracle 係陪你諗嘢嘅夥伴。佢嘅解讀唔係健康、金錢、法律或者安全方面嘅建議，亦唔會預測事件。',
-      privacyTitle: '私隱',
-      privacy: '抽牌同排盤都喺呢部機完成。除非你喺上面啟用端點，否則唔會傳送任何資料；啟用之後都只係傳送結構化嘅牌局同你嘅問題。',
-    },
-    nav: { home: '主頁', settings: '設定', back: '返回' },
-  },
 }
 
 const LANGUAGE_KEY = 'lazyoracle.language'
@@ -289,10 +177,7 @@ export function initialLanguage(): ReadingLanguage {
   }
   const tags = typeof navigator !== 'undefined' ? [navigator.language, ...(navigator.languages ?? [])] : []
   for (const tag of tags) {
-    const lower = tag.toLowerCase()
-    if (lower.startsWith('yue') || lower === 'zh-hk' || lower === 'zh-mo') return 'yue'
-    if (lower.startsWith('zh-hant') || lower === 'zh-tw') return 'zh-Hant'
-    if (lower.startsWith('zh')) return 'zh-Hans'
+    if (tag.toLowerCase().startsWith('zh')) return 'zh-Hans'
   }
   return 'en'
 }

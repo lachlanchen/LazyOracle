@@ -5,7 +5,7 @@ import { SPREAD_ORDER, SPREADS } from '../engines/tarot/spreads'
 import type { Spread, TarotDraw } from '../engines/tarot/types'
 import type { UICopy } from '../i18n'
 import { chatWithEndpoint, loadModelSettings, ModelUnavailable } from '../lib/llm'
-import { offlineReading, scriptText, systemPrompt, tarotContext, userPrompt } from '../lib/reading'
+import { offlineReading, systemPrompt, tarotContext, userPrompt } from '../lib/reading'
 import type { ReadingLanguage } from '../types'
 import { TarotCard } from './TarotCard'
 
@@ -32,7 +32,6 @@ export function TarotScreen({ copy, language }: TarotScreenProps) {
   const [copied, setCopied] = useState(false)
   const abortRef = useRef<AbortController | null>(null)
   const textLanguage = language === 'en' ? 'en' : 'zh'
-  const local = (text: string) => scriptText(text, language)
 
   useEffect(() => () => abortRef.current?.abort(), [])
 
@@ -92,10 +91,10 @@ export function TarotScreen({ copy, language }: TarotScreenProps) {
   const copyReading = async () => {
     if (reading.source === 'none' || !draw) return
     const header = draw.cards
-      .map((item) => `${local(item.position.name[textLanguage])}: ${local(item.card.text[textLanguage].name)} (${item.orientation === 'reversed' ? copy.tarot.reversed : copy.tarot.upright})`)
+      .map((item) => `${item.position.name[textLanguage]}: ${item.card.text[textLanguage].name} (${item.orientation === 'reversed' ? copy.tarot.reversed : copy.tarot.upright})`)
       .join('\n')
     try {
-      await navigator.clipboard.writeText(`${copy.appName} · ${local(draw.spread.name[textLanguage])}\n${draw.question}\n\n${header}\n\n${reading.text}`)
+      await navigator.clipboard.writeText(`${copy.appName} · ${draw.spread.name[textLanguage]}\n${draw.question}\n\n${header}\n\n${reading.text}`)
       setCopied(true)
     } catch {
       setCopied(false)
@@ -134,7 +133,7 @@ export function TarotScreen({ copy, language }: TarotScreenProps) {
                 data-testid={`spread-${id}`}
                 onClick={() => setSpreadId(id)}
               >
-                {local(SPREADS[id].name[textLanguage])}
+                {SPREADS[id].name[textLanguage]}
                 <small>{SPREADS[id].positions.length}</small>
               </button>
             ))}
@@ -147,7 +146,7 @@ export function TarotScreen({ copy, language }: TarotScreenProps) {
       </section>
 
       {draw && (
-        <section className="panel spread-panel" aria-label={local(spread.name[textLanguage])}>
+        <section className="panel spread-panel" aria-label={spread.name[textLanguage]}>
           <div className={`spread-stage ${spread.id}`} data-testid="spread-stage">
             {draw.cards.map((item, index) => (
               <div
@@ -160,8 +159,7 @@ export function TarotScreen({ copy, language }: TarotScreenProps) {
                   orientation={item.orientation}
                   revealed={revealed[index]}
                   language={textLanguage}
-                  displayName={local(item.card.text[textLanguage].name)}
-                  label={spread.id === 'celtic' ? `${index + 1}` : local(item.position.name[textLanguage])}
+                  label={spread.id === 'celtic' ? `${index + 1}` : item.position.name[textLanguage]}
                   crossed={item.position.layout.rotate}
                   size={spread.id === 'celtic' ? 'small' : 'large'}
                   onReveal={() => reveal(index)}
@@ -182,12 +180,12 @@ export function TarotScreen({ copy, language }: TarotScreenProps) {
             <ol className="card-facts" data-testid="card-facts">
               {draw.cards.map((item) => (
                 <li key={item.position.id} className={item.orientation}>
-                  <span className="fact-position">{local(item.position.name[textLanguage])}</span>
+                  <span className="fact-position">{item.position.name[textLanguage]}</span>
                   <span className="fact-card">
-                    {local(item.card.text[textLanguage].name)}
+                    {item.card.text[textLanguage].name}
                     <small>{item.orientation === 'reversed' ? copy.tarot.reversed : copy.tarot.upright}</small>
                   </span>
-                  <span className="fact-keywords">{local(item.card.text[textLanguage][item.orientation].join(textLanguage === 'en' ? ' · ' : '・'))}</span>
+                  <span className="fact-keywords">{item.card.text[textLanguage][item.orientation].join(textLanguage === 'en' ? ' · ' : '・')}</span>
                 </li>
               ))}
             </ol>

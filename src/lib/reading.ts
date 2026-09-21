@@ -1,11 +1,5 @@
 import type { TarotDraw } from '../engines/tarot/types'
 import type { ReadingLanguage } from '../types'
-import { toHant } from './hant'
-
-/** Card and position text in the script of the interface: Simplified, Traditional, or English. */
-export function scriptText(text: string, language: ReadingLanguage): string {
-  return language === 'zh-Hant' || language === 'yue' ? toHant(text) : text
-}
 
 /**
  * Everything the model is allowed to know about a draw. The model narrates
@@ -33,13 +27,13 @@ export function tarotContext(draw: TarotDraw, language: ReadingLanguage): TarotC
     practice: 'tarot',
     language,
     question: draw.question,
-    spread: scriptText(draw.spread.name[textLanguage], language),
+    spread: draw.spread.name[textLanguage],
     cards: draw.cards.map((item) => ({
-      position: scriptText(item.position.name[textLanguage], language),
-      positionAsks: scriptText(item.position.question[textLanguage], language),
-      card: scriptText(item.card.text[textLanguage].name, language),
+      position: item.position.name[textLanguage],
+      positionAsks: item.position.question[textLanguage],
+      card: item.card.text[textLanguage].name,
       orientation: item.orientation,
-      keywords: item.card.text[textLanguage][item.orientation].map((word) => scriptText(word, language)),
+      keywords: item.card.text[textLanguage][item.orientation],
       element: item.card.element,
     })),
   }
@@ -48,8 +42,6 @@ export function tarotContext(draw: TarotDraw, language: ReadingLanguage): TarotC
 const LANGUAGE_NAME: Record<ReadingLanguage, string> = {
   en: 'English',
   'zh-Hans': 'Simplified Chinese (简体中文)',
-  'zh-Hant': 'Traditional Chinese (繁體中文)',
-  yue: 'written Cantonese (粵語書面語)',
 }
 
 export function systemPrompt(language: ReadingLanguage): string {
@@ -98,5 +90,5 @@ export function offlineReading(context: TarotContext): string {
     lines.push(copy.card(item.position, item.card, item.orientation === 'reversed' ? copy.reversed : '', item.keywords.join(joiner), item.positionAsks))
   }
   lines.push(copy.advice)
-  return scriptText(lines.join('\n\n'), context.language)
+  return lines.join('\n\n')
 }

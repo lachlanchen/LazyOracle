@@ -7,8 +7,6 @@ interface TarotCardProps {
   language: 'en' | 'zh'
   /** Position label under the card. */
   label?: string
-  /** Name in the interface script; defaults to the card's text for `language`. */
-  displayName?: string
   onReveal?: () => void
   size?: 'small' | 'large'
   /** The crossing card in a Celtic cross lies on its side. */
@@ -88,9 +86,9 @@ function MajorSigil({ element }: { element: Card['element'] }) {
   }
 }
 
-export function TarotCard({ card, orientation, revealed, language, label, displayName, onReveal, size = 'large', crossed, testId }: TarotCardProps) {
+export function TarotCard({ card, orientation, revealed, language, label, onReveal, size = 'large', crossed, testId }: TarotCardProps) {
   const text = card.text[language]
-  const name = displayName ?? text.name
+  const name = text.name
   const classes = ['tarot-card', size, revealed ? 'revealed' : 'hidden', orientation, crossed ? 'crossed' : ''].filter(Boolean).join(' ')
   return (
     <figure className={classes} data-testid={testId}>

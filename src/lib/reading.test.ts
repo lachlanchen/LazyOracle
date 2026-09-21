@@ -17,19 +17,13 @@ describe('reading context', () => {
       expect(item.keywords).toEqual(drawn.card.text.en[drawn.orientation])
     }
     expect(userPrompt(context)).toContain('Should I take the new job?')
-    expect(systemPrompt('zh-Hant')).toContain('Traditional Chinese')
+    expect(systemPrompt('zh-Hans')).toContain('Simplified Chinese')
   })
 
   it('switches card names to Chinese for the Chinese interfaces', () => {
     const context = tarotContext(draw, 'zh-Hans')
     expect(context.spread).toBe('过去 · 现在 · 未来')
     expect(context.cards[0].card).toBe(draw.cards[0].card.text.zh.name)
-  })
-
-  it('shows Traditional characters for the Traditional and Cantonese interfaces', () => {
-    const context = tarotContext(draw, 'zh-Hant')
-    expect(context.spread).toBe('過去 · 現在 · 未來')
-    expect(offlineReading(tarotContext(draw, 'yue'))).not.toMatch(/[圣权币过对宝剑]/)
   })
 
   it('composes an offline reading that names every card and its orientation', () => {

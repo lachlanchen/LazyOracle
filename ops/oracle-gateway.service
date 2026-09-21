@@ -1,0 +1,21 @@
+[Unit]
+Description=Tianji Cloud reading relay for oracle.lazying.art
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=lazyoracle-web
+Group=lazyoracle-web
+EnvironmentFile=/etc/lazyoracle/gateway.env
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=ORACLE_GATEWAY_LISTEN=127.0.0.1:18963
+ExecStart=/usr/bin/python3 /opt/lazyoracle-web/current/ops/oracle_gateway.py
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

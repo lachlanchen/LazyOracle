@@ -30,6 +30,24 @@ https://oracle.lazying.art {
         file_server
     }
 
+    @reading {
+        method POST OPTIONS GET
+        path /v1/chat/completions /v1/health
+    }
+    handle @reading {
+        reverse_proxy http://127.0.0.1:18963 {
+            flush_interval -1
+            header_up -Authorization
+            header_up -Cookie
+            header_up X-Oracle-Client-Address {remote_host}
+        }
+    }
+    @api_namespace path /v1/* /api/*
+    handle @api_namespace {
+        header Cache-Control "no-store"
+        respond "Not Found" 404
+    }
+
     @versioned_assets path /assets/*
     header @versioned_assets Cache-Control "public, max-age=31536000, immutable"
     @big_static path /wllama/* /mediapipe/* /models/* /fonts/*

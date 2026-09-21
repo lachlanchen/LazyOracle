@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { languageLabels, type UICopy } from '../i18n'
 import { DEVICE_MODELS, deviceModelLoadedId, loadDeviceModel, selectDeviceModel, selectedDeviceModel, unloadDeviceModel } from '../lib/device-model'
-import { chatWithEndpoint, loadModelSettings, saveModelSettings, type ModelSettings } from '../lib/llm'
+import { loadModelSettings, saveModelSettings, type ModelSettings } from '../lib/llm'
 import { clearProfile, loadProfile } from '../lib/profile'
 import type { ReadingLanguage } from '../types'
 
@@ -13,7 +13,6 @@ interface SettingsProps {
 
 export function Settings({ copy, language, onLanguage }: SettingsProps) {
   const [settings, setSettings] = useState<ModelSettings>(() => loadModelSettings())
-  const [status, setStatus] = useState<'idle' | 'saved' | 'testing' | 'ok' | 'failed'>('idle')
   const [deviceId, setDeviceId] = useState<string | null>(() => selectedDeviceModel()?.id ?? null)
   const [progress, setProgress] = useState<{ id: string; fraction: number } | null>(null)
   const [loadedId, setLoadedId] = useState<string | null>(() => deviceModelLoadedId())
@@ -28,26 +27,6 @@ export function Settings({ copy, language, onLanguage }: SettingsProps) {
     if (chosen && deviceModelLoadedId() !== chosen.id) void activateModel(chosen.id)
      
   }, [])
-
-  const update = (patch: Partial<ModelSettings>) => {
-    setSettings((current) => ({ ...current, ...patch }))
-    setStatus('idle')
-  }
-
-  const save = () => {
-    saveModelSettings(settings)
-    setStatus('saved')
-  }
-
-  const test = async () => {
-    setStatus('testing')
-    try {
-      const text = await chatWithEndpoint({ ...settings, endpointEnabled: true }, { system: 'Reply with the single word: ready', user: 'ready?' })
-      setStatus(text.trim() ? 'ok' : 'failed')
-    } catch {
-      setStatus('failed')
-    }
-  }
 
   async function activateModel(id: string) {
     const option = DEVICE_MODELS.find((m) => m.id === id)
@@ -96,6 +75,21 @@ export function Settings({ copy, language, onLanguage }: SettingsProps) {
       <section className="panel">
         <h2>{t.model}</h2>
         <p className="body">{t.modelBody}</p>
+        <h3 className="sub">{t.cloudTitle}</h3>
+        <p className="body">{t.cloudBody}</p>
+        <label className="switch">
+          <input
+            type="checkbox"
+            checked={settings.endpointEnabled}
+            onChange={(event) => {
+              const next = { ...settings, endpointEnabled: event.target.checked }
+              setSettings(next)
+              saveModelSettings(next)
+            }}
+            data-testid="cloud-enabled"
+          />
+          <span>{t.cloudEnabled}</span>
+        </label>
         <h3 className="sub">{t.deviceModel}</h3>
         <p className="body">{t.deviceModelBody}</p>
         <ul className="model-list" data-testid="device-models">
@@ -113,7 +107,7 @@ export function Settings({ copy, language, onLanguage }: SettingsProps) {
             return (
               <li key={option.id} className={active ? 'active' : ''}>
                 <div>
-                  <b>{option.name}</b>
+                  <b>{option.name[l]}</b>
                   <small>{option.sizeMb} MB · {option.note[l]}</small>
                   {loading && (
                     <span className="progress" aria-label={t.downloading}>
@@ -135,34 +129,6 @@ export function Settings({ copy, language, onLanguage }: SettingsProps) {
           })}
         </ul>
         {deviceError && <p className="status failed">{deviceError}</p>}
-
-        <h3 className="sub">{t.endpointTitle}</h3>
-        <label className="switch">
-          <input type="checkbox" checked={settings.endpointEnabled} onChange={(event) => update({ endpointEnabled: event.target.checked })} data-testid="endpoint-enabled" />
-          <span>{t.endpointEnabled}</span>
-        </label>
-        <label className="field">
-          <span>{t.endpointUrl}</span>
-          <input type="url" value={settings.endpointUrl} onChange={(event) => update({ endpointUrl: event.target.value })} placeholder="https://oracle.lazying.art/v1" data-testid="endpoint-url" />
-        </label>
-        <label className="field">
-          <span>{t.endpointToken}</span>
-          <input type="password" value={settings.endpointToken} onChange={(event) => update({ endpointToken: event.target.value })} autoComplete="off" />
-        </label>
-        <label className="field">
-          <span>{t.modelName}</span>
-          <input type="text" value={settings.model} onChange={(event) => update({ model: event.target.value })} />
-        </label>
-        <div className="button-row">
-          <button type="button" className="ghost-button" onClick={test} disabled={status === 'testing'}>
-            {status === 'testing' ? t.testing : t.test}
-          </button>
-          <button type="button" className="primary-button" onClick={save} data-testid="settings-save">
-            {status === 'saved' ? t.saved : t.save}
-          </button>
-        </div>
-        {status === 'ok' && <p className="status ok">{t.testOk}</p>}
-        {status === 'failed' && <p className="status failed">{t.testFailed}</p>}
       </section>
 
       <section className="panel">

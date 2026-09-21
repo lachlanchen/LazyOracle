@@ -29,7 +29,7 @@ python3 - "$SOURCE_COMMIT" "$MAIN_ASSET" > "$STAGE/release-manifest.json" <<'PY'
 import datetime, json, sys
 print(json.dumps({"sourceCommit": sys.argv[1], "builtAt": datetime.datetime.now().astimezone().isoformat(timespec="seconds"), "mainAsset": f"assets/{sys.argv[2]}", "distManifest": "dist-manifest.sha256"}, indent=2))
 PY
-tar --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner -czf "$STAGE/release.tar.gz" -C "$REPO" dist dist-manifest.sha256 -C "$STAGE" release-manifest.json
+tar --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner -czf "$STAGE/release.tar.gz" -C "$REPO" dist dist-manifest.sha256 ops/oracle_gateway.py -C "$STAGE" release-manifest.json
 RELEASE="$(sha256sum "$STAGE/release.tar.gz" | cut -d' ' -f1)"
 echo "release id $RELEASE (source $SOURCE_COMMIT, $MAIN_ASSET)"
 
@@ -52,7 +52,7 @@ if [[ $DRY_RUN == 1 ]]; then
 fi
 
 echo "== switch"
-ssh "$HOST" "set -e; sudo -n ln -sfn $ROOT/releases/$RELEASE $ROOT/current.tmp; sudo -n mv -Tf $ROOT/current.tmp $ROOT/current; echo active"
+ssh "$HOST" "set -e; sudo -n ln -sfn $ROOT/releases/$RELEASE $ROOT/current.tmp; sudo -n mv -Tf $ROOT/current.tmp $ROOT/current; sudo -n systemctl restart oracle-gateway.service 2>/dev/null || true; echo active"
 
 echo "== smoke test"
 curl -fsS -o /dev/null -w 'PWA %{http_code}\n' "$SITE/" || echo "PWA not reachable yet (DNS or certificate pending)"

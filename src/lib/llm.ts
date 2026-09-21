@@ -10,17 +10,19 @@
  */
 
 export interface ModelSettings {
+  /** The cloud reading service (Tianji Cloud) is on unless the user turns it off. */
   endpointEnabled: boolean
   endpointUrl: string
   endpointToken: string
   model: string
 }
 
+/** Tianji Cloud: our own relay at oracle.lazying.art; it holds the provider keys, keeps no content. */
 export const DEFAULT_MODEL_SETTINGS: ModelSettings = {
-  endpointEnabled: false,
-  endpointUrl: 'http://127.0.0.1:11434/v1',
+  endpointEnabled: true,
+  endpointUrl: 'https://oracle.lazying.art/v1',
   endpointToken: '',
-  model: 'qwen3:4b-q4_K_M',
+  model: 'tianji',
 }
 
 const SETTINGS_KEY = 'lazyoracle.model'

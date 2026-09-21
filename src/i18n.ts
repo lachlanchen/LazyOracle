@@ -56,6 +56,9 @@ export interface UICopy {
     language: string
     model: string
     modelBody: string
+    cloudTitle: string
+    cloudBody: string
+    cloudEnabled: string
     deviceModel: string
     deviceModelBody: string
     none: string
@@ -63,17 +66,6 @@ export interface UICopy {
     downloading: string
     loaded: string
     remove: string
-    endpointTitle: string
-    endpointEnabled: string
-    endpointUrl: string
-    endpointToken: string
-    modelName: string
-    test: string
-    testing: string
-    testOk: string
-    testFailed: string
-    save: string
-    saved: string
     profileTitle: string
     clearProfile: string
     disclaimerTitle: string
@@ -100,7 +92,7 @@ const copies: Record<ReadingLanguage, UICopy> = {
     home: { eyebrow: 'Choose a practice', title: 'What would you like to ask?', privacy: 'Everything is calculated here on this device. Your question and birth data are never uploaded.' },
     nav: { home: 'Home', settings: 'Settings', back: 'Back' },
     common: { question: 'Your question', questionPlaceholder: 'Hold a question in mind, or leave this empty for a general reading', editProfile: 'Edit birth details', approximateHour: 'Birth hour unknown: the hour pillar is approximate.', loading: 'Loading…' },
-    reading: { title: 'Reading', thinking: 'Reading…', offlineNote: 'Composed on this device from the computed facts. Add a model in Settings for a narrative reading.', share: 'Copy reading', copied: 'Copied' },
+    reading: { title: 'Reading', thinking: 'Reading…', offlineNote: 'Composed on this device from the computed facts. Turn on Tianji Cloud or download a Tianji model in Settings for a narrative reading.', share: 'Copy reading', copied: 'Copied' },
     profile: {
       title: 'Birth details',
       body: 'Kept only on this device. Used for BaZi, astrology and feng shui.',
@@ -131,31 +123,23 @@ const copies: Record<ReadingLanguage, UICopy> = {
       title: 'Settings',
       language: 'Language',
       model: 'Reading model',
-      modelBody: 'Every practice works with no model: readings are composed on this device from the computed facts. For narrative readings, add an on-device model or connect an endpoint.',
-      deviceModel: 'On-device model',
-      deviceModelBody: 'Downloaded once, then runs fully offline inside the app. Readings take a little longer on older phones.',
-      none: 'None',
+      modelBody: 'The cards, charts and hexagrams are always computed on this device. The narrative reading comes from Tianji Cloud by default, or from a Tianji model you download once and run offline.',
+      cloudTitle: 'Tianji Cloud',
+      cloudBody: 'Sends only the computed facts and your question to our reading service, which forwards them to a language model and keeps nothing. Turn it off to stay fully offline; readings are then composed from the facts, or by a downloaded model.',
+      cloudEnabled: 'Use Tianji Cloud when no model is downloaded',
+      deviceModel: 'On-device models',
+      deviceModelBody: 'Downloaded once, then everything stays on the phone. Readings take a little longer on older phones.',
+      none: 'No download (use Tianji Cloud)',
       download: 'Download and use',
       downloading: 'Downloading',
       loaded: 'Ready',
       remove: 'Stop using',
-      endpointTitle: 'Endpoint (optional)',
-      endpointEnabled: 'Use an endpoint for readings',
-      endpointUrl: 'Endpoint URL',
-      endpointToken: 'Token (optional)',
-      modelName: 'Model',
-      test: 'Test connection',
-      testing: 'Testing…',
-      testOk: 'The model answered.',
-      testFailed: 'No answer from the endpoint.',
-      save: 'Save',
-      saved: 'Saved',
       profileTitle: 'Birth details',
       clearProfile: 'Delete birth details from this device',
       disclaimerTitle: 'For reflection and entertainment',
       disclaimer: 'LazyOracle is a companion for reflection. Its readings are not advice about health, money, law or safety, and they do not predict events.',
       privacyTitle: 'Privacy',
-      privacy: 'Cards are drawn and charts are computed on this device. Photos for palmistry are analysed on the device and never stored. Nothing is sent anywhere unless you enable an endpoint, in which case only the structured facts and your question go to that endpoint.',
+      privacy: 'Cards are drawn and charts are computed on this device. Photos for palmistry are analysed on the device and never stored. With Tianji Cloud on, only the structured facts of a reading and your question are sent to our reading service for the narrative; it keeps nothing. With it off, nothing leaves the device.',
       about: 'LazyOracle by LazyingArt LLC',
     },
   },
@@ -174,7 +158,7 @@ const copies: Record<ReadingLanguage, UICopy> = {
     home: { eyebrow: '选择一种方式', title: '你想问什么？', privacy: '一切都在这台设备上计算。你的问题和出生资料不会被上传。' },
     nav: { home: '首页', settings: '设置', back: '返回' },
     common: { question: '你的问题', questionPlaceholder: '心中默念一个问题，或留空做一次整体解读', editProfile: '修改出生资料', approximateHour: '出生时辰未知：时柱仅供参考。', loading: '加载中……' },
-    reading: { title: '解读', thinking: '正在解读……', offlineNote: '本解读由推算结果在本机组合而成。在设置中添加模型后可获得叙事式解读。', share: '复制解读', copied: '已复制' },
+    reading: { title: '解读', thinking: '正在解读……', offlineNote: '本解读由推算结果在本机组合而成。在设置中开启天机云端或下载天机模型，可获得叙事式解读。', share: '复制解读', copied: '已复制' },
     profile: {
       title: '出生资料',
       body: '只保存在本设备。用于八字、星盘与风水。',
@@ -205,31 +189,23 @@ const copies: Record<ReadingLanguage, UICopy> = {
       title: '设置',
       language: '语言',
       model: '解读模型',
-      modelBody: '所有功能不需要模型也能用：解读由推算结果在本机组合而成。若想获得叙事式解读，可以添加设备内模型或连接端点。',
+      modelBody: '牌、盘与卦始终在本机推算。叙事式解读默认由「天机云端」生成，也可以下载一个天机模型，之后完全离线运行。',
+      cloudTitle: '天机云端',
+      cloudBody: '只把推算结果和你的问题发送到我们的解读服务，由它转交给语言模型，服务不保存任何内容。关闭后即完全离线：解读由推算结果组合而成，或由已下载的模型生成。',
+      cloudEnabled: '未下载模型时使用天机云端',
       deviceModel: '设备内模型',
-      deviceModelBody: '下载一次后完全离线运行。较旧的手机上解读会慢一些。',
-      none: '不使用',
+      deviceModelBody: '下载一次后，一切都留在手机上。较旧的手机上解读会慢一些。',
+      none: '不下载（使用天机云端）',
       download: '下载并使用',
       downloading: '下载中',
       loaded: '已就绪',
       remove: '停止使用',
-      endpointTitle: '端点（可选）',
-      endpointEnabled: '使用端点生成解读',
-      endpointUrl: '端点地址',
-      endpointToken: '令牌（可选）',
-      modelName: '模型',
-      test: '测试连接',
-      testing: '测试中……',
-      testOk: '模型已回应。',
-      testFailed: '端点没有回应。',
-      save: '保存',
-      saved: '已保存',
       profileTitle: '出生资料',
       clearProfile: '从本设备删除出生资料',
       disclaimerTitle: '仅供思考与娱乐',
       disclaimer: 'LazyOracle 是一位陪你思考的伙伴。它的解读不是健康、金钱、法律或安全方面的建议，也不预测事件。',
       privacyTitle: '隐私',
-      privacy: '抽牌与排盘都在本设备完成。手相照片在本机识别，不会保存。除非你启用端点，否则不会向任何地方发送数据；启用后也只发送结构化的推算结果和你的问题。',
+      privacy: '抽牌与排盘都在本设备完成。手相照片在本机识别，不会保存。开启天机云端时，只把结构化的推算结果和你的问题发送到我们的解读服务以生成叙事，服务不保存任何内容；关闭后不会发送任何数据。',
       about: 'LazyOracle · LazyingArt LLC 出品',
     },
   },

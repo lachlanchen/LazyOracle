@@ -9,7 +9,7 @@ import type { ChatRequest } from './llm'
 
 export interface DeviceModelOption {
   id: string
-  name: string
+  name: { en: string; zh: string }
   /** Approximate download size in MB, shown before downloading. */
   sizeMb: number
   url: string
@@ -21,20 +21,20 @@ export interface DeviceModelOption {
 
 export const DEVICE_MODELS: DeviceModelOption[] = [
   {
-    id: 'qwen3-0.6b-q8',
-    name: 'Qwen3 0.6B',
+    id: 'tianji-fast',
+    name: { en: 'Tianji Fast', zh: '天机快速版' },
     sizeMb: 640,
     url: 'https://huggingface.co/Qwen/Qwen3-0.6B-GGUF/resolve/main/Qwen3-0.6B-Q8_0.gguf',
     mirror: 'https://hf-mirror.com/Qwen/Qwen3-0.6B-GGUF/resolve/main/Qwen3-0.6B-Q8_0.gguf',
-    note: { en: 'Fast on any phone; short readings.', zh: '任何手机都很快；解读较短。' },
+    note: { en: 'Runs on any phone; short readings, fully offline.', zh: '任何手机都能跑；解读较短，完全离线。' },
   },
   {
-    id: 'qwen3-1.7b-q4',
-    name: 'Qwen3 1.7B',
+    id: 'tianji-pro',
+    name: { en: 'Tianji Pro', zh: '天机专业版' },
     sizeMb: 1100,
     url: 'https://huggingface.co/Qwen/Qwen3-1.7B-GGUF/resolve/main/Qwen3-1.7B-Q4_K_M.gguf',
     mirror: 'https://hf-mirror.com/Qwen/Qwen3-1.7B-GGUF/resolve/main/Qwen3-1.7B-Q4_K_M.gguf',
-    note: { en: 'Better readings; needs a recent phone.', zh: '解读更好；需要较新的手机。' },
+    note: { en: 'Fuller readings; needs a recent phone, fully offline.', zh: '解读更完整；需要较新的手机，完全离线。' },
   },
 ]
 

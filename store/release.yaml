@@ -1,0 +1,24 @@
+app: LazyOracle
+version: 1.0.0
+web:
+  host: sshem-admin (Aliyun 47.84.190.118); Caddy site /etc/lazyedge/lazyoracle.caddy (HTTP phase installed; HTTPS block in store/lazyoracle.caddy waits for the certificate)
+  domain: oracle.lazying.art
+  dns: currently points at 179.236.105.35 (Huanayun edge, no sudo access); must point at 47.84.190.118 before the certificate can be issued
+  release_root: /opt/lazyoracle-web/releases/<sha>, current symlink switched by tools/deploy-web.sh
+  apk: /opt/lazyoracle-web/current/dist/downloads/LazyOracle-1.0.0-build1.apk
+android:
+  package: art.lazying.lazyoracle
+  versionCode: 1
+  versionName: 1.0.0
+  keystore: ~/.config/lazyoracle/android/upload-keystore.jks (alias lazyoracle-upload; password file beside it, mode 600)
+  bundle_sha256: bf4bc97346de215ba75f9c040a554680dc857d2964fde3d31e22af7a79d01b09
+  apk_sha256: bb0012bdf4515c4f92ccaea9b166bcb99cd7e0c980e4f22bf8d3cefdcb4b74a7
+  play_app_id: 4975413590951100628 (created 2026-09-21 as a paid app)
+ios:
+  bundle_id: art.lazying.lazyoracle (ASC bundle id VA743K7MV2)
+  profile: LazyOracle App Store 1 (f4ada587-2332-4afd-a8f0-725f3238f27c, certificate JTPG5D9562)
+  marketing_version: 1.0.0
+  build: 1
+  ipa_sha256: b0a8ead096ac58683e55661038b598dc72f2ef0364dca2bfb939f62838ac4d83
+  mac: ~/Projects/LazyOracle/release/build1.sh + upload1.sh on echomind-kvm-macos
+  blocker: the App Store Connect app record does not exist yet; creating it needs the account holder's Apple ID sign-in in noVNC

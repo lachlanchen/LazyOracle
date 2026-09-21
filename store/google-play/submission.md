@@ -11,4 +11,5 @@
 ## 2026-09-21 — internal testing release 1 (1.0.0) published
 
 - Internal track: release `1 (1.0.0)` published ("Available to internal testers"); the track shows the temporary app name until the first review completes. Play flagged one warning only (no native debug symbols in the bundle).
+- Testers: email lists `EchoMind Internal Testers`, `L & N license testers`, `L & N phone testers`; join link https://play.google.com/apps/internaltest/4701677916092886102
 - Next: promote release 1 to Production with all countries, then send the whole app for review from Publishing overview.

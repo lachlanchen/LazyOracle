@@ -13,6 +13,8 @@ export interface DeviceModelOption {
   /** Approximate download size in MB, shown before downloading. */
   sizeMb: number
   url: string
+  /** Same file on a mirror reachable from mainland China. */
+  mirror: string
   /** Rough quality note shown in Settings. */
   note: { en: string; zh: string }
 }
@@ -22,14 +24,16 @@ export const DEVICE_MODELS: DeviceModelOption[] = [
     id: 'qwen3-0.6b-q8',
     name: 'Qwen3 0.6B',
     sizeMb: 640,
-    url: 'https://oracle.lazying.art/models/Qwen3-0.6B-Q8_0.gguf',
+    url: 'https://huggingface.co/Qwen/Qwen3-0.6B-GGUF/resolve/main/Qwen3-0.6B-Q8_0.gguf',
+    mirror: 'https://hf-mirror.com/Qwen/Qwen3-0.6B-GGUF/resolve/main/Qwen3-0.6B-Q8_0.gguf',
     note: { en: 'Fast on any phone; short readings.', zh: '任何手机都很快；解读较短。' },
   },
   {
     id: 'qwen3-1.7b-q4',
     name: 'Qwen3 1.7B',
     sizeMb: 1100,
-    url: 'https://oracle.lazying.art/models/Qwen3-1.7B-Q4_K_M.gguf',
+    url: 'https://huggingface.co/Qwen/Qwen3-1.7B-GGUF/resolve/main/Qwen3-1.7B-Q4_K_M.gguf',
+    mirror: 'https://hf-mirror.com/Qwen/Qwen3-1.7B-GGUF/resolve/main/Qwen3-1.7B-Q4_K_M.gguf',
     note: { en: 'Better readings; needs a recent phone.', zh: '解读更好；需要较新的手机。' },
   },
 ]
@@ -90,10 +94,16 @@ export async function loadDeviceModel(option: DeviceModelOption, onProgress?: (f
       'single-thread/wllama.wasm': `${base}wllama.wasm`,
       'multi-thread/wllama.wasm': `${base}wllama.wasm`,
     }) as unknown as WllamaInstance
-    await wllama.loadModelFromUrl(option.url, {
+    const params = {
       n_ctx: 4096,
       progressCallback: ({ loaded, total }: { loaded: number; total: number }) => onProgress?.(total ? loaded / total : 0),
-    })
+    }
+    try {
+      await wllama.loadModelFromUrl(option.url, params)
+    } catch (error) {
+      console.warn('primary model host failed, trying the mirror', error)
+      await wllama.loadModelFromUrl(option.mirror, params)
+    }
     instance = wllama
     loadedId = option.id
   })()

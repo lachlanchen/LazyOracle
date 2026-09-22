@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>LazyOracle — device check</title>
+<link rel="icon" href="/icons/icon-192.png" />
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; padding: 20px 16px calc(24px + env(safe-area-inset-bottom)); background: #0b0d1f; color: #e8e6f2;
+         font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; overflow-wrap: anywhere; }
+  h1 { font-size: 20px; margin: 0 0 4px; color: #d6b26a; }
+  p.lede { color: #9aa0c4; margin: 0 0 18px; font-size: 14px; }
+  .row { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,.08); font-size: 14px; }
+  .row b { color: #9aa0c4; font-weight: 500; }
+  .bar { height: 8px; border-radius: 4px; background: rgba(255,255,255,.1); overflow: hidden; margin: 14px 0; }
+  .bar span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #d6b26a, #f0d9a3); transition: width .2s; }
+  #state { font-size: 15px; margin: 12px 0; }
+  #out { white-space: pre-wrap; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1);
+         border-radius: 12px; padding: 12px; min-height: 60px; font-size: 14px; }
+  #log { font: 12px/1.5 ui-monospace, Menlo, monospace; color: #8b91b5; margin-top: 16px; white-space: pre-wrap; }
+  .ok { color: #7ddba3; } .bad { color: #ff8b78; }
+  a { color: #d6b26a; }
+</style>
+</head>
+<body>
+<h1>Device check</h1>
+<p class="lede">Runs a Tianji model here, in this browser, and reports what happens at every step. Nothing is uploaded. Add <code>?model=pro</code> for the larger model, or <code>?model=tiny</code> for a small stand-in.</p>
+
+<div class="row"><b>Browser</b><span id="ua"></span></div>
+<div class="row"><b>WebAssembly JSPI</b><span id="jspi"></span></div>
+<div class="row"><b>WebAssembly Memory64</b><span id="mem64"></span></div>
+<div class="row"><b>Build used</b><span id="build">—</span></div>
+<div class="row"><b>Storage free</b><span id="quota">—</span></div>
+<div class="row"><b>Model</b><span id="model">—</span></div>
+
+<div class="bar"><span id="fill"></span></div>
+<div id="state">Starting…</div>
+<div id="out">—</div>
+<div id="log"></div>
+
+<script type="module">
+const $ = (id) => document.getElementById(id)
+const log = (line) => { $('log').textContent += line + '\n'; console.log('[check]', line) }
+const MODELS = {
+  fast: { name: 'Tianji Fast (Qwen3 0.6B UD-Q4_K_XL, ~405 MB)', url: 'https://huggingface.co/unsloth/Qwen3-0.6B-GGUF/resolve/main/Qwen3-0.6B-UD-Q4_K_XL.gguf' },
+  pro:  { name: 'Tianji Pro (Qwen3 1.7B UD-Q4_K_XL, ~1.1 GB)',  url: 'https://huggingface.co/unsloth/Qwen3-1.7B-GGUF/resolve/main/Qwen3-1.7B-UD-Q4_K_XL.gguf' },
+  tiny: { name: 'Tiny stand-in (stories15M, ~19 MB)',            url: 'https://huggingface.co/ggml-org/models/resolve/main/tinyllamas/stories15M-q4_0.gguf' },
+}
+const choice = new URLSearchParams(location.search).get('model') || 'fast'
+const model = MODELS[choice] || MODELS.fast
+
+$('ua').textContent = navigator.userAgent.slice(0, 48) + '…'
+const hasJSPI = Boolean(WebAssembly.Suspending)
+let hasMem64 = false
+try { new WebAssembly.Memory({ address: 'i64', initial: 1n }); hasMem64 = true } catch { hasMem64 = false }
+$('jspi').innerHTML = hasJSPI ? '<span class="ok">yes</span>' : '<span class="bad">no</span>'
+$('mem64').innerHTML = hasMem64 ? '<span class="ok">yes</span>' : '<span class="bad">no</span>'
+$('build').textContent = hasJSPI && hasMem64 ? 'default' : 'compatibility (self-hosted)'
+$('model').textContent = model.name
+
+try {
+  const estimate = await navigator.storage?.estimate?.()
+  if (estimate?.quota) $('quota').textContent = `${Math.round((estimate.quota - (estimate.usage || 0)) / 1048576)} MB of ${Math.round(estimate.quota / 1048576)} MB`
+} catch { $('quota').textContent = 'unknown' }
+
+const started = Date.now()
+const since = () => `${((Date.now() - started) / 1000).toFixed(1)}s`
+
+try {
+  log('loading the runtime')
+  const { Wllama } = await import('/wllama/esm/index.js').catch(() => import('https://cdn.jsdelivr.net/npm/@wllama/wllama@3.6.1/esm/index.js'))
+  const wllama = new Wllama({ default: '/wllama/wllama.wasm' })
+  wllama.setCompat({ worker: '/wllama/compat/wllama.js', wasm: '/wllama/compat/wllama.wasm' })
+  log('runtime ready, starting the download')
+  $('state').textContent = 'Downloading…'
+  await wllama.loadModelFromUrl(model.url, {
+    n_ctx: 2048,
+    n_batch: 128,
+    n_threads: Math.max(1, Math.min(4, Math.floor((navigator.hardwareConcurrency || 2) / 2))),
+    n_gpu_layers: 0,
+    progressCallback: ({ loaded, total }) => {
+      const pct = total ? Math.round((loaded / total) * 100) : 0
+      $('fill').style.width = pct + '%'
+      $('state').textContent = pct >= 100 ? `Preparing the model… (${since()})` : `Downloading ${pct}% (${since()})`
+    },
+  })
+  log(`model loaded at ${since()}`)
+  $('state').textContent = `Loaded in ${since()}. Writing a sentence…`
+  let text = ''
+  await wllama.createChatCompletion({
+    messages: [
+      { role: 'system', content: 'You are a calm oracle. Answer in one short sentence.' },
+      { role: 'user', content: 'The Tower, reversed, in the position of the present. What does it suggest?\n/no_think' },
+    ],
+    stream: true,
+    max_tokens: 90,
+    onData: (chunk) => {
+      text += chunk.choices?.[0]?.delta?.content ?? ''
+      $('out').textContent = text.replace(/<think>[\s\S]*?<\/think>/g, '').trim() || '…'
+    },
+  })
+  $('state').innerHTML = `<span class="ok">Everything works.</span> Total ${since()}.`
+  log('completion finished, total ' + since())
+} catch (error) {
+  $('state').innerHTML = `<span class="bad">Failed:</span> ${error && error.message ? error.message : error}`
+  log('FAILED ' + (error && error.stack ? error.stack : error))
+}
+</script>
+</body>
+</html>

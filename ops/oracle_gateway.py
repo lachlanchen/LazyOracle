@@ -146,7 +146,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
             assert isinstance(messages, list) and 1 <= len(messages) <= MAX_MESSAGES
             images = 0
             for m in messages:
-                assert m["role"] in ("system", "user")
+                # A continued conversation carries the model's own replies back.
+                assert m["role"] in ("system", "user", "assistant")
                 content = m["content"]
                 if isinstance(content, str):
                     assert len(content) <= MAX_TEXT

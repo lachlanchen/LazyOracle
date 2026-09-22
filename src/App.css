@@ -19,16 +19,16 @@
 @media (prefers-reduced-motion: reduce) { .sky { animation: none; } }
 
 .topbar { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; padding: 14px 18px 0; max-width: 560px; margin: 0 auto; }
-.brand { border: 0; background: transparent; color: var(--ink); font-family: var(--display); font-weight: 600; letter-spacing: .08em; font-size: 17px; display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 6px 0; }
+.brand { border: 0; background: transparent; color: var(--ink); font-family: var(--display); font-weight: 600; letter-spacing: .08em; font-size: 17px; display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 10px 8px 10px 0; min-height: 44px; }
 .brand-mark { width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ffe9a8, var(--gold) 55%, #7a5c1c 100%); box-shadow: 0 0 18px rgba(217,180,90,.45); display: inline-block; }
-.back-button { border: 0; background: transparent; color: var(--ink-soft); display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; cursor: pointer; padding: 8px 0; }
+.back-button { border: 0; background: transparent; color: var(--ink-soft); display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; cursor: pointer; padding: 12px 10px 12px 0; min-height: 44px; }
 .icon-button { width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255,255,255,.04); color: var(--ink-soft); display: grid; place-items: center; cursor: pointer; }
 
 .screen { position: relative; z-index: 1; max-width: 560px; margin: 0 auto; padding: 8px 18px 0; }
 .screen-heading { padding: 18px 2px 14px; }
 .screen-heading h1 { font-family: var(--display); font-weight: 600; font-size: clamp(30px, 8vw, 40px); letter-spacing: .02em; line-height: 1.1; margin: 8px 0 6px; color: var(--ink); }
 .screen-heading.hero h1 { font-size: clamp(34px, 9.5vw, 48px); }
-.eyebrow { color: var(--gold); font-size: 11px; letter-spacing: .22em; text-transform: uppercase; font-weight: 700; display: inline-flex; gap: 8px; align-items: center; }
+.eyebrow { color: var(--gold); font-size: 12px; letter-spacing: .22em; text-transform: uppercase; font-weight: 700; display: inline-flex; gap: 8px; align-items: center; }
 .tagline { font-family: var(--serif); font-size: 19px; line-height: 1.35; color: var(--ink-soft); margin: 4px 0 0; font-style: italic; }
 
 .panel { position: relative; border: 1px solid var(--line); background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)); border-radius: 22px; padding: 18px; margin-bottom: 14px; backdrop-filter: blur(6px); }
@@ -36,13 +36,13 @@
 .panel .body { color: var(--ink-soft); line-height: 1.55; font-size: 14px; margin: 0 0 12px; }
 
 .field { display: flex; flex-direction: column; gap: 7px; margin-bottom: 14px; }
-.field > span { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-mute); font-weight: 700; }
+.field > span { font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-mute); font-weight: 700; }
 .field textarea, .field input { width: 100%; box-sizing: border-box; border: 1px solid var(--line); background: rgba(0,0,0,.25); color: var(--ink); border-radius: 14px; padding: 12px 14px; font-family: var(--serif); font-size: 18px; line-height: 1.35; resize: vertical; }
 .field textarea::placeholder, .field input::placeholder { color: var(--ink-mute); font-style: italic; }
 
 .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip { border: 1px solid var(--line); background: rgba(255,255,255,.04); color: var(--ink-soft); border-radius: 999px; padding: 9px 14px; font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
-.chip small { font-size: 11px; color: var(--ink-mute); font-weight: 700; }
+.chip small { font-size: 12px; color: var(--ink-mute); font-weight: 700; }
 .chip.active { border-color: var(--gold-line); background: var(--gold-soft); color: var(--ink); }
 .chip.active small { color: var(--gold); }
 
@@ -62,7 +62,7 @@
 .tile-icon { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; background: rgba(217,180,90,.15); color: var(--gold); }
 .tile-name { font-family: var(--display); font-weight: 600; font-size: 19px; letter-spacing: .04em; margin-top: 4px; }
 .tile-blurb { font-family: var(--serif); font-size: 15px; color: var(--ink-soft); line-height: 1.3; }
-.tile-soon { position: absolute; top: 12px; right: 12px; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line); border-radius: 999px; padding: 3px 8px; }
+.tile-soon { position: absolute; top: 12px; right: 12px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-mute); border: 1px solid var(--line); border-radius: 999px; padding: 3px 8px; }
 .privacy-line { color: var(--ink-mute); font-size: 12px; line-height: 1.5; text-align: center; margin: 18px 8px 0; }
 
 /* Spread stage */
@@ -74,7 +74,7 @@
 .spread-slot { position: absolute; transform: translate(-50%, -50%); }
 
 .tarot-card { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; }
-.tarot-card figcaption { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-mute); font-weight: 700; white-space: nowrap; }
+.tarot-card figcaption { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-mute); font-weight: 700; white-space: nowrap; }
 .tarot-card.large .tarot-card-flip { width: 94px; height: 152px; }
 .tarot-card.small .tarot-card-flip { width: 60px; height: 98px; }
 .tarot-card.crossed .tarot-card-flip { transform: rotate(90deg); }
@@ -86,10 +86,10 @@
 .back-emblem { width: 56%; position: relative; }
 .tarot-card-face { background: linear-gradient(180deg, var(--parchment) 0%, var(--parchment-2) 100%); color: #2a2340; transform: rotateY(180deg); display: grid; grid-template-rows: auto 1fr auto auto; align-items: center; justify-items: center; padding: 6px 4px 5px; box-sizing: border-box; }
 .face-frame { position: absolute; inset: 4px; border: 1px solid rgba(122,92,28,.55); border-radius: 7px; pointer-events: none; }
-.face-label { font-family: var(--display); font-weight: 700; font-size: 11px; color: #7a5c1c; letter-spacing: .06em; }
+.face-label { font-family: var(--display); font-weight: 700; font-size: 12px; color: #7a5c1c; letter-spacing: .06em; }
 .face-label.bottom { transform: rotate(180deg); }
 .face-glyph { width: 62%; color: #3b3160; }
-.face-name { font-family: var(--serif); font-weight: 600; font-size: 11px; line-height: 1.1; text-align: center; padding: 0 2px; color: #2a2340; }
+.face-name { font-family: var(--serif); font-weight: 600; font-size: 12px; line-height: 1.1; text-align: center; padding: 0 2px; color: #2a2340; }
 .tarot-card.small .face-name { font-size: 8.5px; }
 .tarot-card.small .face-label { font-size: 8px; }
 .tarot-card.revealed .tarot-card-back { transform: rotateY(-180deg); }
@@ -102,16 +102,16 @@
 
 .card-facts { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
 .card-facts li { display: grid; grid-template-columns: 86px 1fr; gap: 4px 12px; padding: 10px 12px; border-radius: 14px; background: rgba(0,0,0,.22); border: 1px solid var(--line); }
-.fact-position { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); font-weight: 700; align-self: center; }
+.fact-position { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); font-weight: 700; align-self: center; }
 .fact-card { font-family: var(--serif); font-size: 18px; font-weight: 600; display: flex; gap: 8px; align-items: baseline; }
-.fact-card small { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); font-weight: 700; }
+.fact-card small { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); font-weight: 700; }
 .card-facts li.reversed .fact-card small { color: var(--rose); }
 .fact-keywords { grid-column: 2; color: var(--ink-soft); font-size: 13px; }
 
 /* Reading */
 .reading-panel header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
 .reading-panel h2 { margin: 0; }
-.seed { font-size: 11px; color: var(--ink-mute); letter-spacing: .08em; font-variant-numeric: tabular-nums; }
+.seed { font-size: 12px; color: var(--ink-mute); letter-spacing: .08em; font-variant-numeric: tabular-nums; }
 .reading-text p { font-family: var(--serif); font-size: 19px; line-height: 1.5; margin: 0 0 14px; color: var(--ink); }
 .thinking { font-family: var(--serif); font-style: italic; color: var(--ink-soft); font-size: 17px; animation: pulse 1.6s ease-in-out infinite; }
 @keyframes pulse { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
@@ -119,7 +119,8 @@
 
 /* Settings */
 .switch { display: flex; align-items: center; gap: 10px; margin: 6px 0 14px; font-size: 15px; cursor: pointer; }
-.switch input { width: 20px; height: 20px; accent-color: var(--gold); }
+.switch input { width: 24px; height: 24px; accent-color: var(--gold); flex: none; }
+.switch { min-height: 44px; padding: 4px 0; }
 .status { font-size: 13px; margin: 10px 0 0; }
 .status.ok { color: #9ad4a2; }
 .status.failed { color: var(--rose); }
@@ -131,11 +132,11 @@
 
 /* Shared facts */
 .facts { display: grid; grid-template-columns: 96px 1fr; gap: 6px 12px; margin: 14px 0 0; }
-.facts dt { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); font-weight: 700; padding-top: 3px; }
+.facts dt { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); font-weight: 700; padding-top: 3px; }
 .facts dd { margin: 0; font-family: var(--serif); font-size: 17px; line-height: 1.35; grid-column: 2; }
 .facts dd.classical { font-size: 19px; color: var(--gold); }
-.facts-title { display: block; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); font-weight: 700; margin: 14px 0 6px; }
-.link-button { border: 0; background: transparent; color: var(--ink-mute); text-decoration: underline; font-size: 13px; cursor: pointer; padding: 10px 0 0; }
+.facts-title { display: block; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); font-weight: 700; margin: 14px 0 6px; }
+.link-button { border: 0; background: transparent; color: var(--ink-mute); text-decoration: underline; font-size: 13px; cursor: pointer; padding: 12px 0; min-height: 44px; text-align: left; }
 .field-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 10px; }
 .field-row .field { margin-bottom: 10px; }
 .field select { width: 100%; border: 1px solid var(--line); background: rgba(0,0,0,.25); color: var(--ink); border-radius: 14px; padding: 12px 14px; font-family: var(--serif); font-size: 17px; }
@@ -147,7 +148,7 @@
 .hexagram-pair { display: flex; align-items: center; justify-content: center; gap: 18px; padding: 8px 0 4px; }
 .hexagram-block { display: flex; flex-direction: column; align-items: center; gap: 10px; }
 .hexagram { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; }
-.hexagram figcaption { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-mute); font-weight: 700; }
+.hexagram figcaption { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-mute); font-weight: 700; }
 .hexagram-lines { display: flex; flex-direction: column; gap: 9px; }
 .hexagram.small .hexagram-lines { gap: 6px; }
 .hex-line { position: relative; display: flex; gap: 14px; width: 120px; height: 12px; opacity: 0; transform: scaleX(.2); transition: opacity .35s ease, transform .45s cubic-bezier(.2,.7,.2,1); }
@@ -156,7 +157,7 @@
 .hex-line span { flex: 1; border-radius: 3px; background: linear-gradient(180deg, #e9cf82, var(--gold) 60%, #a37f2c); box-shadow: 0 2px 6px rgba(0,0,0,.35); }
 .hex-line.changing span { background: linear-gradient(180deg, #ffd9c9, var(--rose) 60%, #a0503f); }
 .change-mark { position: absolute; right: -22px; top: -4px; font-style: normal; font-size: 14px; color: var(--rose); }
-.hexagram.small .change-mark { right: -16px; top: -6px; font-size: 11px; }
+.hexagram.small .change-mark { right: -16px; top: -6px; font-size: 12px; }
 .hexagram-name { text-align: center; display: flex; flex-direction: column; gap: 2px; }
 .hexagram-name b { font-family: var(--display); font-size: 18px; letter-spacing: .04em; }
 .hexagram-name span { font-family: var(--serif); font-size: 13px; color: var(--ink-soft); }
@@ -166,12 +167,12 @@
 .pillars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .pillar { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 4px 8px; border-radius: 14px; border: 1px solid var(--line); background: rgba(0,0,0,.22); }
 .pillar.day { border-color: var(--gold-line); background: var(--gold-soft); }
-.pillar-title { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-mute); font-weight: 700; }
-.pillar-god { font-size: 10px; color: var(--ink-soft); min-height: 14px; text-align: center; }
+.pillar-title { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-mute); font-weight: 700; }
+.pillar-god { font-size: 12px; color: var(--ink-soft); min-height: 14px; text-align: center; }
 .pillar-char { font-family: var(--display); font-size: 34px; line-height: 1.1; font-weight: 600; }
 .pillar-char.wood { color: #8fd18f; } .pillar-char.fire { color: #ff8f7a; } .pillar-char.earth { color: #d9b45a; } .pillar-char.metal { color: #e6e6f0; } .pillar-char.water { color: #7fb8ff; }
-.pillar-hidden { font-size: 11px; color: var(--ink-mute); letter-spacing: .1em; }
-.pillar-nayin { font-size: 10px; color: var(--ink-mute); }
+.pillar-hidden { font-size: 12px; color: var(--ink-mute); letter-spacing: .1em; }
+.pillar-nayin { font-size: 12px; color: var(--ink-mute); }
 .element-bars { display: grid; gap: 6px; margin-top: 14px; }
 .element-bar { display: grid; grid-template-columns: 52px 1fr 20px; align-items: center; gap: 8px; font-size: 12px; }
 .element-track { height: 8px; border-radius: 4px; background: rgba(255,255,255,.08); overflow: hidden; }
@@ -182,7 +183,7 @@
 .luck-cycles li { display: flex; flex-direction: column; align-items: center; padding: 8px 2px; border-radius: 10px; border: 1px solid var(--line); }
 .luck-cycles li.current { border-color: var(--gold-line); background: var(--gold-soft); }
 .luck-cycles b { font-family: var(--display); font-size: 15px; }
-.luck-cycles small { font-size: 10px; color: var(--ink-mute); }
+.luck-cycles small { font-size: 12px; color: var(--ink-mute); }
 
 /* Astrology */
 .natal-wheel { width: 100%; max-width: 340px; display: block; margin: 0 auto; }
@@ -191,7 +192,7 @@
 .wheel-tick { stroke: var(--gold-line); stroke-width: 1; }
 .wheel-tick.faint { stroke: var(--line); }
 .wheel-axis { stroke: var(--rose); stroke-width: 1; stroke-dasharray: 3 3; }
-.axis-label { fill: var(--rose); font-size: 9px; letter-spacing: .1em; font-weight: 700; }
+.axis-label { fill: var(--rose); font-size: 11px; letter-spacing: .1em; font-weight: 700; }
 .sign-glyph { font-size: 15px; fill: var(--ink-soft); }
 .sign-glyph.fire { fill: #ff9f8a; } .sign-glyph.earth { fill: #d9b45a; } .sign-glyph.air { fill: #cfd6ff; } .sign-glyph.water { fill: #86c1ff; }
 .house-number { font-size: 8px; fill: var(--ink-mute); }
@@ -209,7 +210,7 @@
 .sector.good path { fill: rgba(217,180,90,.35); }
 .sector.bad path { fill: rgba(226,139,122,.18); }
 .sector-label { font-size: 12px; fill: var(--ink); font-weight: 700; }
-.sector-dir { font-size: 11px; fill: var(--ink-mute); letter-spacing: .06em; }
+.sector-dir { font-size: 12px; fill: var(--ink-mute); letter-spacing: .06em; }
 .rose-needle { fill: var(--rose); }
 .rose-pin { fill: var(--gold); }
 .compass-status { text-align: center; margin-top: 8px; }
@@ -231,7 +232,7 @@
 .book-page.left { border-radius: 10px 2px 2px 10px; transform-origin: right center; transform: rotateY(-8deg); }
 .book-page.right { border-radius: 2px 10px 10px 2px; transform-origin: left center; transform: rotateY(90deg); transition: transform .8s cubic-bezier(.2,.7,.2,1); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 18px; box-sizing: border-box; color: #2a2340; text-align: center; }
 .book-panel.opened .book-page.right { transform: rotateY(8deg); }
-.page-number { font-family: var(--display); font-size: 10px; letter-spacing: .18em; color: #7a5c1c; margin-bottom: 10px; }
+.page-number { font-family: var(--display); font-size: 12px; letter-spacing: .18em; color: #7a5c1c; margin-bottom: 10px; }
 .page-text { font-family: var(--serif); font-size: clamp(18px, 5vw, 24px); line-height: 1.3; margin: 0; }
 
 /* Settings models */
@@ -245,7 +246,7 @@
 .about { color: var(--ink-mute); font-size: 12px; }
 
 /* Ask Tianji: a conversation with whichever model is available. */
-.chat-log { display: flex; flex-direction: column; gap: 10px; max-height: 60vh; overflow-y: auto; }
+.chat-log { display: flex; flex-direction: column; gap: 10px; max-height: 60vh; overflow-y: auto; overflow-x: hidden; }
 .chat-bubble { margin: 0; padding: 12px 14px; border-radius: 16px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--line); line-height: 1.65; white-space: pre-wrap; }
 .chat-bubble.mine { background: rgba(214, 178, 106, 0.14); border-color: rgba(214, 178, 106, 0.35); align-self: flex-end; max-width: 86%; }
 .chat-bubble.thinking { color: var(--ink-mute); font-style: italic; }
@@ -256,7 +257,7 @@
 /* The card that offers a model when none is set up. */
 .model-prompt h2 { margin-top: 0; }
 .model-prompt .model-list { margin-top: 12px; }
-.chat-tool { margin: 0; align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-mute); border: 1px dashed var(--line); border-radius: 999px; padding: 6px 12px; }
+.chat-tool { margin: 0; align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; max-width: 100%; overflow-wrap: anywhere; font-size: 13px; color: var(--ink-mute); border: 1px dashed var(--line); border-radius: 999px; padding: 6px 12px; }
 
 /* The ask bar pinned to the bottom of every screen but the chat itself. */
 .chat-dock { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: flex; gap: 8px; align-items: center; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: rgba(11, 13, 31, 0.86); backdrop-filter: blur(12px); border-top: 1px solid var(--line); }
@@ -328,7 +329,7 @@ body {
   height: auto;
 }
 
-.chat-log { max-height: min(60vh, 520px); overscroll-behavior: contain; }
+.chat-log { max-height: min(60vh, 520px); overflow-x: hidden; overscroll-behavior: contain; }
 
 @media (max-width: 360px) {
   .screen { padding-left: 14px; padding-right: 14px; }

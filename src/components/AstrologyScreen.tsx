@@ -70,7 +70,7 @@ export function NatalWheel({ chart }: { chart: NatalChart }) {
         return (
           <>
             <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} className="wheel-axis" />
-            <text x={a.x - 12} y={a.y} className="axis-label" textAnchor="end" dominantBaseline="central">ASC</text>
+            <text x={Math.max(a.x - 12, 14)} y={a.y} className="axis-label" textAnchor="end" dominantBaseline="central">ASC</text>
             <text x={m.x} y={m.y - 10} className="axis-label" textAnchor="middle">MC</text>
           </>
         )

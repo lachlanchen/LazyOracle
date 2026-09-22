@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { languageLabels, type UICopy } from '../i18n'
-import { DEVICE_MODELS, deviceModelLoadedId, loadDeviceModel, selectDeviceModel, selectedDeviceModel, unloadDeviceModel, type LoadPhase } from '../lib/device-model'
+import { DEVICE_MODELS, deviceModelLoadedId, downloadedModelIds, loadDeviceModel, selectDeviceModel, selectedDeviceModel, unloadDeviceModel, type LoadPhase } from '../lib/device-model'
 import { loadModelSettings, saveModelSettings, type ModelSettings } from '../lib/llm'
 import { clearProfile, loadProfile } from '../lib/profile'
 import type { ReadingLanguage } from '../types'
@@ -21,8 +21,15 @@ export function Settings({ copy, language, onLanguage, modelNotice, onDismissNot
   const [loadedId, setLoadedId] = useState<string | null>(() => deviceModelLoadedId())
   const [hasProfile, setHasProfile] = useState(() => loadProfile() !== null)
   const [deviceError, setDeviceError] = useState('')
+  const [cached, setCached] = useState<string[]>([])
   const l = language === 'en' ? 'en' : 'zh'
   const t = copy.settings
+
+  useEffect(() => {
+    // Which models are already on the device, so the interface offers to use
+    // them rather than to fetch them again.
+    void downloadedModelIds().then(setCached)
+  }, [progress])
 
   useEffect(() => {
     // Resume loading a previously chosen model when Settings opens.
@@ -117,7 +124,7 @@ export function Settings({ copy, language, onLanguage, modelNotice, onDismissNot
               <li key={option.id} className={active ? 'active' : ''}>
                 <div>
                   <b>{option.name[l]}</b>
-                  <small>{option.sizeMb} MB · {option.note[l]}</small>
+                  <small>{cached.includes(option.id) ? t.onDevice : `${option.sizeMb} MB`} · {option.note[l]}</small>
                   {loading && (
                     <span className="progress" aria-label={progress?.phase === 'prepare' ? t.preparing : t.downloading}>
                       <span style={{ width: `${Math.round((progress?.fraction ?? 0) * 100)}%` }} />
@@ -132,7 +139,7 @@ export function Settings({ copy, language, onLanguage, modelNotice, onDismissNot
                   </span>
                 ) : (
                   <button type="button" className="ghost-button" onClick={() => void activateModel(option.id)} data-testid={`use-${option.id}`}>
-                    {t.download}
+                    {cached.includes(option.id) ? t.useDownloaded : t.download}
                   </button>
                 )}
               </li>

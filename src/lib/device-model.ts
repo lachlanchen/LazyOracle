@@ -56,12 +56,7 @@ const SELECTED_KEY = 'lazyoracle.deviceModel'
  * reload), so the app must not try that model again by itself.
  */
 const ATTEMPT_KEY = 'lazyoracle.deviceModel.attempt'
-/**
- * Remembers the model whose last start crashed, after the attempt marker has
- * been cleared. A crash often means a half-written file in the cache, which
- * the runtime would reject and download again, so the next deliberate attempt
- * at that model clears its cached copy first.
- */
+/** Remembers which model's last start crashed, so the interface can say so. */
 const CRASHED_KEY = 'lazyoracle.deviceModel.crashed'
 
 function markAttempt(id: string | null): void {
@@ -100,16 +95,6 @@ export function takeCrashedDeviceModel(): DeviceModelOption | null {
   return DEVICE_MODELS.find((m) => m.id === id) ?? null
 }
 
-function shouldPurgeCache(id: string): boolean {
-  try {
-    if (localStorage.getItem(CRASHED_KEY) !== id) return false
-    localStorage.removeItem(CRASHED_KEY)
-    return true
-  } catch {
-    return false
-  }
-}
-
 export function selectedDeviceModel(): DeviceModelOption | null {
   try {
     const id = localStorage.getItem(SELECTED_KEY)
@@ -140,6 +125,22 @@ type WllamaInstance = {
 let instance: WllamaInstance | null = null
 let loadedId: string | null = null
 let loading: Promise<void> | null = null
+
+/**
+ * The models whose files are already on the device and pass the runtime's own
+ * validation. A model in this list costs nothing to start, so the interface
+ * must offer to use it rather than to download it again.
+ */
+export async function downloadedModelIds(): Promise<string[]> {
+  try {
+    const { ModelManager } = await import('@wllama/wllama')
+    const cached = await new ModelManager().getModels()
+    const urls = new Set(cached.map((model) => model.url))
+    return DEVICE_MODELS.filter((option) => urls.has(option.url) || urls.has(option.mirror)).map((option) => option.id)
+  } catch {
+    return []
+  }
+}
 
 export function deviceModelReady(): boolean {
   return Boolean(instance && loadedId && selectedDeviceModel()?.id === loadedId)
@@ -197,17 +198,17 @@ export async function loadDeviceModel(option: DeviceModelOption, onProgress?: Lo
     // We serve that build from our own origin instead, so the app keeps
     // working under its content security policy and with no third party.
     wllama.setCompat({ worker: `${base}compat/wllama.js`, wasm: `${base}compat/wllama.wasm` })
-    if (shouldPurgeCache(option.id)) {
-      // The last attempt at this model brought the app down; start from a
-      // clean file rather than whatever is in the cache.
-      await wllama.cacheManager.delete(option.url).catch(() => undefined)
-      await wllama.cacheManager.delete(option.mirror).catch(() => undefined)
-    }
     // A phone has to hold the weights and the KV cache at once, so the context
     // stays small and only a few threads are used. Too large a context is what
     // makes the web view run out of memory and reload.
     const threads = Math.max(1, Math.min(4, Math.floor((navigator.hardwareConcurrency || 2) / 2)))
     let downloaded = false
+    const cachedAlready = (await downloadedModelIds()).includes(option.id)
+    if (cachedAlready) {
+      downloaded = true
+      markAttempt(option.id)
+      onProgress?.(1, 'prepare')
+    }
     const params = {
       n_ctx: option.contextTokens,
       n_batch: 128,

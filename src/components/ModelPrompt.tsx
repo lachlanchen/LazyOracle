@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Cloud, Download } from 'lucide-react'
-import { DEVICE_MODELS, loadDeviceModel, selectDeviceModel, type LoadPhase } from '../lib/device-model'
+import { DEVICE_MODELS, downloadedModelIds, loadDeviceModel, selectDeviceModel, type LoadPhase } from '../lib/device-model'
 import { loadModelSettings, saveModelSettings } from '../lib/llm'
 import type { UICopy } from '../i18n'
 import type { ReadingLanguage } from '../types'
@@ -21,7 +21,12 @@ interface ModelPromptProps {
 export function ModelPrompt({ copy, language, onReady, onDismiss }: ModelPromptProps) {
   const [progress, setProgress] = useState<{ id: string; fraction: number; phase: LoadPhase } | null>(null)
   const [error, setError] = useState('')
+  const [cached, setCached] = useState<string[]>([])
   const l = language === 'en' ? 'en' : 'zh'
+
+  useEffect(() => {
+    void downloadedModelIds().then(setCached)
+  }, [progress])
   const t = copy.modelPrompt
   const s = copy.settings
 
@@ -60,7 +65,7 @@ export function ModelPrompt({ copy, language, onReady, onDismiss }: ModelPromptP
             <li key={option.id}>
               <div>
                 <b>{option.name[l]}</b>
-                <small>{option.note[l]}</small>
+                <small>{cached.includes(option.id) ? `${s.onDevice} · ` : ''}{option.note[l]}</small>
                 {busy && (
                   <span className="progress" aria-label={progress.phase === 'prepare' ? s.preparing : s.downloading}>
                     <span style={{ width: `${Math.round(progress.fraction * 100)}%` }} />
@@ -73,7 +78,7 @@ export function ModelPrompt({ copy, language, onReady, onDismiss }: ModelPromptP
                 </span>
               ) : (
                 <button type="button" className="ghost-button" disabled={Boolean(progress)} onClick={() => void download(option.id)} data-testid={`prompt-${option.id}`}>
-                  <Download size={16} /> {s.download} · {option.sizeMb} MB
+                  <Download size={16} /> {cached.includes(option.id) ? s.useDownloaded : `${s.download} · ${option.sizeMb} MB`}
                 </button>
               )}
             </li>

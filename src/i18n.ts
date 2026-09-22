@@ -68,6 +68,8 @@ export interface UICopy {
     deviceModel: string
     deviceModelBody: string
     none: string
+    useDownloaded: string
+    onDevice: string
     download: string
     downloading: string
     loaded: string
@@ -171,6 +173,8 @@ const copies: Record<ReadingLanguage, UICopy> = {
       deviceModelBody: 'Downloaded once, then everything stays on the phone. Readings take a little longer on older phones.',
       none: 'No download (use Tianji Cloud)',
       download: 'Download and use',
+      useDownloaded: 'Use',
+      onDevice: 'Already on this device',
       downloading: 'Downloading',
       loaded: 'Ready',
       remove: 'Stop using',
@@ -271,6 +275,8 @@ const copies: Record<ReadingLanguage, UICopy> = {
       deviceModelBody: '下载一次后，一切都留在手机上。较旧的手机上解读会慢一些。',
       none: '不下载（使用天机云端）',
       download: '下载并使用',
+      useDownloaded: '使用',
+      onDevice: '已在本机',
       downloading: '下载中',
       loaded: '已就绪',
       remove: '停止使用',

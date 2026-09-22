@@ -21,7 +21,7 @@ Tarot, BaZi, I Ching, natal chart, feng shui and palmistry, computed on your pho
 
 ### Full description
 
-Seven ways to ask a question, one quiet place to ask it.
+Eight ways to ask a question, one quiet place to ask it.
 
 LazyOracle calculates every reading on your phone. The cards are shuffled here, the four pillars and the natal chart are computed here, the hexagram is cast here. A small language model can run on the device too, so a full narrative reading never needs a network.
 

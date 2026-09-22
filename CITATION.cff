@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+title: "LazyOracle: eight divination practices computed on the device"
+message: "If you refer to this software, please cite it as below."
+type: software
+authors:
+  - given-names: Lachlan
+    family-names: Chen
+    alias: lachlanchen
+    affiliation: LazyingArt LLC
+repository-code: "https://github.com/lachlanchen/LazyOracle"
+url: "https://oracle.lazying.art"
+abstract: >-
+  LazyOracle implements tarot, BaZi, the I Ching, astrology, Eight Mansions
+  feng shui, palmistry and face reading as deterministic engines that run on
+  the user's own device, and uses a language model only to narrate the facts
+  those engines produce.
+license: MIT
+version: 1.0.0
+date-released: "2026-09-22"

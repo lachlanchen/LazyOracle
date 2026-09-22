@@ -1,21 +1,94 @@
+[English](README.md) · [العربية](i18n/README.ar.md) · [Español](i18n/README.es.md) · [Français](i18n/README.fr.md) · [日本語](i18n/README.ja.md) · [한국어](i18n/README.ko.md) · [Tiếng Việt](i18n/README.vi.md) · [中文 (简体)](i18n/README.zh-Hans.md) · [中文（繁體）](i18n/README.zh-Hant.md) · [Deutsch](i18n/README.de.md) · [Русский](i18n/README.ru.md)
+
+![LazyOracle banner](docs/images/banner.svg)
+
 # LazyOracle
 
-**A beautiful, fully on-device fortune-telling companion: Tarot, BaZi (四柱八字), I Ching (周易), Western astrology (星座), Feng Shui (风水), palmistry (手相) and the Book of Answers.**
+**Eight divination practices, computed on your own device and explained in plain words.**
 
-Deterministic engines do the calculating. A small local language model (Qwen3-class, 4-bit, running on the phone) does the explaining. Nothing about your birth data or questions leaves the device unless you explicitly point the app at your own LazyEdge-connected workstation.
+[Open the web app](https://oracle.lazying.art) · [Mirror](https://oracle-fast.lazying.art) · [TestFlight beta](https://testflight.apple.com/join/JZJM3PFb) · [Google Play internal test](https://play.google.com/apps/internaltest/4701677916092886102) · [Privacy](https://oracle.lazying.art/privacy.html) · [Support](https://oracle.lazying.art/support.html)
 
-Status: milestone 1 (Tarot on the PWA) is done; see the progress log in `docs/brief.md`.
+<p align="center"><img src="docs/screenshots/home-practices.png" width="30%" alt="The eight practices"> <img src="docs/screenshots/tarot-three-model-reading.png" width="30%" alt="A three-card reading"> <img src="docs/screenshots/chat-agent.png" width="30%" alt="Ask Tianji casting a hexagram"></p>
 
-<p align="center"><img src="docs/screenshots/home-en.png" width="30%" alt="Home"> <img src="docs/screenshots/tarot-three-hidden.png" width="30%" alt="Three cards face down"> <img src="docs/screenshots/tarot-three-model-reading.png" width="30%" alt="Reading"></p>
+Tarot, BaZi, the I Ching, astrology, feng shui, palmistry and face reading each rest on a body of rules that is precise, even where it is not science. LazyOracle implements those rules exactly, on the device, and then lets a language model put the result into sentences. The model narrates; it never decides. The web app is free. The phone apps are a one-off US$0.99, with no subscription and no running cost, because nothing has to be computed on a server.
+
+## What it does
+
+- **Tarot** — all 78 cards with English and Chinese keywords, three spreads, and a seeded shuffle, so a draw can be reproduced from the seed printed beside it.
+- **BaZi (四柱八字)** — the four pillars with hidden stems, ten gods, nayin and luck cycles, from true solar time corrected for longitude and the equation of time.
+- **I Ching (周易)** — coins or yarrow stalks, moving lines, the resulting hexagram, and 互卦, 错卦 and 综卦, with the classical rule for which line or judgement actually answers.
+- **Astrology (星座)** — a natal chart from an astronomical ephemeris, whole-sign houses, ascendant and midheaven, aspects with orbs, and today's transits.
+- **Feng shui (风水)** — the Eight Mansions: your 命卦 and the eight directions of a home, with the phone's compass to find them.
+- **Palmistry (手相)** — the hand is measured from a photo on the device: elemental hand shape, each finger against the middle finger, the thumb's opening angle, and the eight palaces of the palm.
+- **Face reading (面相)** — 三停, the five-eye proportion, symmetry, the elemental face type, and eight of the 十二宫, all measured on the device.
+- **Book of Answers and Book of Questions** — two original corpora, opened at a page chosen from your question.
+- **Ask Tianji (问天机)** — a conversation that can run any of the engines above as a tool: it draws real cards and casts real hexagrams rather than describing what you could do.
+
+## How a reading is made
+
+Every practice produces a structured set of facts: the cards drawn in their positions, the pillars and their relations, the hexagram and its moving lines. Those facts are computed by ordinary, tested code, so they are identical on every device and every run. Only then is a model asked for prose, with the facts as its only source and instructions not to add, replace or contradict any of them. When no model is available, the app composes the reading from the same facts itself, so a reading always appears.
+
+Three sources are tried in order:
+
+| Source | What it is | When it runs |
+| --- | --- | --- |
+| A downloaded Tianji model | 天机快速版 / Tianji Fast (about 400 MB) or 天机专业版 / Tianji Pro (about 1.1 GB), running in the app through llama.cpp compiled to WebAssembly | Whenever one has been downloaded |
+| Tianji Cloud (天机云端) | Our own relay, which holds the provider key and keeps nothing | Only when switched on in Settings; off by default |
+| The offline composition | The deterministic engine writing the reading itself | Whenever neither of the above is available |
+
+## Privacy
+
+Cards, charts, hexagrams and measurements are computed on the device. Photos for palmistry and face reading are measured in memory and never stored, uploaded or matched against anything. Birth details stay in the browser's local storage on that device. There is no account, no analytics and no advertising identifier. With Tianji Cloud switched on, one request carries the structured facts and your question to our relay, which forwards them to a language model and keeps no copy; with it off, nothing leaves the device at all. The full policy is at [oracle.lazying.art/privacy.html](https://oracle.lazying.art/privacy.html).
+
+## Platforms
+
+| Platform | Implementation | Verification |
+| --- | --- | --- |
+| Web/PWA | React 19, TypeScript, Vite, Workbox | Chromium flows for every practice, offline precache, the Safari code path exercised with `tools/safari-path-test.py` |
+| Android | Capacitor 8 | Signed bundle and APK, installed and launched on API 36 |
+| iOS | Capacitor 8 | Signed archive uploaded to App Store Connect, distributed through TestFlight |
+
+## Build and test
+
+Requirements: Node.js 22+ and npm; Android Studio with JDK 21 for Android; Xcode for Apple targets.
 
 ```bash
 npm install
-npm run dev        # PWA at http://localhost:5173
-npm run check      # lint, tests, production build
+npm run dev     # the PWA at http://localhost:5173
+npm run check   # lint, 66 tests, production build
 ```
 
-Readings are written by a downloaded Tianji model (天机快速版 / 天机专业版) when you have one, or composed from the computed facts. Settings also has a Tianji Cloud switch, off by default, which sends only the computed facts to our reading relay at `oracle.lazying.art/v1`. Sibling of [L & N](https://github.com/lachlanchen/L-And-N), which supplies the app shell and the publishing pipeline.
+Two browser checks run against a built `dist/`, with Playwright's Chromium:
 
-Price: US$0.99 (CNY 8 / HKD 8) on the App Store and Google Play; the PWA is free.
+```bash
+python3 tools/safari-path-test.py   # on-device models still load on Safari and iOS
+python3 tools/agent-chat-test.py    # the chat really runs the engines it claims to
+```
 
-[TestFlight public beta](https://testflight.apple.com/join/JZJM3PFb) · [Google Play internal test](https://play.google.com/apps/internaltest/4701677916092886102) · [Web app](https://oracle.lazying.art) · [Android APK build 1](https://oracle.lazying.art/downloads/LazyOracle-1.0.0-build1.apk) · App Store and Google Play listings: in review.
+## Repository layout
+
+- `src/engines/` — one folder per practice, pure functions with tests and no interface code.
+- `src/lib/` — the reading pipeline, the model sources, the agent's tools and the saved conversations.
+- `src/components/` — one screen per practice, plus the chat and settings.
+- `ops/` — the Tianji Cloud relay, dependency-free Python, with its systemd unit.
+- `store/` — store metadata, privacy declarations, screenshots and release status.
+- `tools/` — release, deployment and browser-verification scripts.
+- `docs/` — the product brief and progress log, handoff notes and plans.
+
+## Support
+
+If this project is useful, a star, an issue, a translation or a carefully scoped pull request all help. Financial support pays for hosting.
+
+| Donate | PayPal | Stripe |
+| --- | --- | --- |
+| [LazyingArt Donate](https://chat.lazying.art/donate) | [paypal.me/RongzhouChen](https://paypal.me/RongzhouChen) | [Support with Stripe](https://buy.stripe.com/aFadR8gIaflgfQV6T4fw400) |
+
+[Sponsor on GitHub](https://github.com/sponsors/lachlanchen)
+
+## About
+
+Made by [Lachlan Chen](https://github.com/lachlanchen) at LazyingArt. Sibling of [L & N](https://github.com/lachlanchen/L-And-N), which supplies the app shell and the publishing pipeline.
+
+Divination is treated here as a mirror for reflection, not as prediction. Nothing in this app is medical, legal or financial advice.
+
+Released under the [MIT License](LICENSE).

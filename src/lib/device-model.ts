@@ -181,7 +181,9 @@ export class ModelTooLarge extends Error {}
  * The reservation is not touched, so it costs nothing when it succeeds.
  */
 export async function canHoldModel(option: DeviceModelOption): Promise<boolean> {
-  const needed = Math.ceil(option.sizeMb * 1.6 * 1024 * 1024)
+  // Loading needs the file about three times over on iOS (read, clone to the
+  // worker, and the runtime's own copy), so ask for a little over twice it.
+  const needed = Math.ceil(option.sizeMb * 2.2 * 1024 * 1024)
   try {
     const memory = new WebAssembly.Memory({ initial: Math.ceil(needed / 65536) })
     return memory.buffer.byteLength >= needed

@@ -24,6 +24,26 @@ try {
   if (estimate?.quota) $('quota').textContent = `${Math.round((estimate.quota - (estimate.usage || 0)) / 1048576)} MB of ${Math.round(estimate.quota / 1048576)} MB`
 } catch { $('quota').textContent = 'unknown' }
 
+// How large a single block this browser will reserve. On a phone this is the
+// real ceiling for an on-device model, and it is far below the phone's RAM.
+function reservable(mb) {
+  try {
+    const memory = new WebAssembly.Memory({ initial: Math.ceil((mb * 1024 * 1024) / 65536) })
+    return memory.buffer.byteLength >= mb * 1024 * 1024
+  } catch {
+    return false
+  }
+}
+let low = 0
+let high = 4096
+while (high - low > 32) {
+  const mid = Math.floor((low + high) / 2)
+  if (reservable(mid)) low = mid
+  else high = mid
+}
+$('ceiling').textContent = `${low} MB in one block`
+log(`largest reservable block: ${low} MB`)
+
 const started = Date.now()
 const since = () => `${((Date.now() - started) / 1000).toFixed(1)}s`
 

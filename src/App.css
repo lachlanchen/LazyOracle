@@ -260,8 +260,8 @@
 .chat-tool { margin: 0; align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; max-width: 100%; overflow-wrap: anywhere; font-size: 13px; color: var(--ink-mute); border: 1px dashed var(--line); border-radius: 999px; padding: 6px 12px; }
 
 /* The ask bar pinned to the bottom of every screen but the chat itself. */
-.chat-dock { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: flex; gap: 8px; align-items: center; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: rgba(11, 13, 31, 0.86); backdrop-filter: blur(12px); border-top: 1px solid var(--line); }
-.chat-dock input { flex: 1; min-width: 0; padding: 12px 14px; border-radius: 999px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.05); color: var(--ink); font-size: 15px; }
+.chat-dock { position: fixed; left: 0; right: 0; bottom: var(--keyboard-inset, 0px); z-index: 20; display: flex; gap: 8px; align-items: center; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: rgba(11, 13, 31, 0.86); backdrop-filter: blur(12px); border-top: 1px solid var(--line); }
+.chat-dock input { flex: 1; min-width: 0; padding: 12px 14px; border-radius: 999px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.05); color: var(--ink); font-size: 16px; }
 .chat-dock input:focus { outline: none; border-color: rgba(214, 178, 106, 0.6); }
 .chat-dock .icon-button:disabled { opacity: 0.4; }
 
@@ -335,4 +335,24 @@ body {
   .screen { padding-left: 14px; padding-right: 14px; }
   .panel { padding: 15px; border-radius: 18px; }
   .practice-grid { gap: 10px; }
+}
+
+
+/* ---- Text fields --------------------------------------------------------
+ * Safari on iOS zooms the page whenever a field smaller than 16px is
+ * focused, and the zoom is what makes the whole interface look wider and
+ * scroll sideways. Nothing typed into is allowed below that size.
+ */
+input,
+textarea,
+select {
+  font-size: max(16px, 1rem);
+}
+
+/* The ask bar rides above the on-screen keyboard rather than hiding behind
+ * it; --keyboard-inset is measured from the visual viewport. */
+.chat-dock { transition: bottom .18s ease-out; }
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-dock { transition: none; }
 }

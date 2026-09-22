@@ -62,6 +62,25 @@ function App() {
   )
 
   useEffect(() => {
+    // How much of the window the on-screen keyboard covers, so the ask bar
+    // can sit above it instead of behind it. Safari reports this through the
+    // visual viewport; browsers without one simply get zero.
+    const viewport = window.visualViewport
+    if (!viewport) return undefined
+    const measure = () => {
+      const overlap = Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop)
+      document.documentElement.style.setProperty('--keyboard-inset', `${Math.round(overlap)}px`)
+    }
+    measure()
+    viewport.addEventListener('resize', measure)
+    viewport.addEventListener('scroll', measure)
+    return () => {
+      viewport.removeEventListener('resize', measure)
+      viewport.removeEventListener('scroll', measure)
+    }
+  }, [])
+
+  useEffect(() => {
     // Warm the chosen on-device model in the background so the first reading
     // does not wait. Skipped after a crash, which left nothing selected.
     const chosen = selectedDeviceModel()

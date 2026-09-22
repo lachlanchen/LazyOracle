@@ -43,14 +43,17 @@ function persona(language: ReadingLanguage): string {
 
 export function ChatScreen({ copy, language, pending, onPendingConsumed }: ChatScreenProps) {
   const [ready, setReady] = useState(() => chatAvailable())
-  const [turns, setTurns] = useState<Turn[]>([])
+  const [conversations, setConversations] = useState<Conversation[]>(() => loadConversations())
+  // Opening the chat continues where the reader left off. A conversation
+  // accumulates until they deliberately start a new one, so the model keeps
+  // the earlier questions as context.
+  const [turns, setTurns] = useState<Turn[]>(() => (loadConversations()[0]?.turns as Turn[] | undefined) ?? [])
   const [draft, setDraft] = useState('')
   const [streaming, setStreaming] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
-  const [conversations, setConversations] = useState<Conversation[]>(() => loadConversations())
   const [showHistory, setShowHistory] = useState(false)
-  const conversationId = useRef(newConversationId())
+  const conversationId = useRef(loadConversations()[0]?.id ?? newConversationId())
   const abort = useRef<AbortController | null>(null)
   const asked = useRef('')
   const t = copy.chat

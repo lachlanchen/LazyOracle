@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { castHexagram, hexagramByNumber, hexagramFromLines } from './cast'
-import { HEXAGRAMS, TRIGRAMS } from './data'
+import { castHexagram, hexagramByNumber, hexagramFromLines, inverseHexagram, nuclearHexagram, oppositeHexagram, readingFocus } from './cast'
+import { HEXAGRAMS, TRIGRAMS, type Line } from './data'
 
 describe('hexagram table', () => {
   it('has 64 distinct hexagrams whose line patterns are all different', () => {
@@ -57,5 +57,42 @@ describe('casting', () => {
     const yarrow = count('yarrow')
     expect(yarrow[6]).toBeCloseTo(1 / 16, 1)
     expect(yarrow[8]).toBeCloseTo(7 / 16, 1)
+  })
+})
+
+describe('related hexagrams and the reading rule', () => {
+  it('derives the nuclear, opposite and inverse hexagrams', () => {
+    // Hexagram 1 乾 is all yang: its opposite is 2 坤, and both are unchanged
+    // by being turned over or by taking their inner lines.
+    const qian = castHexagram({ seed: 1 })
+    const lines = [1, 1, 1, 1, 1, 1] as Line[]
+    expect(nuclearHexagram(lines).number).toBe(1)
+    expect(oppositeHexagram(lines).number).toBe(2)
+    expect(inverseHexagram(lines).number).toBe(1)
+    expect(qian.nuclear.number).toBeGreaterThan(0)
+    // 屯 (3) turned upside down is 蒙 (4), the classical pair.
+    const zhun = hexagramByNumber(3)
+    expect(inverseHexagram(zhun.lines).number).toBe(4)
+  })
+
+  it('places the answer where the classical rule places it', () => {
+    expect(readingFocus([]).kind).toBe('judgement')
+    expect(readingFocus([4]).positions).toEqual([4])
+    // With two moving lines the upper one leads, so it comes first.
+    expect(readingFocus([2, 5]).positions).toEqual([5, 2])
+    expect(readingFocus([1, 2, 3]).kind).toBe('both-judgements')
+    // Four moving lines: read the two that stayed still, in the resulting hexagram.
+    const four = readingFocus([1, 2, 3, 4])
+    expect(four.from).toBe('resulting')
+    expect(four.positions).toEqual([5, 6])
+    expect(readingFocus([1, 2, 3, 4, 5]).positions).toEqual([6])
+    expect(readingFocus([1, 2, 3, 4, 5, 6]).kind).toBe('resulting-judgement')
+  })
+
+  it('carries the rule and the related hexagrams on every cast', () => {
+    const cast = castHexagram({ seed: 42 })
+    expect(cast.focus.rule.zh.length).toBeGreaterThan(4)
+    expect(cast.focus.rule.en.length).toBeGreaterThan(10)
+    expect([cast.nuclear.number, cast.opposite.number, cast.inverse.number].every((n) => n >= 1 && n <= 64)).toBe(true)
   })
 })

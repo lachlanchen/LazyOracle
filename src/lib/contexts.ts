@@ -2,7 +2,7 @@ import { BODY_TEXT, formatDegree, SIGNS, type NatalChart, type Transit, type Pla
 import { ELEMENT_EN, TEN_GOD_EN, type BaziChart } from '../engines/bazi/bazi'
 import { DIRECTION_TEXT, GUA_EN, type EightMansions } from '../engines/fengshui/fengshui'
 import { linePositionText, type IChingCast } from '../engines/iching/cast'
-import { LINE_TEXT, SHAPE_TEXT, type PalmFeatures } from '../engines/palm/palm'
+import { FINGER_TEXT, LINE_TEXT, opennessText, PALACE_TEXT, SHAPE_TEXT, thumbAngleText, type PalmFeatures } from '../engines/palm/palm'
 import type { Opening } from '../engines/answers/answers'
 import type { ReadingLanguage } from '../types'
 
@@ -33,6 +33,10 @@ export interface IChingContext {
   primary: { number: number; name: string; judgement: string; keywords: string[]; sense: string; lower: string; upper: string }
   changingLines: { position: number; meaning: string }[]
   resulting: { number: number; name: string; keywords: string[]; sense: string } | null
+  /** 互卦, 错卦, 综卦: what is hidden inside, its counterpart, and the other side's view. */
+  related: { nuclear: string; opposite: string; inverse: string }
+  /** Where the answer is read, by the classical rule. */
+  focus: string
 }
 
 export function ichingContext(cast: IChingCast, language: ReadingLanguage): IChingContext {
@@ -54,14 +58,21 @@ export function ichingContext(cast: IChingCast, language: ReadingLanguage): IChi
     },
     changingLines: cast.changingPositions.map((position) => ({ position, meaning: linePositionText(position, l) })),
     resulting: cast.resulting ? { number: cast.resulting.number, name: name(cast.resulting), keywords: cast.resulting.keywords[l], sense: cast.resulting.sense[l] } : null,
+    related: {
+      nuclear: `${cast.nuclear.number} ${name(cast.nuclear)}`,
+      opposite: `${cast.opposite.number} ${name(cast.opposite)}`,
+      inverse: `${cast.inverse.number} ${name(cast.inverse)}`,
+    },
+    focus: cast.focus.rule[l],
   }
 }
 
 export function ichingSystemPrompt(language: ReadingLanguage): string {
   return [
     ...common(language, 'a calm reader of the I Ching (周易)'),
-    'Structure: name the primary hexagram and quote its judgement; explain its sense for the question; then each changing line by position; then, if there is a resulting hexagram, what the situation is moving toward; finish with two or three sentences of practical advice.',
-    'Length: 200 to 350 words.',
+    'Structure: name the primary hexagram and quote its judgement; explain its sense for the question; say where the answer is read, following the rule given in the facts, and read it there; then each changing line by position; then, if there is a resulting hexagram, what the situation is moving toward; mention the nuclear hexagram once, as what lies inside the situation; finish with two or three sentences of practical advice.',
+    'Follow the reading rule in the facts exactly. Do not move the answer to a different line.',
+    'Length: 220 to 380 words.',
   ].join('\n')
 }
 
@@ -71,6 +82,8 @@ export function ichingOffline(c: IChingContext): string {
     if (c.changingLines.length) parts.push(`Changing lines: ${c.changingLines.map((line) => line.meaning).join(' ')}`)
     else parts.push('No line changes: the situation is stable; read the judgement as it stands.')
     if (c.resulting) parts.push(`It moves toward hexagram ${c.resulting.number}, ${c.resulting.name}: ${c.resulting.sense} Keywords: ${c.resulting.keywords.join(', ')}.`)
+    parts.push(`Where to read the answer: ${c.focus}`)
+    parts.push(`Inside it lies hexagram ${c.related.nuclear}; its counterpart is ${c.related.opposite}; seen from the other side it is ${c.related.inverse}.`)
     parts.push('Hold the question next to the judgement, then next to the moving lines. Where they agree is your answer; where they differ is what still needs deciding.')
     return parts.join('\n\n')
   }
@@ -78,6 +91,8 @@ export function ichingOffline(c: IChingContext): string {
   if (c.changingLines.length) parts.push(`变爻：${c.changingLines.map((line) => line.meaning).join(' ')}`)
   else parts.push('无变爻：局面平稳，以本卦卦辞为断。')
   if (c.resulting) parts.push(`之卦为第${c.resulting.number}卦 ${c.resulting.name}：${c.resulting.sense} 关键词：${c.resulting.keywords.join('、')}。`)
+  parts.push(`断法：${c.focus}`)
+  parts.push(`互卦为第${c.related.nuclear}卦，错卦为第${c.related.opposite}卦，综卦为第${c.related.inverse}卦。`)
   parts.push('把问题先对照卦辞，再对照变爻。两者相合之处便是答案；相异之处，正是你还需要决定的。')
   return parts.join('\n\n')
 }
@@ -290,10 +305,22 @@ export interface PalmContext {
   shapeKeywords: string[]
   proportions: { fingerRatio: number; palmRatio: number; indexToRing: number }
   lines: string[]
+  /** Finger lengths against the middle finger, only the notable ones. */
+  fingers: string[]
+  /** The palaces that stand out or are notably flat. */
+  palaces: string[]
+  /** Thumb opening and how widely the fingers are held. */
+  hand: string[]
 }
 
 export function palmContext(f: PalmFeatures, language: ReadingLanguage, question: string): PalmContext {
   const l = language === 'en' ? 'en' : 'zh'
+  const fingers = f.fingers
+    .filter((finger) => finger.length !== 'average')
+    .map((finger) => `${FINGER_TEXT[finger.finger][l]}: ${FINGER_TEXT[finger.finger][finger.length === 'long' ? 'long' : 'short'][l]}`)
+  const palaces = f.palaces
+    .filter((palace) => palace.state !== 'even')
+    .map((palace) => `${PALACE_TEXT[palace.palace][l]} — ${PALACE_TEXT[palace.palace][palace.state === 'full' ? 'full' : 'flat'][l]}`)
   return {
     practice: 'palm',
     language,
@@ -301,23 +328,42 @@ export function palmContext(f: PalmFeatures, language: ReadingLanguage, question
     shape: SHAPE_TEXT[f.shape][l],
     shapeKeywords: SHAPE_TEXT[f.shape].keywords[l],
     proportions: { fingerRatio: Math.round(f.fingerRatio * 100) / 100, palmRatio: Math.round(f.palmRatio * 100) / 100, indexToRing: Math.round(f.indexToRing * 100) / 100 },
-    lines: [LINE_TEXT.heart[f.lines.heart][l], LINE_TEXT.head[f.lines.head][l], LINE_TEXT.life[f.lines.life][l]],
+    lines: [LINE_TEXT.heart[f.lines.heart][l], LINE_TEXT.head[f.lines.head][l], LINE_TEXT.life[f.lines.life][l], LINE_TEXT.fate[f.lines.fate][l]],
+    fingers,
+    palaces,
+    hand: [thumbAngleText(f.thumbAngle, l), opennessText(f.openness, l)],
   }
 }
 
 export function palmSystemPrompt(language: ReadingLanguage): string {
   return [
     ...common(language, 'a friendly palm reader who treats palmistry as a mirror for reflection, not prediction'),
-    'Structure: the hand shape and what its keywords suggest; the three lines in turn; how they combine; two sentences of encouragement. Say once, lightly, that this is for reflection.',
-    'Length: 180 to 300 words.',
+    'Structure: the hand shape and what its keywords suggest; the three major lines and the fate line in turn; the fingers and the palaces that stand out, named as the facts name them; how all of it combines; two sentences of encouragement. Say once, lightly, that this is for reflection.',
+    'Use only the facts given. Do not invent a line, a finger or a palace that is not listed.',
+    'Length: 220 to 360 words.',
   ].join('\n')
 }
 
 export function palmOffline(c: PalmContext): string {
+  const parts: string[] = []
   if (c.language === 'en') {
-    return [`${c.shape}: ${c.shapeKeywords.join(', ')}.`, c.lines.join(' '), `Finger-to-palm ratio ${c.proportions.fingerRatio}, palm width ratio ${c.proportions.palmRatio}, index-to-ring ${c.proportions.indexToRing}.`, 'Read the shape as your default pace and the lines as the habits you have grown into. Palmistry is a mirror to think with, not a forecast.'].join('\n\n')
+    parts.push(`${c.shape}: ${c.shapeKeywords.join(', ')}.`)
+    parts.push(c.lines.join(' '))
+    if (c.fingers.length) parts.push(`Fingers: ${c.fingers.join(' ')}`)
+    if (c.palaces.length) parts.push(`Palaces: ${c.palaces.join(' ')}`)
+    parts.push(c.hand.join(' '))
+    parts.push(`Finger-to-palm ratio ${c.proportions.fingerRatio}, palm width ratio ${c.proportions.palmRatio}, index-to-ring ${c.proportions.indexToRing}.`)
+    parts.push('Read the shape as your default pace, the lines as the habits you have grown into, and the palaces as where your energy collects. Palmistry is a mirror to think with, not a forecast.')
+    return parts.join('\n\n')
   }
-  return [`${c.shape}：${c.shapeKeywords.join('、')}。`, c.lines.join(' '), `指长比 ${c.proportions.fingerRatio}，掌宽比 ${c.proportions.palmRatio}，食指/无名指 ${c.proportions.indexToRing}。`, '手型是你的默认节奏，纹路是你养成的习惯。手相是一面用来思考的镜子，不是预告。'].join('\n\n')
+  parts.push(`${c.shape}：${c.shapeKeywords.join('、')}。`)
+  parts.push(c.lines.join(' '))
+  if (c.fingers.length) parts.push(`五指：${c.fingers.join(' ')}`)
+  if (c.palaces.length) parts.push(`八宫：${c.palaces.join(' ')}`)
+  parts.push(c.hand.join(' '))
+  parts.push(`指长比 ${c.proportions.fingerRatio}，掌宽比 ${c.proportions.palmRatio}，食指/无名指 ${c.proportions.indexToRing}。`)
+  parts.push('手型是你的默认节奏，纹路是你养成的习惯，八宫是气力聚集之处。手相是一面用来思考的镜子，不是预告。')
+  return parts.join('\n\n')
 }
 
 // ---------- Books ----------

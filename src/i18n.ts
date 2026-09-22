@@ -45,11 +45,11 @@ export interface UICopy {
     seed: string
     tapToReveal: string
   }
-  iching: { eyebrow: string; title: string; method: string; coins: string; yarrow: string; cast: string; castAgain: string; primary: string; resulting: string; changing: string; noChange: string; judgement: string; line: string }
+  iching: { eyebrow: string; title: string; method: string; coins: string; yarrow: string; cast: string; castAgain: string; primary: string; resulting: string; changing: string; noChange: string; judgement: string; line: string; related: string; rule: string }
   bazi: { eyebrow: string; title: string; year: string; month: string; day: string; hour: string; dayMaster: string; elements: string; strength: Record<'strong' | 'balanced' | 'weak', string>; favourable: string; luck: string; thisYear: string; hidden: string; compute: string; solarTerms: string }
   astrology: { eyebrow: string; title: string; ascendant: string; midheaven: string; placements: string; house: string; aspects: string; today: string; noTransits: string; retrograde: string; compute: string }
   fengshui: { eyebrow: string; title: string; gua: string; east: string; west: string; compass: string; enableCompass: string; heading: string; facing: string; good: string; bad: string; noCompass: string; compute: string }
-  palm: { eyebrow: string; title: string; takePhoto: string; choosePhoto: string; analysing: string; noHand: string; retake: string; heart: string; heartIndex: string; heartMiddle: string; heartBetween: string; head: string; headStraight: string; headCurved: string; life: string; lifeWide: string; lifeClose: string; read: string; shape: string; hint: string }
+  palm: { eyebrow: string; title: string; takePhoto: string; choosePhoto: string; analysing: string; noHand: string; retake: string; heart: string; heartIndex: string; heartMiddle: string; heartBetween: string; head: string; headStraight: string; headCurved: string; life: string; lifeWide: string; lifeClose: string; fate: string; fatePresent: string; fateAbsent: string; fateUnsure: string; read: string; shape: string; fingersLabel: string; palacesLabel: string; handLabel: string; hint: string }
   answers: { eyebrow: string; title: string; answers: string; questions: string; open: string; openAgain: string; page: string; hint: string }
   settings: {
     title: string
@@ -110,7 +110,7 @@ const copies: Record<ReadingLanguage, UICopy> = {
       eyebrow: 'Tarot', title: 'Ask the cards', spreadLabel: 'Spread', draw: 'Shuffle and draw', drawAgain: 'Draw again', revealAll: 'Reveal all',
       upright: 'upright', reversed: 'reversed', seed: 'Draw', tapToReveal: 'Tap a card to turn it',
     },
-    iching: { eyebrow: 'I Ching', title: 'Cast a hexagram', method: 'Method', coins: 'Three coins', yarrow: 'Yarrow stalks', cast: 'Cast the lines', castAgain: 'Cast again', primary: 'Primary hexagram', resulting: 'Moving toward', changing: 'Changing lines', noChange: 'No changing lines', judgement: 'Judgement', line: 'Line' },
+    iching: { eyebrow: 'I Ching', title: 'Cast a hexagram', method: 'Method', coins: 'Three coins', yarrow: 'Yarrow stalks', cast: 'Cast the lines', castAgain: 'Cast again', primary: 'Primary hexagram', resulting: 'Moving toward', changing: 'Changing lines', noChange: 'No changing lines', judgement: 'Judgement', line: 'Line', related: 'Inner, counterpart, reverse', rule: 'Where to read' },
     bazi: { eyebrow: 'BaZi 四柱', title: 'Four pillars', year: 'Year', month: 'Month', day: 'Day', hour: 'Hour', dayMaster: 'Day master', elements: 'Five elements', strength: { strong: 'strong', balanced: 'balanced', weak: 'weak' }, favourable: 'Favourable', luck: 'Luck cycles', thisYear: 'This year', hidden: 'hidden', compute: 'Compute the chart', solarTerms: 'Solar terms' },
     astrology: { eyebrow: 'Astrology', title: 'Natal chart', ascendant: 'Ascendant', midheaven: 'Midheaven', placements: 'Placements', house: 'house', aspects: 'Aspects', today: 'Today\'s sky', noTransits: 'No close transits to your natal planets today.', retrograde: 'retrograde', compute: 'Draw the chart' },
     fengshui: { eyebrow: 'Feng Shui 八宅', title: 'Eight Mansions', gua: 'Personal trigram', east: 'East group', west: 'West group', compass: 'Compass', enableCompass: 'Enable the compass', heading: 'Heading', facing: 'Facing', good: 'Favourable', bad: 'Avoid', noCompass: 'No compass on this device; read the sectors from a map.', compute: 'Find my directions' },
@@ -119,7 +119,8 @@ const copies: Record<ReadingLanguage, UICopy> = {
       heart: 'Where does your heart line end?', heartIndex: 'Under the index finger', heartMiddle: 'Under the middle finger', heartBetween: 'Between them',
       head: 'Is your head line straight or curved?', headStraight: 'Straight', headCurved: 'Curved',
       life: 'Does your life line sweep wide or hug the thumb?', lifeWide: 'Sweeps wide', lifeClose: 'Hugs the thumb',
-      read: 'Read my hand', shape: 'Hand shape', hint: 'The photo never leaves the device.',
+      fate: 'Is there a line running up the centre of your palm?', fatePresent: 'Yes, clear', fateAbsent: 'No', fateUnsure: 'Hard to tell',
+      read: 'Read my hand', shape: 'Hand shape', fingersLabel: 'Fingers', palacesLabel: 'Palaces', handLabel: 'Hand', hint: 'The photo never leaves the device.',
     },
     answers: { eyebrow: 'The books', title: 'Ask and open', answers: 'Book of Answers', questions: 'Book of Questions', open: 'Open the book', openAgain: 'Open again', page: 'Page', hint: 'Hold your question, then open.' },
     settings: {
@@ -179,7 +180,7 @@ const copies: Record<ReadingLanguage, UICopy> = {
       eyebrow: '塔罗', title: '向牌发问', spreadLabel: '牌阵', draw: '洗牌并抽牌', drawAgain: '再抽一次', revealAll: '全部翻开',
       upright: '正位', reversed: '逆位', seed: '牌局', tapToReveal: '点击牌面翻开',
     },
-    iching: { eyebrow: '周易', title: '起一卦', method: '起卦方式', coins: '三枚铜钱', yarrow: '蓍草', cast: '起卦', castAgain: '再起一卦', primary: '本卦', resulting: '之卦', changing: '变爻', noChange: '无变爻', judgement: '卦辞', line: '爻' },
+    iching: { eyebrow: '周易', title: '起一卦', method: '起卦方式', coins: '三枚铜钱', yarrow: '蓍草', cast: '起卦', castAgain: '再起一卦', primary: '本卦', resulting: '之卦', changing: '变爻', noChange: '无变爻', judgement: '卦辞', line: '爻', related: '互卦 / 错卦 / 综卦', rule: '断法' },
     bazi: { eyebrow: '八字 四柱', title: '四柱八字', year: '年柱', month: '月柱', day: '日柱', hour: '时柱', dayMaster: '日主', elements: '五行', strength: { strong: '身强', balanced: '中和', weak: '身弱' }, favourable: '喜用', luck: '大运', thisYear: '流年', hidden: '藏干', compute: '排盘', solarTerms: '节气' },
     astrology: { eyebrow: '星座', title: '本命盘', ascendant: '上升', midheaven: '天顶', placements: '行星落座', house: '宫', aspects: '相位', today: '今日星空', noTransits: '今日与本命行星没有紧密的行运相位。', retrograde: '逆行', compute: '绘制星盘' },
     fengshui: { eyebrow: '风水 八宅', title: '八宅方位', gua: '命卦', east: '东四命', west: '西四命', compass: '罗盘', enableCompass: '开启罗盘', heading: '朝向', facing: '面向', good: '吉方', bad: '凶方', noCompass: '此设备没有罗盘，请对照地图查看方位。', compute: '查看我的方位' },
@@ -188,7 +189,8 @@ const copies: Record<ReadingLanguage, UICopy> = {
       heart: '你的感情线止于哪里？', heartIndex: '食指下方', heartMiddle: '中指下方', heartBetween: '两指之间',
       head: '你的智慧线是直的还是弯的？', headStraight: '平直', headCurved: '弯曲',
       life: '你的生命线弧度开阔，还是贴近拇指？', lifeWide: '弧度开阔', lifeClose: '贴近拇指',
-      read: '解读我的手', shape: '手型', hint: '照片不会离开本设备。',
+      fate: '掌心中央有一条竖纹（事业线）吗？', fatePresent: '有，清晰', fateAbsent: '没有', fateUnsure: '看不清',
+      read: '解读我的手', shape: '手型', fingersLabel: '五指', palacesLabel: '八宫', handLabel: '掌形', hint: '照片不会离开本设备。',
     },
     answers: { eyebrow: '两本书', title: '发问并翻开', answers: '答案之书', questions: '问题之书', open: '翻开这本书', openAgain: '再翻一次', page: '第', hint: '心中默念问题，然后翻开。' },
     settings: {

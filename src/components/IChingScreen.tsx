@@ -125,6 +125,14 @@ export function IChingScreen({ copy, language }: IChingScreenProps) {
                   <dd>{cast.resulting.sense[l]}</dd>
                 </>
               )}
+              <dt>{t.rule}</dt>
+              <dd>{cast.focus.rule[l]}</dd>
+              <dt>{t.related}</dt>
+              <dd>
+                {[cast.nuclear, cast.opposite, cast.inverse]
+                  .map((hexagram) => `${hexagram.number} ${hexagram.name.zh}`)
+                  .join(' · ')}
+              </dd>
             </dl>
           )}
         </section>

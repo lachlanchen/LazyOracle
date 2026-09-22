@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { Camera, Hand, Image as ImageIcon } from 'lucide-react'
-import { palmFeatures, SHAPE_TEXT, type LineTraits, type PalmFeatures, type Point } from '../engines/palm/palm'
+import { FINGER_TEXT, palmFeatures, PALACE_TEXT, SHAPE_TEXT, type LineTraits, type PalmFeatures, type Point } from '../engines/palm/palm'
 import type { UICopy } from '../i18n'
 import { palmContext, palmOffline, palmSystemPrompt } from '../lib/contexts'
 import { detectHand } from '../lib/hand-detect'
@@ -23,7 +23,7 @@ export function PalmScreen({ copy, language }: PalmScreenProps) {
   const [phase, setPhase] = useState<Phase>('idle')
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [landmarks, setLandmarks] = useState<Point[] | null>(null)
-  const [lines, setLines] = useState<LineTraits>({ heart: 'between', head: 'curved', life: 'wide' })
+  const [lines, setLines] = useState<LineTraits>({ heart: 'between', head: 'curved', life: 'wide', fate: 'unsure' })
   const [features, setFeatures] = useState<PalmFeatures | null>(null)
   const [question, setQuestion] = useState('')
   const [round, setRound] = useState(0)
@@ -107,6 +107,7 @@ export function PalmScreen({ copy, language }: PalmScreenProps) {
               ['heart', ['index', 'middle', 'between'], ['heartIndex', 'heartMiddle', 'heartBetween']],
               ['head', ['straight', 'curved'], ['headStraight', 'headCurved']],
               ['life', ['wide', 'close'], ['lifeWide', 'lifeClose']],
+              ['fate', ['present', 'absent', 'unsure'], ['fatePresent', 'fateAbsent', 'fateUnsure']],
             ] as const
           ).map(([key, values, labels]) => (
             <div className="field" key={key}>
@@ -141,6 +142,24 @@ export function PalmScreen({ copy, language }: PalmScreenProps) {
           <dl className="facts">
             <dt>{t.shape}</dt>
             <dd>{SHAPE_TEXT[features.shape][l]} · {SHAPE_TEXT[features.shape].keywords[l].join(l === 'en' ? ', ' : '、')}</dd>
+            <dt>{t.handLabel}</dt>
+            <dd>
+              {l === 'en' ? `thumb ${features.thumbAngle}°` : `拇指开角 ${features.thumbAngle}°`}
+              {' · '}
+              {l === 'en' ? `spread ${features.openness}` : `五指张开度 ${features.openness}`}
+            </dd>
+            <dt>{t.fingersLabel}</dt>
+            <dd>
+              {features.fingers
+                .map((finger) => `${FINGER_TEXT[finger.finger][l]} ${finger.ratioToSaturn}`)
+                .join(l === 'en' ? ', ' : '、')}
+            </dd>
+            {features.strongPalaces.length > 0 && (
+              <>
+                <dt>{t.palacesLabel}</dt>
+                <dd>{features.strongPalaces.map((palace) => PALACE_TEXT[palace][l]).join(l === 'en' ? ', ' : '、')}</dd>
+              </>
+            )}
           </dl>
         </section>
       )}

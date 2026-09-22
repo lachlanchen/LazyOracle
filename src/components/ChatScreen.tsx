@@ -18,6 +18,9 @@ interface ChatScreenProps {
   onPendingConsumed?: () => void
 }
 
+/** How many earlier turns travel with a new question. */
+const HISTORY_TURNS = 12
+
 /** A line in the visible conversation. Tool lines record what was actually run. */
 interface Turn {
   role: 'user' | 'assistant' | 'tool'
@@ -94,11 +97,13 @@ export function ChatScreen({ copy, language, pending, onPendingConsumed }: ChatS
     const controller = new AbortController()
     abort.current = controller
 
+    // A conversation is kept for the reader, but only its recent part is
+    // sent: providers cap how many messages they accept, and an old exchange
+    // adds little to the answer.
+    const recent = visible.filter((turn) => turn.role !== 'tool').slice(-HISTORY_TURNS)
     let working: ChatMessage[] = [
       { role: 'system', content: `${persona(language)}\n\n${toolInstructions(language)}` },
-      ...visible
-        .filter((turn) => turn.role !== 'tool')
-        .map((turn) => ({ role: turn.role === 'user' ? ('user' as const) : ('assistant' as const), content: turn.content })),
+      ...recent.map((turn) => ({ role: turn.role === 'user' ? ('user' as const) : ('assistant' as const), content: turn.content })),
     ]
 
     try {

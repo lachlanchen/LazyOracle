@@ -21,7 +21,7 @@ Providers, in order, each enabled by its environment variables:
   2. LazyEdge upstream  LAZYEDGE_URL (full chat-completions URL), LAZYEDGE_TOKEN,
                       LAZYEDGE_MODEL_FAST, LAZYEDGE_MODEL_PRO
 
-Limits: 8 MiB request body (an image costs most of it), 4 images, 12k characters
+Limits: 8 MiB request body (an image costs most of it), 40 messages, 4 images, 12k characters
 of text per message, 40 requests per 10 minutes per client address, 90 s
 upstream timeout. Only POST /v1/chat/completions and GET /v1/health are served.
 """
@@ -38,6 +38,9 @@ import urllib.request
 LISTEN = os.environ.get("ORACLE_GATEWAY_LISTEN", "127.0.0.1:18963")
 MAX_BODY = 8 * 1024 * 1024
 MAX_IMAGES = 4
+# A chat continues across turns, so a reading is one message but a
+# conversation is many; this is the ceiling, not the expectation.
+MAX_MESSAGES = 40
 MAX_TEXT = 12000
 RATE_WINDOW = 600
 RATE_LIMIT = 40
@@ -140,7 +143,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
         try:
             payload = json.loads(self.rfile.read(length))
             messages = payload["messages"]
-            assert isinstance(messages, list) and 1 <= len(messages) <= 4
+            assert isinstance(messages, list) and 1 <= len(messages) <= MAX_MESSAGES
             images = 0
             for m in messages:
                 assert m["role"] in ("system", "user")

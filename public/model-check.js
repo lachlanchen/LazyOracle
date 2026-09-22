@@ -3,6 +3,7 @@
 const $ = (id) => document.getElementById(id)
 const log = (line) => { $('log').textContent += line + '\n'; console.log('[check]', line) }
 const MODELS = {
+  mini: { name: 'Tianji Mini (Qwen3 0.6B UD-Q2_K_XL, ~302 MB)', url: 'https://huggingface.co/unsloth/Qwen3-0.6B-GGUF/resolve/main/Qwen3-0.6B-UD-Q2_K_XL.gguf' },
   fast: { name: 'Tianji Fast (Qwen3 0.6B UD-Q4_K_XL, ~405 MB)', url: 'https://huggingface.co/unsloth/Qwen3-0.6B-GGUF/resolve/main/Qwen3-0.6B-UD-Q4_K_XL.gguf' },
   pro:  { name: 'Tianji Pro (Qwen3 1.7B UD-Q4_K_XL, ~1.1 GB)',  url: 'https://huggingface.co/unsloth/Qwen3-1.7B-GGUF/resolve/main/Qwen3-1.7B-UD-Q4_K_XL.gguf' },
   tiny: { name: 'Tiny stand-in (stories15M, ~19 MB)',            url: 'https://huggingface.co/ggml-org/models/resolve/main/tinyllamas/stories15M-q4_0.gguf' },

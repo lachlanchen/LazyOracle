@@ -561,3 +561,10 @@ select {
   }
   .rose-needle { transition: none; }
 }
+
+
+/* The book's own button needs air between it and the two that choose which
+   book to open; without it the three read as one crowded block. */
+.ask-panel .chip-row + .primary-button {
+  margin-top: 14px;
+}

@@ -53,7 +53,11 @@ https://oracle.lazying.art {
     @big_static path /wllama/* /mediapipe/* /models/* /fonts/*
     header @big_static Cache-Control "public, max-age=2592000"
 
+    # try_files is a rewrite and would run before the handle blocks above, so
+    # the SPA fallback lives in its own (last) handle.
     root * /opt/lazyoracle-web/current/dist
-    try_files {path} {path}/index.html /index.html
-    file_server
+    handle {
+        try_files {path} {path}/index.html /index.html
+        file_server
+    }
 }

@@ -113,7 +113,14 @@ function App() {
   return (
     <div className="app">
       <div className="sky" aria-hidden="true" />
-      <header className="topbar">
+      <header
+        className="topbar"
+        ref={(node) => {
+          // The chat screen fills the window below this bar, so its height
+          // has to be a real measurement rather than a guess.
+          if (node) document.documentElement.style.setProperty('--topbar-h', `${Math.round(node.getBoundingClientRect().height)}px`)
+        }}
+      >
         {view === 'home' ? (
           <button type="button" className="brand" onClick={() => setView('home')}>
             <span className="brand-mark" aria-hidden="true" />

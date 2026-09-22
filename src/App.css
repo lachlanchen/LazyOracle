@@ -585,3 +585,61 @@ select {
 .today-strip:hover { border-color: rgba(214, 178, 106, .45); }
 .today-date { color: var(--gold); font-size: 12px; letter-spacing: .1em; }
 .today-line b { margin-right: 6px; font-weight: 700; }
+
+
+/* ---- The chat is one screen, with one scroll ----------------------------
+ * The conversation scrolls inside its own panel while the heading stays put
+ * and the composer is pinned to the bottom. Without this the page scrolls as
+ * well as the log, which feels like two scrollbars fighting.
+ */
+.chat-screen {
+  position: fixed;
+  top: calc(var(--topbar-h, 60px) + env(safe-area-inset-top));
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-width: 560px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-bottom: 0;
+  animation: none;
+}
+
+/* The heading and the history list keep their size; only the log grows. */
+.chat-screen .screen-heading { flex: 0 0 auto; }
+.chat-screen [data-testid='chat-history-list'] { flex: 0 1 auto; max-height: 40%; overflow-y: auto; }
+
+.chat-screen .chat-log {
+  flex: 1 1 auto;
+  max-height: none;
+  min-height: 0;
+  overflow-y: auto;
+  margin-bottom: 10px;
+}
+
+.chat-screen .chat-compose {
+  flex: 0 0 auto;
+  position: sticky;
+  bottom: 0;
+  margin-bottom: calc(10px + env(safe-area-inset-bottom));
+  background: rgba(11, 13, 31, 0.92);
+  backdrop-filter: blur(12px);
+}
+
+/* Clear sits on the left at a quarter of the row; send takes the rest. */
+.chat-actions { display: flex; gap: 10px; align-items: stretch; flex-wrap: nowrap; }
+.chat-clear { flex: 0 0 26%; justify-content: center; white-space: nowrap; padding-left: 10px; padding-right: 10px; gap: 6px; }
+/* On a narrow phone the word does not fit beside the icon, and a wrapped
+   "Cle ar" looks broken; the icon keeps its accessible name either way. */
+@media (max-width: 430px) {
+  .chat-clear .button-label { display: none; }
+  .chat-clear { flex: 0 0 22%; }
+}
+.chat-send { flex: 1 1 auto; justify-content: center; }
+.chat-clear:disabled { opacity: .35; }
+
+/* The chat screen owns the bottom of the window, so the page itself does not
+   need the room the ask bar normally reserves. */
+.app:has(.chat-screen) { padding-bottom: 0; }

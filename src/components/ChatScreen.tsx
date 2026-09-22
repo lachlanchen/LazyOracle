@@ -252,7 +252,7 @@ export function ChatScreen({ copy, language, pending, onPendingConsumed }: ChatS
   }
 
   return (
-    <main className="screen chat-screen">
+    <main className="screen chat-screen" data-testid="chat-screen">
       <header className="screen-heading chat-heading">
         <div>
           <span className="eyebrow">{t.eyebrow}</span>
@@ -345,18 +345,24 @@ export function ChatScreen({ copy, language, pending, onPendingConsumed }: ChatS
             />
           </label>
           <div className="chat-actions">
+            <button
+              type="button"
+              className="ghost-button chat-clear"
+              onClick={startNew}
+              disabled={turns.length === 0 || busy}
+              aria-label={t.clear}
+              data-testid="chat-clear"
+            >
+              <Trash2 size={16} />
+              <span className="button-label">{t.clear}</span>
+            </button>
             {busy ? (
-              <button type="button" className="ghost-button" onClick={stop}>
+              <button type="button" className="ghost-button chat-send" onClick={stop}>
                 <Square size={16} /> {t.stop}
               </button>
             ) : (
-              <button type="button" className="primary-button" onClick={() => void send()} disabled={!draft.trim()} data-testid="chat-send">
+              <button type="button" className="primary-button chat-send" onClick={() => void send()} disabled={!draft.trim()} data-testid="chat-send">
                 <Send size={16} /> {t.send}
-              </button>
-            )}
-            {turns.length > 0 && !busy && (
-              <button type="button" className="ghost-button" onClick={startNew}>
-                <Trash2 size={16} /> {t.clear}
               </button>
             )}
           </div>

@@ -34,6 +34,11 @@ export default defineConfig({
         skipWaiting: true,
         clientsClaim: true,
         navigateFallback: '/index.html',
+        // Without this, the worker answers every navigation with the app
+        // shell, which hides the standalone pages: the privacy policy and
+        // support page the stores link to, the device check, and any file
+        // served for download.
+        navigateFallbackDenylist: [/^\/(privacy|support|model-check)\.html$/, /^\/downloads\//],
         globPatterns: ['**/*.{js,css,html,png,svg,json,woff2}'],
         ignoreURLParametersMatching: [/^utm_/, /^fbclid$/, /^v$/],
       },

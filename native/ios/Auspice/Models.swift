@@ -144,3 +144,66 @@ struct BookOpening: Decodable {
     let question: String
     let openedAt: String
 }
+
+// MARK: - BaZi
+
+struct Pillar: Decodable {
+    struct Hidden: Decodable, Identifiable {
+        let stem: String
+        let god: String
+        var id: String { stem + god }
+    }
+    let stem: String
+    let branch: String
+    let ganzhi: String
+    let stemGod: String
+    let hiddenStems: [Hidden]
+    let naYin: String
+    let element: String
+}
+
+struct LuckCycle: Decodable, Identifiable {
+    let ganzhi: String
+    let startYear: Int
+    let endYear: Int
+    let startAge: Int
+    var id: Int { startYear }
+}
+
+struct BaziChart: Decodable {
+    struct Pillars: Decodable {
+        let year: Pillar
+        let month: Pillar
+        let day: Pillar
+        let hour: Pillar
+    }
+    struct DayMaster: Decodable {
+        let stem: String
+        let element: String
+        let yinYang: String
+    }
+    struct Lunar: Decodable {
+        let text: String
+        let jieQiBefore: String
+        let jieQiAfter: String
+    }
+    struct LuckStart: Decodable {
+        let years: Int
+        let months: Int
+    }
+    struct CurrentYear: Decodable {
+        let year: Int
+        let ganzhi: String
+        let god: String
+    }
+    let solarCorrectionMinutes: Double
+    let pillars: Pillars
+    let dayMaster: DayMaster
+    let elements: [String: Double]
+    let strength: String
+    let favourable: [String]
+    let lunar: Lunar
+    let luckCycles: [LuckCycle]
+    let luckStart: LuckStart
+    let currentYear: CurrentYear
+}

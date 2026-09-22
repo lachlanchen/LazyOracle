@@ -2,10 +2,12 @@
  * On-device language model through wllama (llama.cpp compiled to WebAssembly).
  * It runs the same GGUF files the native shells will use, inside the web view
  * on every platform, so a reading never has to leave the device. The model is
- * downloaded once from our host and cached by the browser's Cache API; the
- * user chooses the size in Settings.
+ * downloaded once from Hugging Face and cached on the device; the user
+ * chooses the size in Settings. Both are Unsloth dynamic quantisations, which
+ * keep the sensitive layers at higher precision and so read noticeably better
+ * than a plain four-bit file of the same size.
  */
-import type { ChatRequest } from './llm'
+import type { ChatMessage, ChatRequest, StreamOptions } from './llm'
 
 export interface DeviceModelOption {
   id: string
@@ -29,18 +31,18 @@ export const DEVICE_MODELS: DeviceModelOption[] = [
   {
     id: 'tianji-fast',
     name: { en: 'Tianji Fast', zh: '天机快速版' },
-    sizeMb: 400,
-    url: 'https://huggingface.co/unsloth/Qwen3-0.6B-GGUF/resolve/main/Qwen3-0.6B-Q4_K_M.gguf',
-    mirror: 'https://hf-mirror.com/unsloth/Qwen3-0.6B-GGUF/resolve/main/Qwen3-0.6B-Q4_K_M.gguf',
+    sizeMb: 405,
+    url: 'https://huggingface.co/unsloth/Qwen3-0.6B-GGUF/resolve/main/Qwen3-0.6B-UD-Q4_K_XL.gguf',
+    mirror: 'https://hf-mirror.com/unsloth/Qwen3-0.6B-GGUF/resolve/main/Qwen3-0.6B-UD-Q4_K_XL.gguf',
     note: { en: 'Runs on any phone; short readings, fully offline.', zh: '任何手机都能跑；解读较短，完全离线。' },
     contextTokens: 2048,
   },
   {
     id: 'tianji-pro',
     name: { en: 'Tianji Pro', zh: '天机专业版' },
-    sizeMb: 1110,
-    url: 'https://huggingface.co/unsloth/Qwen3-1.7B-GGUF/resolve/main/Qwen3-1.7B-Q4_K_M.gguf',
-    mirror: 'https://hf-mirror.com/unsloth/Qwen3-1.7B-GGUF/resolve/main/Qwen3-1.7B-Q4_K_M.gguf',
+    sizeMb: 1135,
+    url: 'https://huggingface.co/unsloth/Qwen3-1.7B-GGUF/resolve/main/Qwen3-1.7B-UD-Q4_K_XL.gguf',
+    mirror: 'https://hf-mirror.com/unsloth/Qwen3-1.7B-GGUF/resolve/main/Qwen3-1.7B-UD-Q4_K_XL.gguf',
     note: { en: 'Fuller readings; needs a phone with plenty of memory.', zh: '解读更完整；需要内存较大的手机。' },
     contextTokens: 2048,
   },
@@ -202,41 +204,44 @@ export async function unloadDeviceModel(): Promise<void> {
   loadedId = null
 }
 
-/** Streams a completion from the loaded on-device model. */
+/** Streams a reading from the loaded on-device model. */
 export async function chatOnDevice(request: ChatRequest): Promise<string> {
-  if (!instance) throw new Error('no on-device model loaded')
-  let full = ''
-  let visible = ''
-  let thinking = false
-  await instance.createChatCompletion({
-    messages: [
+  return streamOnDevice(
+    [
       { role: 'system', content: request.system },
       { role: 'user', content: `${request.user}\n/no_think` },
     ],
+    { signal: request.signal, onToken: request.onToken },
+  )
+}
+
+/** Streams a whole conversation from the loaded on-device model. */
+export async function streamOnDevice(messages: ChatMessage[], options: StreamOptions = {}): Promise<string> {
+  if (!instance) throw new Error('no on-device model loaded')
+  let full = ''
+  let visible = ''
+  await instance.createChatCompletion({
+    messages,
     stream: true,
     temperature: 0.7,
     max_tokens: 700,
     cache_prompt: true,
-    abortSignal: request.signal,
+    abortSignal: options.signal,
     onData: (chunk: { choices?: { delta?: { content?: string | null } }[] }) => {
       const delta = chunk.choices?.[0]?.delta?.content ?? ''
       if (!delta) return
       full += delta
       let shown = full
+      // Qwen3 reasons inside <think>; nothing of it is shown.
       if (shown.includes('<think>')) {
-        if (!shown.includes('</think>')) {
-          thinking = true
-          return
-        }
+        if (!shown.includes('</think>')) return
         shown = shown.slice(shown.indexOf('</think>') + 8)
       }
-      thinking = false
       if (shown.length > visible.length) {
-        request.onToken?.(shown.slice(visible.length))
+        options.onToken?.(shown.slice(visible.length))
         visible = shown
       }
     },
   })
-  void thinking
   return full.replace(/<think>[\s\S]*?<\/think>\s*/g, '').trim()
 }

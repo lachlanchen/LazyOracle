@@ -51,6 +51,9 @@ export interface UICopy {
   fengshui: { eyebrow: string; title: string; gua: string; east: string; west: string; compass: string; enableCompass: string; heading: string; facing: string; good: string; bad: string; noCompass: string; compute: string }
   palm: { eyebrow: string; title: string; takePhoto: string; choosePhoto: string; analysing: string; noHand: string; retake: string; heart: string; heartIndex: string; heartMiddle: string; heartBetween: string; head: string; headStraight: string; headCurved: string; life: string; lifeWide: string; lifeClose: string; fate: string; fatePresent: string; fateAbsent: string; fateUnsure: string; read: string; shape: string; fingersLabel: string; palacesLabel: string; handLabel: string; hint: string }
   answers: { eyebrow: string; title: string; answers: string; questions: string; open: string; openAgain: string; page: string; hint: string }
+  face: { eyebrow: string; title: string; takePhoto: string; choosePhoto: string; analysing: string; noFace: string; read: string; element: string; courts: string; proportions: string; palaces: string; hint: string }
+  chat: { eyebrow: string; title: string; opening: string; placeholder: string; send: string; stop: string; clear: string; thinking: string; failed: string }
+  modelPrompt: { title: string; body: string; cloudNote: string; useCloud: string; later: string }
   settings: {
     title: string
     language: string
@@ -90,7 +93,9 @@ const copies: Record<ReadingLanguage, UICopy> = {
       astrology: { name: 'Astrology', blurb: 'Your natal chart and the sky today.' },
       fengshui: { name: 'Feng Shui', blurb: 'Eight directions of your home.' },
       palm: { name: 'Palmistry', blurb: 'The shape and lines of your hand.' },
+      face: { name: 'Face Reading', blurb: 'The three courts and twelve palaces of your face.' },
       answers: { name: 'Book of Answers', blurb: 'Ask, open, read.' },
+      chat: { name: 'Ask Tianji', blurb: 'Talk a reading through in your own words.' },
     },
     home: { eyebrow: 'Choose a practice', title: 'What would you like to ask?', privacy: 'Everything is calculated here on this device. Your question and birth data are never uploaded.' },
     nav: { home: 'Home', settings: 'Settings', back: 'Back' },
@@ -122,6 +127,30 @@ const copies: Record<ReadingLanguage, UICopy> = {
       fate: 'Is there a line running up the centre of your palm?', fatePresent: 'Yes, clear', fateAbsent: 'No', fateUnsure: 'Hard to tell',
       read: 'Read my hand', shape: 'Hand shape', fingersLabel: 'Fingers', palacesLabel: 'Palaces', handLabel: 'Hand', hint: 'The photo never leaves the device.',
     },
+    face: {
+      eyebrow: 'Face reading', title: 'Your face', takePhoto: 'Take a photo', choosePhoto: 'Choose a photo',
+      analysing: 'Finding the face…', noFace: 'No face found. Face the camera in even light, with your whole face in the frame.',
+      read: 'Read my face', element: 'Face type', courts: 'Three courts', proportions: 'Proportions', palaces: 'Palaces',
+      hint: 'The photo is measured on this device and never leaves it.',
+    },
+    chat: {
+      eyebrow: 'Ask Tianji',
+      title: 'Talk it through',
+      opening: 'Ask anything about a reading you have had, or about tarot, the four pillars, the I Ching, astrology, feng shui, palmistry or the books.',
+      placeholder: 'Type your question',
+      send: 'Send',
+      stop: 'Stop',
+      clear: 'Clear',
+      thinking: 'Thinking…',
+      failed: 'The reading model did not answer. Try again, or check Settings.',
+    },
+    modelPrompt: {
+      title: 'Choose how readings are written',
+      body: 'The cards, charts and hexagrams are always computed on this device. For the reading itself, download a Tianji model once and stay offline, or use Tianji Cloud.',
+      cloudNote: 'No download. Only the computed facts and your question are sent.',
+      useCloud: 'Use the cloud',
+      later: 'Not now',
+    },
     answers: { eyebrow: 'The books', title: 'Ask and open', answers: 'Book of Answers', questions: 'Book of Questions', open: 'Open the book', openAgain: 'Open again', page: 'Page', hint: 'Hold your question, then open.' },
     settings: {
       title: 'Settings',
@@ -146,7 +175,7 @@ const copies: Record<ReadingLanguage, UICopy> = {
       disclaimerTitle: 'For reflection and entertainment',
       disclaimer: 'LazyOracle is a companion for reflection. Its readings are not advice about health, money, law or safety, and they do not predict events.',
       privacyTitle: 'Privacy',
-      privacy: 'Cards are drawn and charts are computed on this device. Photos for palmistry are analysed on the device and never stored. With Tianji Cloud on, only the structured facts of a reading and your question are sent to our reading service for the narrative; it keeps nothing. With it off, nothing leaves the device.',
+      privacy: 'Cards are drawn and charts are computed on this device. Photos for palmistry and face reading are measured on the device and never stored. With Tianji Cloud on, only the structured facts of a reading and your question are sent to our reading service for the narrative; it keeps nothing. With it off, nothing leaves the device.',
       about: 'LazyOracle by LazyingArt LLC',
     },
   },
@@ -160,7 +189,9 @@ const copies: Record<ReadingLanguage, UICopy> = {
       astrology: { name: '星座', blurb: '你的本命盘与今日星空。' },
       fengshui: { name: '风水', blurb: '家宅八方。' },
       palm: { name: '手相', blurb: '手型与掌纹。' },
+      face: { name: '面相', blurb: '三停、五岳与十二宫。' },
       answers: { name: '答案之书', blurb: '发问，翻开，阅读。' },
+      chat: { name: '问天机', blurb: '用自己的话把一次解读聊透。' },
     },
     home: { eyebrow: '选择一种方式', title: '你想问什么？', privacy: '一切都在这台设备上计算。你的问题和出生资料不会被上传。' },
     nav: { home: '首页', settings: '设置', back: '返回' },
@@ -192,6 +223,30 @@ const copies: Record<ReadingLanguage, UICopy> = {
       fate: '掌心中央有一条竖纹（事业线）吗？', fatePresent: '有，清晰', fateAbsent: '没有', fateUnsure: '看不清',
       read: '解读我的手', shape: '手型', fingersLabel: '五指', palacesLabel: '八宫', handLabel: '掌形', hint: '照片不会离开本设备。',
     },
+    face: {
+      eyebrow: '面相', title: '你的面相', takePhoto: '拍摄面部', choosePhoto: '选择照片',
+      analysing: '正在识别面部……', noFace: '没有识别到面部。请正面对准镜头，光线均匀，整张脸在画面内。',
+      read: '开始看面相', element: '面型', courts: '三停', proportions: '比例', palaces: '十二宫',
+      hint: '照片在本设备上测量，不会离开这台设备。',
+    },
+    chat: {
+      eyebrow: '问天机',
+      title: '聊一聊',
+      opening: '可以问刚才的解读，也可以问塔罗、四柱、周易、星座、风水、手相与答案之书。',
+      placeholder: '输入你的问题',
+      send: '发送',
+      stop: '停止',
+      clear: '清空',
+      thinking: '正在思考……',
+      failed: '解读模型没有回应。请再试一次，或到设置中查看。',
+    },
+    modelPrompt: {
+      title: '选择解读由谁来写',
+      body: '抽牌、排盘与起卦始终在本设备完成。解读文字可以下载一个天机模型后完全离线生成，也可以使用天机云端。',
+      cloudNote: '无需下载。只发送推算结果与你的问题。',
+      useCloud: '使用云端',
+      later: '暂不',
+    },
     answers: { eyebrow: '两本书', title: '发问并翻开', answers: '答案之书', questions: '问题之书', open: '翻开这本书', openAgain: '再翻一次', page: '第', hint: '心中默念问题，然后翻开。' },
     settings: {
       title: '设置',
@@ -216,7 +271,7 @@ const copies: Record<ReadingLanguage, UICopy> = {
       disclaimerTitle: '仅供思考与娱乐',
       disclaimer: 'LazyOracle 是一位陪你思考的伙伴。它的解读不是健康、金钱、法律或安全方面的建议，也不预测事件。',
       privacyTitle: '隐私',
-      privacy: '抽牌与排盘都在本设备完成。手相照片在本机识别，不会保存。开启天机云端时，只把结构化的推算结果和你的问题发送到我们的解读服务以生成叙事，服务不保存任何内容；关闭后不会发送任何数据。',
+      privacy: '抽牌与排盘都在本设备完成。手相与面相照片都在本机测量，不会保存。开启天机云端时，只把结构化的推算结果和你的问题发送到我们的解读服务以生成叙事，服务不保存任何内容；关闭后不会发送任何数据。',
       about: 'LazyOracle · LazyingArt LLC 出品',
     },
   },

@@ -58,6 +58,17 @@ export interface ChatRequest {
   onToken?: (text: string) => void
 }
 
+/** One turn of a conversation, in the shape every provider expects. */
+export interface ChatMessage {
+  role: 'system' | 'user' | 'assistant'
+  content: string
+}
+
+export interface StreamOptions {
+  signal?: AbortSignal
+  onToken?: (text: string) => void
+}
+
 export class ModelUnavailable extends Error {}
 
 /** Strips a Qwen3 "thinking" block if the server did not already. */
@@ -70,24 +81,29 @@ function chatUrl(base: string): string {
   return trimmed.endsWith('/chat/completions') ? trimmed : `${trimmed}/chat/completions`
 }
 
-/** Streams a completion from an OpenAI-compatible endpoint. Resolves to the full text. */
+/** Streams a reading from an OpenAI-compatible endpoint. Resolves to the full text. */
 export async function chatWithEndpoint(settings: ModelSettings, request: ChatRequest, fetchImpl: typeof fetch = fetch): Promise<string> {
+  return streamMessages(
+    settings,
+    [
+      { role: 'system', content: request.system },
+      { role: 'user', content: request.user },
+    ],
+    { signal: request.signal, onToken: request.onToken },
+    fetchImpl,
+  )
+}
+
+/** Streams a whole conversation from an OpenAI-compatible endpoint. */
+export async function streamMessages(settings: ModelSettings, messages: ChatMessage[], options: StreamOptions = {}, fetchImpl: typeof fetch = fetch): Promise<string> {
   if (!settings.endpointEnabled || !settings.endpointUrl) throw new ModelUnavailable('endpoint disabled')
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
   if (settings.endpointToken) headers.Authorization = `Bearer ${settings.endpointToken}`
   const response = await fetchImpl(chatUrl(settings.endpointUrl), {
     method: 'POST',
     headers,
-    signal: request.signal,
-    body: JSON.stringify({
-      model: settings.model,
-      stream: true,
-      temperature: 0.7,
-      messages: [
-        { role: 'system', content: request.system },
-        { role: 'user', content: request.user },
-      ],
-    }),
+    signal: options.signal,
+    body: JSON.stringify({ model: settings.model, stream: true, temperature: 0.7, messages }),
   })
   if (!response.ok || !response.body) throw new ModelUnavailable(`endpoint answered ${response.status}`)
   const reader = response.body.getReader()
@@ -123,7 +139,7 @@ export async function chatWithEndpoint(settings: ModelSettings, request: ChatReq
         }
         if (!visible) continue
         text += visible
-        request.onToken?.(visible)
+        options.onToken?.(visible)
       } catch {
         // Ignore keep-alive or malformed lines.
       }

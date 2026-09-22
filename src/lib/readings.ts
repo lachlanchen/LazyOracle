@@ -1,5 +1,5 @@
-import { chatWithEndpoint, loadModelSettings, ModelUnavailable } from './llm'
-import { chatOnDevice, deviceModelReady, selectedDeviceModel } from './device-model'
+import { chatWithEndpoint, loadModelSettings, ModelUnavailable, streamMessages, type ChatMessage } from './llm'
+import { chatOnDevice, deviceModelReady, selectedDeviceModel, streamOnDevice } from './device-model'
 
 export type ReadingSource = 'none' | 'offline' | 'device' | 'model'
 
@@ -61,4 +61,37 @@ export function generateReading(request: ReadingRequest, onUpdate: (update: Read
     if (!(error instanceof ModelUnavailable)) console.warn('reading failed', error)
     finishOffline()
   })
+}
+
+/** Whether a conversation can be held at all: a model on the device, or the cloud. */
+export function chatAvailable(): boolean {
+  return deviceModelReady() || loadModelSettings().endpointEnabled
+}
+
+export interface ChatUpdate {
+  source: 'device' | 'model'
+  text: string
+  done: boolean
+}
+
+/**
+ * Streams an answer to a conversation, from the on-device model when one is
+ * loaded and otherwise from Tianji Cloud. Unlike a reading there is no
+ * deterministic fallback: a conversation needs a model, so the caller checks
+ * `chatAvailable()` first and offers a download when it is false.
+ */
+export async function generateChat(messages: ChatMessage[], onUpdate: (update: ChatUpdate) => void, signal?: AbortSignal): Promise<void> {
+  const settings = loadModelSettings()
+  const source: ChatUpdate['source'] = deviceModelReady() ? 'device' : 'model'
+  let streamed = ''
+  const onToken = (token: string) => {
+    streamed += token
+    onUpdate({ source, text: streamed, done: false })
+  }
+  onUpdate({ source, text: '', done: false })
+  const text =
+    source === 'device'
+      ? await streamOnDevice(messages, { signal, onToken })
+      : await streamMessages({ ...settings, model: selectedDeviceModel()?.id ?? settings.model }, messages, { signal, onToken })
+  onUpdate({ source, text: text || streamed, done: true })
 }

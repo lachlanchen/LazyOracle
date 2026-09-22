@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
-import { ArrowLeft, BookOpen, Compass, Hand, Hexagon, Moon, Settings2, Sparkles, Star } from 'lucide-react'
+import { ArrowLeft, BookOpen, Compass, Hand, Hexagon, MessagesSquare, Moon, ScanFace, Settings2, Sparkles, Star } from 'lucide-react'
 import './App.css'
 import { AnswersScreen } from './components/AnswersScreen'
+import { ChatScreen } from './components/ChatScreen'
 import { AstrologyScreen } from './components/AstrologyScreen'
 import { BaziScreen } from './components/BaziScreen'
+import { FaceScreen } from './components/FaceScreen'
 import { FengShuiScreen } from './components/FengShuiScreen'
 import { IChingScreen } from './components/IChingScreen'
 import { PalmScreen } from './components/PalmScreen'
@@ -11,6 +13,8 @@ import { Settings } from './components/Settings'
 import { TarotScreen } from './components/TarotScreen'
 import { initialLanguage, rememberLanguage, uiCopy } from './i18n'
 import { loadDeviceModel, selectedDeviceModel, takeCrashedDeviceModel } from './lib/device-model'
+import { ModelPrompt } from './components/ModelPrompt'
+import { chatAvailable } from './lib/readings'
 import type { Practice, ReadingLanguage } from './types'
 
 type View = 'home' | 'settings' | Practice
@@ -22,7 +26,9 @@ const PRACTICES: { id: Practice; icon: typeof Sparkles }[] = [
   { id: 'astrology', icon: Star },
   { id: 'fengshui', icon: Compass },
   { id: 'palm', icon: Hand },
+  { id: 'face', icon: ScanFace },
   { id: 'answers', icon: BookOpen },
+  { id: 'chat', icon: MessagesSquare },
 ]
 
 /**
@@ -33,11 +39,22 @@ const PRACTICES: { id: Practice; icon: typeof Sparkles }[] = [
  */
 const crashedModel = takeCrashedDeviceModel()
 
+const PROMPT_KEY = 'lazyoracle.modelPromptDismissed'
+
+function promptDismissed(): boolean {
+  try {
+    return localStorage.getItem(PROMPT_KEY) === 'yes'
+  } catch {
+    return false
+  }
+}
+
 function App() {
   const [language, setLanguage] = useState<ReadingLanguage>(initialLanguage)
   const [view, setView] = useState<View>('home')
   const copy = uiCopy(language)
 
+  const [showPrompt, setShowPrompt] = useState(() => !chatAvailable() && !promptDismissed())
   const [modelNotice, setModelNotice] = useState(() =>
     crashedModel ? crashedModel.name[language === 'en' ? 'en' : 'zh'] : '',
   )
@@ -61,7 +78,9 @@ function App() {
     astrology: () => <AstrologyScreen key={language} copy={copy} language={language} />,
     fengshui: () => <FengShuiScreen key={language} copy={copy} language={language} />,
     palm: () => <PalmScreen key={language} copy={copy} language={language} />,
+    face: () => <FaceScreen key={language} copy={copy} language={language} />,
     answers: () => <AnswersScreen key={language} copy={copy} language={language} />,
+    chat: () => <ChatScreen key={language} copy={copy} language={language} />,
   }
 
   return (
@@ -90,6 +109,21 @@ function App() {
             <h1>{copy.home.title}</h1>
             <p className="tagline">{copy.tagline}</p>
           </header>
+          {showPrompt && (
+            <ModelPrompt
+              copy={copy}
+              language={language}
+              onReady={() => setShowPrompt(false)}
+              onDismiss={() => {
+                try {
+                  localStorage.setItem(PROMPT_KEY, 'yes')
+                } catch {
+                  // Storage may be blocked; the card then returns next launch.
+                }
+                setShowPrompt(false)
+              }}
+            />
+          )}
           <div className="practice-grid">
             {PRACTICES.map(({ id, icon: Icon }) => (
               <button key={id} type="button" className={`practice-tile ${id}`} onClick={() => setView(id)} data-testid={`practice-${id}`}>

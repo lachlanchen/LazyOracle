@@ -2,6 +2,7 @@ import { BODY_TEXT, formatDegree, SIGNS, type NatalChart, type Transit, type Pla
 import { ELEMENT_EN, TEN_GOD_EN, type BaziChart } from '../engines/bazi/bazi'
 import { DIRECTION_TEXT, GUA_EN, type EightMansions } from '../engines/fengshui/fengshui'
 import { linePositionText, type IChingCast } from '../engines/iching/cast'
+import { COURT_TEXT, ELEMENT_TEXT, FACE_PALACE_TEXT, proportionText, symmetryText, type FaceFeatures } from '../engines/face/face'
 import { FINGER_TEXT, LINE_TEXT, opennessText, PALACE_TEXT, SHAPE_TEXT, thumbAngleText, type PalmFeatures } from '../engines/palm/palm'
 import type { Opening } from '../engines/answers/answers'
 import type { ReadingLanguage } from '../types'
@@ -363,6 +364,69 @@ export function palmOffline(c: PalmContext): string {
   parts.push(c.hand.join(' '))
   parts.push(`指长比 ${c.proportions.fingerRatio}，掌宽比 ${c.proportions.palmRatio}，食指/无名指 ${c.proportions.indexToRing}。`)
   parts.push('手型是你的默认节奏，纹路是你养成的习惯，八宫是气力聚集之处。手相是一面用来思考的镜子，不是预告。')
+  return parts.join('\n\n')
+}
+
+// ---------- Face reading ----------
+
+export interface FaceContext {
+  practice: 'face'
+  language: ReadingLanguage
+  question: string
+  /** 五行面型 and its keywords. */
+  element: string
+  elementKeywords: string[]
+  /** 三停, each with its share of the face's height. */
+  courts: string[]
+  /** 五眼 and the spacing of the eyes. */
+  proportions: string
+  symmetry: string
+  /** The palaces that are generous or narrow; the even ones are left out. */
+  palaces: string[]
+}
+
+export function faceContext(f: FaceFeatures, language: ReadingLanguage, question: string): FaceContext {
+  const l = language === 'en' ? 'en' : 'zh'
+  return {
+    practice: 'face',
+    language,
+    question,
+    element: ELEMENT_TEXT[f.element][l],
+    elementKeywords: ELEMENT_TEXT[f.element].keywords[l],
+    courts: f.courts.map((court) => `${COURT_TEXT[court.court][l]} ${Math.round(court.share * 100)}% — ${COURT_TEXT[court.court][court.state === 'long' ? 'long' : court.state === 'short' ? 'short' : 'even'][l]}`),
+    proportions: proportionText(f, l),
+    symmetry: symmetryText(f.symmetry, l),
+    palaces: f.palaces
+      .filter((palace) => palace.state !== 'even')
+      .map((palace) => `${FACE_PALACE_TEXT[palace.palace][l]} ${palace.value} — ${FACE_PALACE_TEXT[palace.palace][palace.state === 'generous' ? 'generous' : 'narrow'][l]}`),
+  }
+}
+
+export function faceSystemPrompt(language: ReadingLanguage): string {
+  return [
+    ...common(language, 'a reader of Chinese physiognomy (面相) who treats a face as a portrait of habits, not a verdict'),
+    'Structure: the elemental face type and what it suggests; the three courts and what each period of life is said to carry; the proportions and symmetry; then the palaces that stand out, named as the facts name them; finish with two or three sentences the reader can act on.',
+    'Use only the measurements given, and quote a ratio when it supports a point. Never comment on beauty, health, race or worth, and never predict illness or death.',
+    'Say once, lightly, that a face is read here as a mirror for reflection.',
+    'Length: 220 to 360 words.',
+  ].join('\n')
+}
+
+export function faceOffline(c: FaceContext): string {
+  const parts: string[] = []
+  if (c.language === 'en') {
+    parts.push(`${c.element}: ${c.elementKeywords.join(', ')}.`)
+    parts.push(c.courts.join(' '))
+    parts.push(`${c.proportions} ${c.symmetry}`)
+    if (c.palaces.length) parts.push(`Palaces: ${c.palaces.join(' ')}`)
+    parts.push('The three courts are read as the early, middle and later parts of a life, and the palaces as where attention collects. A face is a mirror to think with, not a verdict.')
+    return parts.join('\n\n')
+  }
+  parts.push(`${c.element}：${c.elementKeywords.join('、')}。`)
+  parts.push(c.courts.join(' '))
+  parts.push(`${c.proportions}${c.symmetry}`)
+  if (c.palaces.length) parts.push(`十二宫：${c.palaces.join(' ')}`)
+  parts.push('三停分主早年、中年与晚年，十二宫是心力聚集之处。面相是一面用来思考的镜子，不是定论。')
   return parts.join('\n\n')
 }
 

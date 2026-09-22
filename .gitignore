@@ -15,3 +15,6 @@ ios/App/Pods/
 .env
 *.tsbuildinfo
 .tiny.gguf
+
+# Built from src/engine-bridge.ts by tools/build-engine-bundle.mjs
+native/shared/

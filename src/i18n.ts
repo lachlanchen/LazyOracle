@@ -52,7 +52,7 @@ export interface UICopy {
   palm: { eyebrow: string; title: string; takePhoto: string; choosePhoto: string; analysing: string; noHand: string; retake: string; heart: string; heartIndex: string; heartMiddle: string; heartBetween: string; head: string; headStraight: string; headCurved: string; life: string; lifeWide: string; lifeClose: string; fate: string; fatePresent: string; fateAbsent: string; fateUnsure: string; read: string; shape: string; fingersLabel: string; palacesLabel: string; handLabel: string; hint: string }
   answers: { eyebrow: string; title: string; answers: string; questions: string; open: string; openAgain: string; page: string; hint: string }
   face: { eyebrow: string; title: string; takePhoto: string; choosePhoto: string; analysing: string; noFace: string; read: string; element: string; courts: string; proportions: string; palaces: string; hint: string }
-  chat: { eyebrow: string; title: string; opening: string; placeholder: string; send: string; stop: string; clear: string; thinking: string; failed: string }
+  chat: { eyebrow: string; title: string; opening: string; placeholder: string; dockPlaceholder: string; send: string; stop: string; clear: string; thinking: string; failed: string; newChat: string; history: string; historyEmpty: string }
   modelPrompt: { title: string; body: string; cloudNote: string; useCloud: string; later: string }
   settings: {
     title: string
@@ -138,11 +138,15 @@ const copies: Record<ReadingLanguage, UICopy> = {
       title: 'Talk it through',
       opening: 'Ask anything about a reading you have had, or about tarot, the four pillars, the I Ching, astrology, feng shui, palmistry or the books.',
       placeholder: 'Type your question',
+      dockPlaceholder: 'Ask Tianji anything',
       send: 'Send',
       stop: 'Stop',
       clear: 'Clear',
       thinking: 'Thinking…',
       failed: 'The reading model did not answer. Try again, or check Settings.',
+      newChat: 'New',
+      history: 'History',
+      historyEmpty: 'No saved conversations yet.',
     },
     modelPrompt: {
       title: 'Choose how readings are written',
@@ -234,11 +238,15 @@ const copies: Record<ReadingLanguage, UICopy> = {
       title: '聊一聊',
       opening: '可以问刚才的解读，也可以问塔罗、四柱、周易、星座、风水、手相与答案之书。',
       placeholder: '输入你的问题',
+      dockPlaceholder: '有什么想问天机的',
       send: '发送',
       stop: '停止',
       clear: '清空',
       thinking: '正在思考……',
       failed: '解读模型没有回应。请再试一次，或到设置中查看。',
+      newChat: '新对话',
+      history: '历史',
+      historyEmpty: '还没有保存的对话。',
     },
     modelPrompt: {
       title: '选择解读由谁来写',

@@ -256,3 +256,12 @@
 /* The card that offers a model when none is set up. */
 .model-prompt h2 { margin-top: 0; }
 .model-prompt .model-list { margin-top: 12px; }
+.chat-tool { margin: 0; align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-mute); border: 1px dashed var(--line); border-radius: 999px; padding: 6px 12px; }
+
+/* The ask bar pinned to the bottom of every screen but the chat itself. */
+.chat-dock { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: flex; gap: 8px; align-items: center; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: rgba(11, 13, 31, 0.86); backdrop-filter: blur(12px); border-top: 1px solid var(--line); }
+.chat-dock input { flex: 1; min-width: 0; padding: 12px 14px; border-radius: 999px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.05); color: var(--ink); font-size: 15px; }
+.chat-dock input:focus { outline: none; border-color: rgba(214, 178, 106, 0.6); }
+.chat-dock .icon-button:disabled { opacity: 0.4; }
+.app { padding-bottom: 76px; }
+.chat-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }

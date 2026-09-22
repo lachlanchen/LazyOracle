@@ -34,7 +34,7 @@ export const DEVICE_MODELS: DeviceModelOption[] = [
     sizeMb: 405,
     url: 'https://huggingface.co/unsloth/Qwen3-0.6B-GGUF/resolve/main/Qwen3-0.6B-UD-Q4_K_XL.gguf',
     mirror: 'https://hf-mirror.com/unsloth/Qwen3-0.6B-GGUF/resolve/main/Qwen3-0.6B-UD-Q4_K_XL.gguf',
-    note: { en: 'Runs on any phone; short readings, fully offline.', zh: '任何手机都能跑；解读较短，完全离线。' },
+    note: { en: 'Quick readings on any phone. Downloaded once, then it works with no network at all.', zh: '在任何手机上都跑得动，解读简短。下载一次之后完全离线可用。' },
     contextTokens: 2048,
   },
   {
@@ -43,7 +43,7 @@ export const DEVICE_MODELS: DeviceModelOption[] = [
     sizeMb: 1135,
     url: 'https://huggingface.co/unsloth/Qwen3-1.7B-GGUF/resolve/main/Qwen3-1.7B-UD-Q4_K_XL.gguf',
     mirror: 'https://hf-mirror.com/unsloth/Qwen3-1.7B-GGUF/resolve/main/Qwen3-1.7B-UD-Q4_K_XL.gguf',
-    note: { en: 'Fuller readings; needs a phone with plenty of memory.', zh: '解读更完整；需要内存较大的手机。' },
+    note: { en: 'Fuller, more careful readings. Best on a newer phone with plenty of memory.', zh: '解读更完整、更细致。建议在内存较大的较新手机上使用。' },
     contextTokens: 2048,
   },
 ]

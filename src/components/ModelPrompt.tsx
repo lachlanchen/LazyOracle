@@ -60,7 +60,7 @@ export function ModelPrompt({ copy, language, onReady, onDismiss }: ModelPromptP
             <li key={option.id}>
               <div>
                 <b>{option.name[l]}</b>
-                <small>{option.sizeMb} MB · {option.note[l]}</small>
+                <small>{option.note[l]}</small>
                 {busy && (
                   <span className="progress" aria-label={progress.phase === 'prepare' ? s.preparing : s.downloading}>
                     <span style={{ width: `${Math.round(progress.fraction * 100)}%` }} />
@@ -73,7 +73,7 @@ export function ModelPrompt({ copy, language, onReady, onDismiss }: ModelPromptP
                 </span>
               ) : (
                 <button type="button" className="ghost-button" disabled={Boolean(progress)} onClick={() => void download(option.id)} data-testid={`prompt-${option.id}`}>
-                  <Download size={16} /> {s.download}
+                  <Download size={16} /> {s.download} · {option.sizeMb} MB
                 </button>
               )}
             </li>

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { ArrowLeft, BookOpen, Compass, Hand, Hexagon, MessagesSquare, Moon, ScanFace, Settings2, Sparkles, Star } from 'lucide-react'
 import './App.css'
 import { AnswersScreen } from './components/AnswersScreen'
+import { ChatDock } from './components/ChatDock'
 import { ChatScreen } from './components/ChatScreen'
 import { AstrologyScreen } from './components/AstrologyScreen'
 import { BaziScreen } from './components/BaziScreen'
@@ -54,6 +55,7 @@ function App() {
   const [view, setView] = useState<View>('home')
   const copy = uiCopy(language)
 
+  const [pendingQuestion, setPendingQuestion] = useState('')
   const [showPrompt, setShowPrompt] = useState(() => !chatAvailable() && !promptDismissed())
   const [modelNotice, setModelNotice] = useState(() =>
     crashedModel ? crashedModel.name[language === 'en' ? 'en' : 'zh'] : '',
@@ -80,7 +82,9 @@ function App() {
     palm: () => <PalmScreen key={language} copy={copy} language={language} />,
     face: () => <FaceScreen key={language} copy={copy} language={language} />,
     answers: () => <AnswersScreen key={language} copy={copy} language={language} />,
-    chat: () => <ChatScreen key={language} copy={copy} language={language} />,
+    chat: () => (
+      <ChatScreen key={language} copy={copy} language={language} pending={pendingQuestion} onPendingConsumed={() => setPendingQuestion('')} />
+    ),
   }
 
   return (
@@ -145,6 +149,16 @@ function App() {
           onLanguage={chooseLanguage}
           modelNotice={modelNotice}
           onDismissNotice={() => setModelNotice('')}
+        />
+      )}
+
+      {view !== 'chat' && (
+        <ChatDock
+          copy={copy}
+          onAsk={(question) => {
+            setPendingQuestion(question)
+            setView('chat')
+          }}
         />
       )}
     </div>

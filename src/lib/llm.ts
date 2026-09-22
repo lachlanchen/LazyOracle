@@ -3,23 +3,26 @@
  *
  * 1. `device`: an on-device engine (llama.cpp through the native shells; not
  *    yet wired on the PWA, so it reports unavailable).
- * 2. `endpoint`: any OpenAI-compatible chat endpoint the user configured,
- *    typically the owner's workstation reached through LazyEdge, or a local
- *    Ollama on a desktop. Sent only when the user turned it on.
+ * 2. `endpoint`: Tianji Cloud, our reading relay (OpenAI-compatible). Used only
+ *    when the user turned it on in Settings.
  * 3. `offline`: the deterministic composition from card meanings. Always works.
  */
 
 export interface ModelSettings {
-  /** The cloud reading service (Tianji Cloud) is on unless the user turns it off. */
+  /** The cloud reading service (Tianji Cloud); off until the user turns it on. */
   endpointEnabled: boolean
   endpointUrl: string
   endpointToken: string
   model: string
 }
 
-/** Tianji Cloud: our own relay at oracle.lazying.art; it holds the provider keys, keeps no content. */
+/**
+ * Tianji Cloud: our own relay at oracle.lazying.art; it holds the provider keys and
+ * keeps no content. Off by default: the first release is the fully local version
+ * (downloaded Tianji model, else the deterministic composition).
+ */
 export const DEFAULT_MODEL_SETTINGS: ModelSettings = {
-  endpointEnabled: true,
+  endpointEnabled: false,
   endpointUrl: 'https://oracle.lazying.art/v1',
   endpointToken: '',
   model: 'tianji',

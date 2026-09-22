@@ -212,6 +212,12 @@ export async function loadDeviceModel(option: DeviceModelOption, onProgress?: Lo
       n_ctx: option.contextTokens,
       n_batch: 128,
       n_threads: threads,
+      // The runtime offloads every layer to the GPU unless told otherwise.
+      // On a phone that asks the GPU process for several hundred megabytes,
+      // and when it is refused the whole web view is killed: the page goes
+      // white and reloads. The models here are small enough to read fluently
+      // on the processor, so the GPU is left alone.
+      n_gpu_layers: 0,
       progressCallback: ({ loaded, total }: { loaded: number; total: number }) => {
         const fraction = total ? loaded / total : 0
         onProgress?.(fraction, 'download')

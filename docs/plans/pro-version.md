@@ -104,6 +104,28 @@ features. Face reading, when it is added, uses MediaPipe Face Landmarker the
 same way, with the cloud photo path as the Pro upgrade. A workstation vision
 model (Qwen3-VL through LazyEdge) remains the fallback provider.
 
+## If the photo should stay on the device
+
+There is a third option between landmarks and the cloud: a small vision model
+downloaded like the Tianji models are. wllama already supports multimodal GGUF
+files through an `mmprojUrl`, so no new runtime is needed.
+
+| Model | Weights (Q8) | Projector (Q8) | Total download |
+| --- | --- | --- | --- |
+| SmolVLM 256M | 175 MB | 104 MB | about 280 MB |
+| SmolVLM 500M | 437 MB | 109 MB | about 550 MB |
+| Qwen2.5-VL 3B | 1.9 GB (Q4) | 845 MB | about 2.8 GB, too large for a phone |
+
+Only the two SmolVLM sizes are realistic, and neither can be bundled inside the
+app: Google Play's base delivery and Apple's cellular limits both push a
+download that large out of the binary and into an on-demand download, which is
+exactly how the Tianji models already work. Their reading quality on a palm
+photo is also unproven and likely weaker than the cloud path.
+
+So the order of preference is: landmarks plus narration on the device for
+everyone, the cloud vision path as the Pro upgrade, and a downloadable vision
+model only if buyers ask for a photo reading that never leaves the phone.
+
 ## Order of work
 
 1. Wait for the current reviews to finish, so the 0.99 app is live and its

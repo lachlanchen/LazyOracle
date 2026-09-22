@@ -156,6 +156,7 @@ async def run(width, faults):
             ("Feng Shui", None),
             ("Palmistry", None),
             ("Face Reading", None),
+            ("Almanac", None),
             ("Book of Answers", "Open the book"),
         ]:
             await page.get_by_text(screen, exact=False).first.click(force=True)

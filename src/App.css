@@ -568,3 +568,14 @@ select {
 .ask-panel .chip-row + .primary-button {
   margin-top: 14px;
 }
+
+/* The almanac: a page from a paper calendar, with the day's own words. */
+.almanac-date { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.almanac-date .field { flex: 1 1 140px; min-width: 0; margin-bottom: 0; }
+.almanac-date .ghost-button { flex: 0 0 auto; min-width: 48px; justify-content: center; font-size: 22px; line-height: 1; }
+.almanac-date input[type=date] { width: 100%; box-sizing: border-box; }
+.almanac-yi { color: #8fd7a8; }
+.almanac-ji { color: #ff9b8a; }
+.almanac-verdict { margin: 12px 0 4px; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255,255,255,.04); line-height: 1.6; }
+.almanac-verdict.suitable { border-color: rgba(143, 215, 168, .45); }
+.almanac-verdict.avoid { border-color: rgba(255, 155, 138, .45); }

@@ -52,6 +52,7 @@ export interface UICopy {
   palm: { eyebrow: string; title: string; takePhoto: string; choosePhoto: string; analysing: string; noHand: string; retake: string; heart: string; heartIndex: string; heartMiddle: string; heartBetween: string; head: string; headStraight: string; headCurved: string; life: string; lifeWide: string; lifeClose: string; fate: string; fatePresent: string; fateAbsent: string; fateUnsure: string; read: string; shape: string; fingersLabel: string; palacesLabel: string; handLabel: string; hint: string }
   answers: { eyebrow: string; title: string; answers: string; questions: string; open: string; openAgain: string; page: string; hint: string }
   face: { eyebrow: string; title: string; takePhoto: string; choosePhoto: string; analysing: string; noFace: string; read: string; element: string; courts: string; proportions: string; palaces: string; hint: string }
+  almanac: { eyebrow: string; title: string; hint: string; pickDate: string; previousDay: string; nextDay: string; today: string; suitable: string; avoid: string; nothingListed: string; officer: string; clash: string; harm: string; hours: string; pengzu: string; canI: string; read: string }
   chat: { eyebrow: string; title: string; opening: string; placeholder: string; dockPlaceholder: string; send: string; stop: string; clear: string; thinking: string; failed: string; newChat: string; history: string; historyEmpty: string; earlier: string }
   modelPrompt: { title: string; body: string; cloudNote: string; useCloud: string; later: string }
   settings: {
@@ -97,6 +98,7 @@ const copies: Record<ReadingLanguage, UICopy> = {
       fengshui: { name: 'Feng Shui', blurb: 'Eight directions of your home.' },
       palm: { name: 'Palmistry', blurb: 'The shape and lines of your hand.' },
       face: { name: 'Face Reading', blurb: 'The three courts and twelve palaces of your face.' },
+      almanac: { name: 'Almanac', blurb: 'What today suits, and what it does not.' },
       answers: { name: 'Book of Answers', blurb: 'Ask, open, read.' },
       chat: { name: 'Ask Tianji', blurb: 'Talk a reading through in your own words.' },
     },
@@ -135,6 +137,13 @@ const copies: Record<ReadingLanguage, UICopy> = {
       analysing: 'Finding the face…', noFace: 'No face found. Face the camera in even light, with your whole face in the frame.',
       read: 'Read my face', element: 'Face type', courts: 'Three courts', proportions: 'Proportions', palaces: 'Palaces',
       hint: 'The photo is measured on this device and never leaves it.',
+    },
+    almanac: {
+      eyebrow: 'Almanac', title: 'What today suits', hint: 'Straight from the traditional tables: nothing here is guessed.',
+      pickDate: 'Pick a date', previousDay: 'The day before', nextDay: 'The day after', today: 'Today',
+      suitable: 'Suitable', avoid: 'To avoid', nothingListed: 'Nothing listed', officer: 'Officer, spirit, mansion',
+      clash: 'Clash', harm: 'harm to the', hours: 'Favourable hours', pengzu: "Peng Zu's taboos",
+      canI: 'Can I do this today?', read: 'Read the day',
     },
     chat: {
       eyebrow: 'Ask Tianji',
@@ -201,6 +210,7 @@ const copies: Record<ReadingLanguage, UICopy> = {
       fengshui: { name: '风水', blurb: '家宅八方。' },
       palm: { name: '手相', blurb: '手型与掌纹。' },
       face: { name: '面相', blurb: '三停、五岳与十二宫。' },
+      almanac: { name: '黄历', blurb: '今日宜什么，忌什么。' },
       answers: { name: '答案之书', blurb: '发问，翻开，阅读。' },
       chat: { name: '问天机', blurb: '用自己的话把一次解读聊透。' },
     },
@@ -239,6 +249,13 @@ const copies: Record<ReadingLanguage, UICopy> = {
       analysing: '正在识别面部……', noFace: '没有识别到面部。请正面对准镜头，光线均匀，整张脸在画面内。',
       read: '开始看面相', element: '面型', courts: '三停', proportions: '比例', palaces: '十二宫',
       hint: '照片在本设备上测量，不会离开这台设备。',
+    },
+    almanac: {
+      eyebrow: '黄历', title: '今日宜忌', hint: '直接取自通书诸表，此处没有一句是猜的。',
+      pickDate: '选择日期', previousDay: '前一天', nextDay: '后一天', today: '今天',
+      suitable: '宜', avoid: '忌', nothingListed: '（无）', officer: '建除·值神·星宿',
+      clash: '冲', harm: '煞', hours: '吉时', pengzu: '彭祖百忌',
+      canI: '今天适合做什么？', read: '解读今日',
     },
     chat: {
       eyebrow: '问天机',

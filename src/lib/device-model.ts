@@ -328,7 +328,8 @@ export async function streamOnDevice(messages: ChatMessage[], options: StreamOpt
   await instance.createChatCompletion({
     messages,
     stream: true,
-    temperature: 0.7,
+    // Greedy, for the same reason as the cloud path: fixed facts, fixed reading.
+    temperature: options.temperature ?? 0,
     max_tokens: 700,
     cache_prompt: true,
     abortSignal: options.signal,

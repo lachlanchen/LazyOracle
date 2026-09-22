@@ -136,6 +136,8 @@ export function ChatScreen({ copy, language, pending, onPendingConsumed }: ChatS
     setStreaming('')
     const controller = new AbortController()
     abort.current = controller
+    // Guards against a model that keeps asking for the same thing.
+    const attempted = new Set<string>()
 
     // Everything the reader can see is kept. What travels with the question
     // is the summary of the older part plus as many recent turns as the
@@ -169,6 +171,12 @@ export function ChatScreen({ copy, language, pending, onPendingConsumed }: ChatS
             } catch {
               args = {}
             }
+            const signature = `${call.name}:${JSON.stringify(args)}`
+            if (attempted.has(signature)) {
+              working = [...working, { role: 'tool', content: JSON.stringify({ ok: false, error: 'already called with these arguments; use the earlier result' }), tool_call_id: call.id, name: call.name }]
+              continue
+            }
+            attempted.add(signature)
             const result = runTool({ name: call.name, arguments: args }, language)
             setTurns((current) => [...current, { role: 'tool', content: result.label }])
             working = [...working, { role: 'tool', content: result.output, tool_call_id: call.id, name: call.name }]
@@ -179,7 +187,12 @@ export function ChatScreen({ copy, language, pending, onPendingConsumed }: ChatS
 
         // A model on the phone writes the call as a line of text.
         const written = last ? null : parseToolCall(reply)
+        if (written && attempted.has(`${written.name}:${JSON.stringify(written.arguments)}`)) {
+          working = [...working, { role: 'assistant', content: reply }, { role: 'user', content: 'TOOL RESULT: that call was already made; use its result and answer now.' }]
+          continue
+        }
         if (written) {
+          attempted.add(`${written.name}:${JSON.stringify(written.arguments)}`)
           const result = runTool(written, language)
           setTurns((current) => [...current, { role: 'tool', content: result.label }])
           setStreaming('')

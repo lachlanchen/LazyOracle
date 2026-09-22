@@ -82,6 +82,11 @@ export interface StreamOptions {
   onToken?: (text: string) => void
   /** Function definitions the model may call, in OpenAI's shape. */
   tools?: unknown[]
+  /**
+   * 0 by default. A reading is an interpretation of fixed facts, so the same
+   * draw should read the same way; sampling is what makes it feel random.
+   */
+  temperature?: number
 }
 
 export interface StreamResult {
@@ -126,9 +131,11 @@ export async function streamMessagesFull(settings: ModelSettings, messages: Chat
     body: JSON.stringify({
       model: settings.model,
       stream: true,
-      temperature: 0.7,
+      temperature: options.temperature ?? 0,
       messages,
-      ...(options.tools ? { tools: options.tools, tool_choice: 'auto' } : {}),
+      // One tool at a time: a reading that needs two draws should ask twice,
+      // so each result is read before the next is requested.
+      ...(options.tools ? { tools: options.tools, tool_choice: 'auto', parallel_tool_calls: false } : {}),
     }),
   })
   if (!response.ok || !response.body) throw new ModelUnavailable(`endpoint answered ${response.status}`)

@@ -12,7 +12,7 @@
  */
 import type { ReadingLanguage } from '../types'
 
-export type Practice = 'tarot' | 'bazi' | 'iching' | 'astrology' | 'fengshui' | 'palm' | 'face' | 'answers'
+export type Practice = 'tarot' | 'bazi' | 'iching' | 'astrology' | 'fengshui' | 'palm' | 'face' | 'answers' | 'almanac'
 
 interface Note {
   /** The method, in the order the reader applies it. */
@@ -135,6 +135,23 @@ const NOTES: Record<Practice, Note> = {
       '绝不评论美丑、族裔、健康或智力，也不得暗示面相可以预测他人的行为。',
     ],
     source: { en: 'Chinese physiognomy: 三停五眼 proportion and the 十二宫 palaces.', zh: '中国相术：三停五眼之度与十二宫。' },
+  },
+  almanac: {
+    en: [
+      'The almanac is a lookup, not an opinion: quote the day\'s own 宜 and 忌 words and say which one decides the question.',
+      'If the undertaking is not named in either list, say so plainly, then fall back to the day officer (建除) and whether the governing spirit walks the yellow or the black road.',
+      'Name the clash (冲) and the direction of harm (煞), because a person born in the clashing year is the one case where a favourable day is still not theirs.',
+      'Offer the favourable double hours as the practical answer: a day that is only middling still has hours that are not.',
+      'Say once that this is custom rather than prediction, and never turn a taboo into a warning about safety or health.',
+    ],
+    zh: [
+      '黄历是查出来的，不是议出来的：引用当日的「宜」「忌」原文，并指明是哪一条决定了此事。',
+      '若宜忌两列都未提及所问之事，直说未载，再以建除值日与值神所行黄道黑道为参。',
+      '点出冲与煞的方位：唯一要提醒的例外，是生肖正冲之人，吉日于他仍非吉。',
+      '把吉时列出来作为实际答复：平平之日，仍有不平平的时辰。',
+      '提一次这是民俗而非预测，也不要把某项禁忌讲成安全或健康上的警告。',
+    ],
+    source: { en: 'The almanac tables (通书): 建除十二神, 二十八宿, 黄道黑道十二神, 彭祖百忌.', zh: '通书诸表：建除十二神、二十八宿、黄道黑道十二神、彭祖百忌。' },
   },
   answers: {
     en: [

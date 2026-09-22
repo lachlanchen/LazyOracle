@@ -1,6 +1,7 @@
 import { BODY_TEXT, formatDegree, SIGNS, type NatalChart, type Transit, type Placement } from '../engines/astrology/astrology'
 import { ELEMENT_EN, TEN_GOD_EN, type BaziChart } from '../engines/bazi/bazi'
 import { DIRECTION_TEXT, GUA_EN, type EightMansions } from '../engines/fengshui/fengshui'
+import { judgeActivity, luckyHours, STANDING_TEXT, VERDICT_TEXT, type Activity, type AlmanacDay } from '../engines/almanac/almanac'
 import { linePositionText, type IChingCast } from '../engines/iching/cast'
 import { COURT_TEXT, ELEMENT_TEXT, FACE_PALACE_TEXT, proportionText, symmetryText, type FaceFeatures } from '../engines/face/face'
 import { FINGER_TEXT, LINE_TEXT, opennessText, PALACE_TEXT, SHAPE_TEXT, thumbAngleText, type PalmFeatures } from '../engines/palm/palm'
@@ -443,6 +444,84 @@ export function faceOffline(c: FaceContext): string {
   parts.push(`${c.proportions}${c.symmetry}`)
   if (c.palaces.length) parts.push(`十二宫：${c.palaces.join(' ')}`)
   parts.push('三停分主早年、中年与晚年，十二宫是心力聚集之处。面相是一面用来思考的镜子，不是定论。')
+  return parts.join('\n\n')
+}
+
+// ---------- Almanac ----------
+
+export interface AlmanacContext {
+  practice: 'almanac'
+  language: ReadingLanguage
+  question: string
+  date: string
+  lunar: string
+  ganzhi: string
+  solarTerm: string | null
+  /** What the day is held to suit, and to avoid, in the almanac's own words. */
+  yi: string[]
+  ji: string[]
+  clash: string
+  harmDirection: string
+  dayOfficer: string
+  mansion: string
+  spirit: string
+  standing: string
+  luckyHours: string[]
+  /** The undertaking asked about, and what the almanac says about it. */
+  asked: { activity: string; verdict: string; basis: string } | null
+}
+
+export function almanacContext(day: AlmanacDay, activity: Activity | null, language: ReadingLanguage, question: string): AlmanacContext {
+  const l = language === 'en' ? 'en' : 'zh'
+  const judgement = activity ? judgeActivity(day, activity) : null
+  return {
+    practice: 'almanac',
+    language,
+    question,
+    date: day.date,
+    lunar: `${day.lunar.text}（${day.lunar.yearGanZhi}年 ${day.lunar.zodiac}）`,
+    ganzhi: `${day.lunar.yearGanZhi} ${day.lunar.monthGanZhi} ${day.lunar.dayGanZhi}`,
+    solarTerm: day.solarTerm,
+    yi: day.yi,
+    ji: day.ji,
+    clash: day.clash,
+    harmDirection: day.harmDirection,
+    dayOfficer: day.dayOfficer,
+    mansion: `${day.mansion.name}（${day.mansion.animal}·${day.mansion.direction}·${day.mansion.beast}）`,
+    spirit: `${day.spirit.name}·${day.spirit.road}·${day.spirit.luck}`,
+    standing: STANDING_TEXT[day.standing][l],
+    luckyHours: luckyHours(day).map((hour) => `${hour.ganzhi} ${hour.range} ${hour.spirit}`),
+    asked: activity && judgement ? { activity: activity.name[l], verdict: VERDICT_TEXT[judgement.verdict][l], basis: judgement.basis[l] } : null,
+  }
+}
+
+export function almanacSystemPrompt(language: ReadingLanguage): string {
+  return [
+    ...common(language, "a reader of the Chinese almanac (黄历), who quotes the day's own words rather than improvising"),
+    ...methodNote('almanac', language),
+    'Structure: answer the undertaking asked about in the first sentence, quoting the almanac word that decides it; then the day itself, its officer, spirit and mansion; then the favourable hours; then one practical sentence.',
+    'Never add an undertaking to 宜 or 忌 that the facts do not list.',
+    'Length: 120 to 220 words.',
+  ].join('\n')
+}
+
+export function almanacOffline(c: AlmanacContext): string {
+  const parts: string[] = []
+  if (c.language === 'en') {
+    if (c.asked) parts.push(`${c.asked.activity}: ${c.asked.verdict}. ${c.asked.basis}`)
+    parts.push(`${c.date}, ${c.lunar}. Pillars ${c.ganzhi}${c.solarTerm ? `, solar term ${c.solarTerm}` : ''}.`)
+    parts.push(`Suitable: ${c.yi.join(', ') || 'nothing listed'}. To avoid: ${c.ji.join(', ') || 'nothing listed'}.`)
+    parts.push(`Day officer ${c.dayOfficer}, spirit ${c.spirit}, mansion ${c.mansion}. The day clashes with ${c.clash}, harm to the ${c.harmDirection}. Overall ${c.standing}.`)
+    if (c.luckyHours.length) parts.push(`Favourable hours: ${c.luckyHours.join('; ')}.`)
+    parts.push('The almanac is custom rather than prediction: it is a way of choosing a time, not a forecast of what will happen.')
+    return parts.join('\n\n')
+  }
+  if (c.asked) parts.push(`${c.asked.activity}：${c.asked.verdict}。${c.asked.basis}`)
+  parts.push(`${c.date} ${c.lunar}。${c.ganzhi}${c.solarTerm ? `，${c.solarTerm}` : ''}。`)
+  parts.push(`宜：${c.yi.join('、') || '（无）'}。忌：${c.ji.join('、') || '（无）'}。`)
+  parts.push(`建除「${c.dayOfficer}」，值神 ${c.spirit}，宿 ${c.mansion}。冲${c.clash}，煞${c.harmDirection}。整体${c.standing}。`)
+  if (c.luckyHours.length) parts.push(`吉时：${c.luckyHours.join('；')}。`)
+  parts.push('黄历是择日的民俗，不是预测：它帮你挑时间，不预告结果。')
   return parts.join('\n\n')
 }
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { ArrowLeft, BookOpen, Compass, Hand, Hexagon, MessagesSquare, Moon, ScanFace, Settings2, Sparkles, Star } from 'lucide-react'
+import { ArrowLeft, BookOpen, CalendarDays, Compass, Hand, Hexagon, MessagesSquare, Moon, ScanFace, Settings2, Sparkles, Star } from 'lucide-react'
 import './App.css'
+import { AlmanacScreen } from './components/AlmanacScreen'
 import { AnswersScreen } from './components/AnswersScreen'
 import { ChatDock } from './components/ChatDock'
 import { ChatScreen } from './components/ChatScreen'
@@ -28,6 +29,7 @@ const PRACTICES: { id: Practice; icon: typeof Sparkles }[] = [
   { id: 'fengshui', icon: Compass },
   { id: 'palm', icon: Hand },
   { id: 'face', icon: ScanFace },
+  { id: 'almanac', icon: CalendarDays },
   { id: 'answers', icon: BookOpen },
   { id: 'chat', icon: MessagesSquare },
 ]
@@ -100,6 +102,7 @@ function App() {
     fengshui: () => <FengShuiScreen key={language} copy={copy} language={language} />,
     palm: () => <PalmScreen key={language} copy={copy} language={language} />,
     face: () => <FaceScreen key={language} copy={copy} language={language} />,
+    almanac: () => <AlmanacScreen key={language} copy={copy} language={language} />,
     answers: () => <AnswersScreen key={language} copy={copy} language={language} />,
     chat: () => (
       <ChatScreen key={language} copy={copy} language={language} pending={pendingQuestion} onPendingConsumed={() => setPendingQuestion('')} />

@@ -209,6 +209,41 @@ class Handler(http.server.BaseHTTPRequestHandler):
                     self.log_message("provider=%s tier=%s status=200", name, wanted)
                     return
             except urllib.error.HTTPError as error:
+                detail = ""
+                try:
+                    detail = error.read().decode()[:400]
+                except Exception:  # noqa: BLE001 - the body is best effort
+                    detail = ""
+                # DeepSeek's thinking mode rejects a replayed assistant turn
+                # that carries no reasoning of its own. Demote those to plain
+                # history and try once more before moving on.
+                if error.code == 400 and "reasoning" in detail.lower():
+                    demoted = [
+                        {"role": "user", "content": f"Earlier assistant reply: {m['content']}"}
+                        if m.get("role") == "assistant" and isinstance(m.get("content"), str) and not m.get("tool_calls")
+                        else m
+                        for m in messages
+                    ]
+                    retry = dict(body, messages=demoted)
+                    try:
+                        request = urllib.request.Request(url, data=json.dumps(retry).encode(), method="POST", headers={"Content-Type": "application/json", "Authorization": f"Bearer {token}", "Accept": "text/event-stream"})
+                        with urllib.request.urlopen(request, timeout=TIMEOUT) as upstream:
+                            self.send_response(200)
+                            self._cors()
+                            self.send_header("Content-Type", "text/event-stream")
+                            self.send_header("Cache-Control", "no-store")
+                            self.send_header("X-Accel-Buffering", "no")
+                            self.end_headers()
+                            while True:
+                                chunk = upstream.read(1024)
+                                if not chunk:
+                                    break
+                                self.wfile.write(chunk)
+                                self.wfile.flush()
+                            self.log_message("provider=%s tier=%s status=200 (retried without replayed reasoning)", name, wanted)
+                            return
+                    except Exception:  # noqa: BLE001 - fall through to the next provider
+                        pass
                 last_error = f"{name} answered {error.code}"
                 self.log_message("provider=%s status=%s", name, error.code)
             except Exception as error:  # noqa: BLE001 - try the next provider

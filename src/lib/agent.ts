@@ -16,6 +16,7 @@
  * The loop runs the call, appends the result, and asks the model again, at
  * most `MAX_STEPS` times before it must answer in words.
  */
+import { ACTIVITIES, almanacFor, judgeActivity, luckyHours, STANDING_TEXT, VERDICT_TEXT } from '../engines/almanac/almanac'
 import { openBook } from '../engines/answers/answers'
 import { computeChart, formatDegree, transitsFor, SIGNS } from '../engines/astrology/astrology'
 import { computeBazi } from '../engines/bazi/bazi'
@@ -237,6 +238,43 @@ export const TOOLS: ToolSpec[] = [
     },
   },
   {
+    name: 'almanac_day',
+    usage: {
+      en: `almanac_day {"date": "YYYY-MM-DD", "activity": one of ${ACTIVITIES.map((a) => a.id).join('|')}} — looks a day up in the Chinese almanac: what it suits and what it does not, the day officer, spirit, mansion, clash, and the favourable hours. Omit the date for today, omit the activity for the whole page.`,
+      zh: `almanac_day {"date": "YYYY-MM-DD", "activity": ${ACTIVITIES.map((a) => a.id).join('|')} 之一} — 查黄历：当日宜忌、建除、值神、二十八宿、冲煞与吉时。不给日期即为今日，不给事项即返回整页。`,
+    },
+    run: (args, language) => {
+      const l = language === 'en' ? 'en' : 'zh'
+      const raw = text(args.date)
+      const parsed = raw ? new Date(`${raw}T12:00:00`) : new Date()
+      const when = Number.isNaN(parsed.getTime()) ? new Date() : parsed
+      const day = almanacFor(when)
+      const activity = ACTIVITIES.find((item) => item.id === args.activity)
+      const judgement = activity ? judgeActivity(day, activity) : null
+      return {
+        output: {
+          date: day.date,
+          lunar: `${day.lunar.text} ${day.lunar.yearGanZhi}年 ${day.lunar.zodiac}`,
+          pillars: `${day.lunar.yearGanZhi} ${day.lunar.monthGanZhi} ${day.lunar.dayGanZhi}`,
+          solarTerm: day.solarTerm,
+          yi: day.yi,
+          ji: day.ji,
+          dayOfficer: day.dayOfficer,
+          spirit: `${day.spirit.name} ${day.spirit.road} ${day.spirit.luck}`,
+          mansion: `${day.mansion.name} ${day.mansion.animal} ${day.mansion.direction}`,
+          clash: day.clash,
+          harmDirection: day.harmDirection,
+          standing: STANDING_TEXT[day.standing][l],
+          luckyHours: luckyHours(day).map((hour) => `${hour.ganzhi} ${hour.range}`),
+          asked: activity && judgement ? { activity: activity.name[l], verdict: VERDICT_TEXT[judgement.verdict][l], basis: judgement.basis[l] } : null,
+        },
+        label: activity && judgement
+          ? { en: `Almanac ${day.date}: ${activity.name.en} — ${VERDICT_TEXT[judgement.verdict].en}`, zh: `黄历 ${day.date}：${activity.name.zh}${VERDICT_TEXT[judgement.verdict].zh}` }
+          : { en: `Looked up the almanac for ${day.date}`, zh: `查了 ${day.date} 的黄历` },
+      }
+    },
+  },
+  {
     name: 'today',
     usage: {
       en: 'today {} — the current date and the day\'s sexagenary pillar, for questions about timing.',
@@ -284,6 +322,12 @@ export function toolSchemas(language: ReadingLanguage): unknown[] {
     },
     birth_details: { properties: {} },
     today: { properties: {} },
+    almanac_day: {
+      properties: {
+        date: { type: 'string', description: 'The day to look up, as YYYY-MM-DD. Omit for today.' },
+        activity: { type: 'string', enum: ACTIVITIES.map((item) => item.id), description: 'The undertaking to judge. Omit for the whole page.' },
+      },
+    },
   }
   return TOOLS.map((tool) => ({
     type: 'function',
@@ -306,7 +350,9 @@ export function toolInstructions(language: ReadingLanguage): string {
       'The result comes back as a TOOL RESULT message; then answer in words, using those facts and naming them.',
       'Draw, cast or compute rather than describing what the reader could do, and never invent a card, hexagram, pillar or page yourself.',
       'Palmistry and face reading need a photo, so they are not tools: for those, say which screen to open.',
-      `You may use at most ${MAX_STEPS} tool calls before answering.`,
+      `You may use at most ${MAX_STEPS} tool calls before answering. Near that limit, answer with what you have and name the limitation honestly rather than starting something new.`,
+      'A tool result carries "ok": false when the engine could not compute something. Say so plainly; never fill the gap with a guess.',
+      'Never ask for the same tool with the same arguments twice.',
       'Tools:',
       list,
     ].join('\n')
@@ -317,7 +363,9 @@ export function toolInstructions(language: ReadingLanguage): string {
     '结果会以「TOOL RESULT」消息返回；随后用文字作答，引用其中的事实并点明出处。',
     '需要抽牌、起卦或排盘时直接调用，不要只描述来访者可以做什么，也不要自行编造牌、卦、四柱或书页。',
     '手相与面相需要照片，因此没有对应工具：遇到这类问题，请指出应打开哪个页面。',
-    `作答前最多可调用 ${MAX_STEPS} 次工具。`,
+    `作答前最多可调用 ${MAX_STEPS} 次工具；接近上限时，用已有的结果作答并如实说明不足，不要另起炉灶。`,
+    '工具返回中的 "ok": false 表示引擎无法算出该项。请如实说明，不要用猜测填补。',
+    '同一工具、同样的参数不要调用第二次。',
     '可用工具：',
     list,
   ].join('\n')
@@ -348,7 +396,9 @@ export function runTool(call: ToolCall, language: ReadingLanguage): ToolResult {
   if (!spec) return { call, output: JSON.stringify({ error: `unknown tool ${call.name}` }), label: l === 'en' ? 'Unknown tool' : '未知工具', ok: false }
   try {
     const { output, label } = spec.run(call.arguments, language)
-    return { call, output: JSON.stringify(output), label: label[l], ok: true }
+    const body = output as Record<string, unknown>
+    const ok = !(body && typeof body === 'object' && 'error' in body)
+    return { call, output: JSON.stringify({ ok, ...body }), label: label[l], ok }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     return { call, output: JSON.stringify({ error: message }), label: l === 'en' ? `${call.name} failed` : `${call.name} 调用失败`, ok: false }

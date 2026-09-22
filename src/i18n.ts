@@ -52,7 +52,7 @@ export interface UICopy {
   palm: { eyebrow: string; title: string; takePhoto: string; choosePhoto: string; analysing: string; noHand: string; retake: string; heart: string; heartIndex: string; heartMiddle: string; heartBetween: string; head: string; headStraight: string; headCurved: string; life: string; lifeWide: string; lifeClose: string; fate: string; fatePresent: string; fateAbsent: string; fateUnsure: string; read: string; shape: string; fingersLabel: string; palacesLabel: string; handLabel: string; hint: string }
   answers: { eyebrow: string; title: string; answers: string; questions: string; open: string; openAgain: string; page: string; hint: string }
   face: { eyebrow: string; title: string; takePhoto: string; choosePhoto: string; analysing: string; noFace: string; read: string; element: string; courts: string; proportions: string; palaces: string; hint: string }
-  chat: { eyebrow: string; title: string; opening: string; placeholder: string; dockPlaceholder: string; send: string; stop: string; clear: string; thinking: string; failed: string; newChat: string; history: string; historyEmpty: string }
+  chat: { eyebrow: string; title: string; opening: string; placeholder: string; dockPlaceholder: string; send: string; stop: string; clear: string; thinking: string; failed: string; newChat: string; history: string; historyEmpty: string; earlier: string }
   modelPrompt: { title: string; body: string; cloudNote: string; useCloud: string; later: string }
   settings: {
     title: string
@@ -150,6 +150,7 @@ const copies: Record<ReadingLanguage, UICopy> = {
       newChat: 'New',
       history: 'History',
       historyEmpty: 'No saved conversations yet.',
+      earlier: 'Show earlier messages',
     },
     modelPrompt: {
       title: 'Choose how readings are written',
@@ -253,6 +254,7 @@ const copies: Record<ReadingLanguage, UICopy> = {
       newChat: '新对话',
       history: '历史',
       historyEmpty: '还没有保存的对话。',
+      earlier: '显示更早的消息',
     },
     modelPrompt: {
       title: '选择解读由谁来写',

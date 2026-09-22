@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { drawSpread } from '../engines/tarot/draw'
 import { chatWithEndpoint, DEFAULT_MODEL_SETTINGS, ModelUnavailable, stripThinking } from './llm'
+import { fitToBudget } from './readings'
 import { offlineReading, systemPrompt, tarotContext, userPrompt } from './reading'
 
 describe('reading context', () => {
@@ -71,5 +72,30 @@ describe('endpoint client', () => {
     expect(call[0]).toBe('http://example.test/v1/chat/completions')
     expect((call[1].headers as Record<string, string>).Authorization).toBe('Bearer abc')
     expect(stripThinking('<think>x</think>  hello')).toBe('hello')
+  })
+})
+
+describe('conversation context', () => {
+  it('keeps the newest turns and hands back the rest to be summarised', () => {
+    const turns = Array.from({ length: 12 }, (_, index) => ({ content: `turn number ${index} with some words in it` }))
+    const { keep, older } = fitToBudget(turns, 200)
+    expect(keep.length + older.length).toBe(12)
+    // The kept turns are the most recent ones, and they fit the budget.
+    expect(keep[keep.length - 1]).toBe(turns[11])
+    expect(keep.reduce((sum, turn) => sum + turn.content.length + 16, 0)).toBeLessThanOrEqual(200 + 60)
+    expect(older[0]).toBe(turns[0])
+  })
+
+  it('never sends an empty conversation, however tight the budget', () => {
+    const turns = [{ content: 'x'.repeat(500) }, { content: 'y'.repeat(500) }]
+    const { keep } = fitToBudget(turns, 10)
+    expect(keep).toHaveLength(2)
+  })
+
+  it('leaves a short conversation untouched', () => {
+    const turns = [{ content: 'hello' }, { content: 'there' }]
+    const { keep, older } = fitToBudget(turns, 16000)
+    expect(keep).toHaveLength(2)
+    expect(older).toHaveLength(0)
   })
 })

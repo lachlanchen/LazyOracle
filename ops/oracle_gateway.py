@@ -21,7 +21,7 @@ Providers, in order, each enabled by its environment variables:
   2. LazyEdge upstream  LAZYEDGE_URL (full chat-completions URL), LAZYEDGE_TOKEN,
                       LAZYEDGE_MODEL_FAST, LAZYEDGE_MODEL_PRO
 
-Limits: 8 MiB request body (an image costs most of it), 40 messages, 4 images, 12k characters
+Limits: 8 MiB request body (an image costs most of it), 200 messages, 4 images, 12k characters
 of text per message, 40 requests per 10 minutes per client address, 90 s
 upstream timeout. Only POST /v1/chat/completions and GET /v1/health are served.
 """
@@ -40,7 +40,7 @@ MAX_BODY = 8 * 1024 * 1024
 MAX_IMAGES = 4
 # A chat continues across turns, so a reading is one message but a
 # conversation is many; this is the ceiling, not the expectation.
-MAX_MESSAGES = 40
+MAX_MESSAGES = 200
 MAX_TEXT = 12000
 RATE_WINDOW = 600
 RATE_LIMIT = 40

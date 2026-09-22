@@ -17,6 +17,14 @@ export interface Conversation {
   turns: StoredTurn[]
   /** Milliseconds since the epoch, for ordering the list. */
   updatedAt: number
+  /**
+   * A short account of the turns that no longer fit in the model's context,
+   * written by the model itself. The conversation keeps growing on screen;
+   * only what is sent is compacted.
+   */
+  summary?: string
+  /** How many leading turns the summary already covers. */
+  summarised?: number
 }
 
 const KEY = 'lazyoracle.chats'

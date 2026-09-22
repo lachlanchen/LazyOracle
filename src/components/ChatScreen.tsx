@@ -5,7 +5,7 @@ import { MAX_STEPS, parseToolCall, runTool, toolInstructions, toolResultMessage 
 import { conversationTitle, deleteConversation, loadConversations, newConversationId, saveConversation, type Conversation } from '../lib/chat-store'
 import type { ChatMessage } from '../lib/llm'
 import { renderInline } from '../lib/markdown'
-import { chatAvailable, generateChat } from '../lib/readings'
+import { chatAvailable, fitToBudget, generateChat, historyBudget, summariseTurns } from '../lib/readings'
 import type { ReadingLanguage } from '../types'
 import { ModelPrompt } from './ModelPrompt'
 
@@ -18,8 +18,8 @@ interface ChatScreenProps {
   onPendingConsumed?: () => void
 }
 
-/** How many earlier turns travel with a new question. */
-const HISTORY_TURNS = 12
+/** How many turns are drawn at once; older ones load when asked for. */
+const VISIBLE_TURNS = 24
 
 /** A line in the visible conversation. Tool lines record what was actually run. */
 interface Turn {
@@ -56,6 +56,10 @@ export function ChatScreen({ copy, language, pending, onPendingConsumed }: ChatS
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [showHistory, setShowHistory] = useState(false)
+  const [shown, setShown] = useState(VISIBLE_TURNS)
+  // What the model was told about the turns that no longer fit its context.
+  const summary = useRef<string>(loadConversations()[0]?.summary ?? '')
+  const summarised = useRef<number>(loadConversations()[0]?.summarised ?? 0)
   const conversationId = useRef(loadConversations()[0]?.id ?? newConversationId())
   const abort = useRef<AbortController | null>(null)
   const asked = useRef('')
@@ -77,7 +81,36 @@ export function ChatScreen({ copy, language, pending, onPendingConsumed }: ChatS
 
   const remember = (finished: Turn[]) => {
     if (finished.length === 0) return
-    setConversations(saveConversation({ id: conversationId.current, title: conversationTitle(finished), turns: finished, updatedAt: Date.now() }))
+    setConversations(
+      saveConversation({
+        id: conversationId.current,
+        title: conversationTitle(finished),
+        turns: finished,
+        updatedAt: Date.now(),
+        summary: summary.current || undefined,
+        summarised: summarised.current || undefined,
+      }),
+    )
+  }
+
+  /**
+   * Keeps the conversation sendable however long it grows: everything the
+   * reader can see is kept, while the part that no longer fits the model's
+   * context is folded into a short account written by the model.
+   */
+  const compact = async (all: Turn[], signal: AbortSignal) => {
+    const pending = all.slice(summarised.current).filter((turn) => turn.role !== 'tool')
+    const { older } = fitToBudget(pending, historyBudget())
+    if (older.length < 2) return
+    try {
+      summary.current = await summariseTurns(summary.current, older, language, signal)
+      summarised.current += older.length
+    } catch (error) {
+      // A failed summary is not worth interrupting the reader for; the next
+      // turn simply sends a little less history.
+      console.warn('could not compact the conversation', error)
+      summarised.current += older.length
+    }
   }
 
   /**
@@ -97,13 +130,17 @@ export function ChatScreen({ copy, language, pending, onPendingConsumed }: ChatS
     const controller = new AbortController()
     abort.current = controller
 
-    // A conversation is kept for the reader, but only its recent part is
-    // sent: providers cap how many messages they accept, and an old exchange
-    // adds little to the answer.
-    const recent = visible.filter((turn) => turn.role !== 'tool').slice(-HISTORY_TURNS)
+    // Everything the reader can see is kept. What travels with the question
+    // is the summary of the older part plus as many recent turns as the
+    // model's context allows.
+    const pending = visible.slice(summarised.current).filter((turn) => turn.role !== 'tool')
+    const { keep } = fitToBudget(pending, historyBudget())
     let working: ChatMessage[] = [
       { role: 'system', content: `${persona(language)}\n\n${toolInstructions(language)}` },
-      ...recent.map((turn) => ({ role: turn.role === 'user' ? ('user' as const) : ('assistant' as const), content: turn.content })),
+      ...(summary.current
+        ? [{ role: 'system' as const, content: language === 'en' ? `Earlier in this conversation: ${summary.current}` : `此前的对话要点：${summary.current}` }]
+        : []),
+      ...keep.map((turn) => ({ role: turn.role === 'user' ? ('user' as const) : ('assistant' as const), content: turn.content })),
     ]
 
     try {
@@ -124,6 +161,8 @@ export function ChatScreen({ copy, language, pending, onPendingConsumed }: ChatS
         setStreaming('')
         working = [...working, { role: 'assistant', content: reply }, { role: 'user', content: toolResultMessage(result) }]
       }
+      // Fold away anything that will not fit next time, before the reader asks again.
+      await compact([...visible, { role: 'assistant', content: '' }], controller.signal)
     } catch (chatError) {
       if (!controller.signal.aborted) {
         console.warn('chat failed', chatError)
@@ -160,6 +199,9 @@ export function ChatScreen({ copy, language, pending, onPendingConsumed }: ChatS
     setStreaming('')
     setError('')
     conversationId.current = newConversationId()
+    summary.current = ''
+    summarised.current = 0
+    setShown(VISIBLE_TURNS)
     setShowHistory(false)
   }
 
@@ -198,6 +240,9 @@ export function ChatScreen({ copy, language, pending, onPendingConsumed }: ChatS
                     onClick={() => {
                       setTurns(conversation.turns as Turn[])
                       conversationId.current = conversation.id
+                      summary.current = conversation.summary ?? ''
+                      summarised.current = conversation.summarised ?? 0
+                      setShown(VISIBLE_TURNS)
                       setShowHistory(false)
                     }}
                   >
@@ -216,7 +261,12 @@ export function ChatScreen({ copy, language, pending, onPendingConsumed }: ChatS
       {ready && (
         <section className="panel chat-log" data-testid="chat-log">
           {turns.length === 0 && !streaming && !busy && <p className="body">{t.opening}</p>}
-          {turns.map((turn, index) =>
+          {turns.length > shown && (
+            <button type="button" className="link-button" onClick={() => setShown((count) => count + VISIBLE_TURNS)} data-testid="chat-earlier">
+              {t.earlier}
+            </button>
+          )}
+          {turns.slice(Math.max(0, turns.length - shown)).map((turn, index) =>
             turn.role === 'tool' ? (
               <p key={index} className="chat-tool">
                 <Wand2 size={14} /> {turn.content}

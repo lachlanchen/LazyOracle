@@ -25,6 +25,7 @@
     "@capacitor/preferences": "^8.0.0",
     "@mediapipe/tasks-vision": "^1.0.1",
     "@wllama/wllama": "^3.6.1",
+    "@wllama/wllama-compat": "^3.6.1",
     "astronomy-engine": "^2.1.19",
     "lucide-react": "^1.41.0",
     "lunar-typescript": "^1.8.6",

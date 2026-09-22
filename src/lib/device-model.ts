@@ -59,6 +59,8 @@ export function selectDeviceModel(id: string | null): void {
 }
 
 type WllamaInstance = {
+  /** Points wllama at the Safari-compatible build; we host it ourselves. */
+  setCompat: (compat: { worker: string; wasm: string } | null, mode?: 'safari' | 'firefox_safari') => void
   loadModelFromUrl: (url: string, options: Record<string, unknown>) => Promise<void>
   createChatCompletion: (options: Record<string, unknown>) => Promise<unknown>
   exit: () => Promise<void>
@@ -94,6 +96,12 @@ export async function loadDeviceModel(option: DeviceModelOption, onProgress?: (f
       'single-thread/wllama.wasm': `${base}wllama.wasm`,
       'multi-thread/wllama.wasm': `${base}wllama.wasm`,
     }) as unknown as WllamaInstance
+    // Safari, and therefore every web view on iOS, cannot run the default
+    // build (it needs WebAssembly Memory64 and JSPI). wllama then switches to
+    // a compatibility build, which it fetches from a public CDN by default.
+    // We serve that build from our own origin instead, so the app keeps
+    // working under its content security policy and with no third party.
+    wllama.setCompat({ worker: `${base}compat/wllama.js`, wasm: `${base}compat/wllama.wasm` })
     const params = {
       n_ctx: 4096,
       progressCallback: ({ loaded, total }: { loaded: number; total: number }) => onProgress?.(total ? loaded / total : 0),

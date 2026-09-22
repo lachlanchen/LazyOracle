@@ -6,10 +6,15 @@ facts of one reading). This relay forwards it, streaming, to the first
 provider that answers, and holds the provider credentials so the app never
 does. Nothing is logged except counts and status codes.
 
+The app asks for a tier, not for a vendor model: "tianji-fast" (天机快速版) or
+"tianji-pro" (天机专业版). Each provider maps the tier to one of its own models,
+so the tier a user knows stays the same wherever the reading is written.
+
 Providers, in order, each enabled by its environment variables:
-  1. DeepSeek         DEEPSEEK_API_KEY, DEEPSEEK_MODEL (default deepseek-chat)
-  2. LazyEdge upstream  LAZYEDGE_URL (full chat-completions URL),
-                        LAZYEDGE_TOKEN, LAZYEDGE_MODEL (default localllm-pocket)
+  1. DeepSeek         DEEPSEEK_API_KEY, DEEPSEEK_MODEL_FAST (default deepseek-chat),
+                      DEEPSEEK_MODEL_PRO (default deepseek-reasoner)
+  2. LazyEdge upstream  LAZYEDGE_URL (full chat-completions URL), LAZYEDGE_TOKEN,
+                      LAZYEDGE_MODEL_FAST, LAZYEDGE_MODEL_PRO
 
 Limits: 4 KiB request body per message, 40 requests per 10 minutes per client
 address, 90 s upstream timeout. Only POST /v1/chat/completions and
@@ -31,11 +36,29 @@ RATE_WINDOW = 600
 RATE_LIMIT = 40
 TIMEOUT = 90
 
+TIERS = ("tianji-fast", "tianji-pro")
+
 PROVIDERS = []
 if os.environ.get("DEEPSEEK_API_KEY"):
-    PROVIDERS.append(("deepseek", "https://api.deepseek.com/chat/completions", os.environ["DEEPSEEK_API_KEY"], os.environ.get("DEEPSEEK_MODEL", "deepseek-chat")))
+    PROVIDERS.append((
+        "deepseek",
+        os.environ.get("DEEPSEEK_URL", "https://api.deepseek.com/chat/completions"),
+        os.environ["DEEPSEEK_API_KEY"],
+        {
+            "tianji-fast": os.environ.get("DEEPSEEK_MODEL_FAST", os.environ.get("DEEPSEEK_MODEL", "deepseek-chat")),
+            "tianji-pro": os.environ.get("DEEPSEEK_MODEL_PRO", os.environ.get("DEEPSEEK_MODEL", "deepseek-reasoner")),
+        },
+    ))
 if os.environ.get("LAZYEDGE_URL") and os.environ.get("LAZYEDGE_TOKEN"):
-    PROVIDERS.append(("lazyedge", os.environ["LAZYEDGE_URL"], os.environ["LAZYEDGE_TOKEN"], os.environ.get("LAZYEDGE_MODEL", "localllm-pocket")))
+    PROVIDERS.append((
+        "lazyedge",
+        os.environ["LAZYEDGE_URL"],
+        os.environ["LAZYEDGE_TOKEN"],
+        {
+            "tianji-fast": os.environ.get("LAZYEDGE_MODEL_FAST", os.environ.get("LAZYEDGE_MODEL", "localllm-pocket")),
+            "tianji-pro": os.environ.get("LAZYEDGE_MODEL_PRO", os.environ.get("LAZYEDGE_MODEL", "localllm-pocket")),
+        },
+    ))
 
 _lock = threading.Lock()
 _hits: dict[str, list[float]] = {}
@@ -114,13 +137,14 @@ class Handler(http.server.BaseHTTPRequestHandler):
         except Exception:
             self._reject(400, "bad request")
             return
+        tier = payload.get("model") if payload.get("model") in TIERS else TIERS[0]
         if not PROVIDERS:
             self._reject(503, "no reading provider configured")
             return
         upstream_body = {"messages": messages, "stream": True, "temperature": float(payload.get("temperature", 0.7)), "max_tokens": 900}
         last_error = "no provider answered"
-        for name, url, token, model in PROVIDERS:
-            body = dict(upstream_body, model=model)
+        for name, url, token, models in PROVIDERS:
+            body = dict(upstream_body, model=models[tier])
             req = urllib.request.Request(url, data=json.dumps(body).encode(), method="POST", headers={"Content-Type": "application/json", "Authorization": f"Bearer {token}", "Accept": "text/event-stream"})
             try:
                 with urllib.request.urlopen(req, timeout=TIMEOUT) as upstream:
@@ -136,7 +160,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
                             break
                         self.wfile.write(chunk)
                         self.wfile.flush()
-                    self.log_message("provider=%s status=200", name)
+                    self.log_message("provider=%s tier=%s status=200", name, tier)
                     return
             except urllib.error.HTTPError as error:
                 last_error = f"{name} answered {error.code}"

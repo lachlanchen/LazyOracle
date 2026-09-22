@@ -14,7 +14,7 @@ npm run dev        # PWA at http://localhost:5173
 npm run check      # lint, tests, production build
 ```
 
-To get narrative readings on the desktop, open Settings, enable the endpoint and point it at a local Ollama (`http://127.0.0.1:11434/v1`, model `qwen3:4b-q4_K_M`) or your LazyEdge workstation route. Sibling of [L & N](https://github.com/lachlanchen/L-And-N), which supplies the app shell and the publishing pipeline.
+Readings are written by a downloaded Tianji model (天机快速版 / 天机专业版) when you have one, or composed from the computed facts. Settings also has a Tianji Cloud switch, off by default, which sends only the computed facts to our reading relay at `oracle.lazying.art/v1`. Sibling of [L & N](https://github.com/lachlanchen/L-And-N), which supplies the app shell and the publishing pipeline.
 
 Price: US$0.99 (CNY 8 / HKD 8) on the App Store and Google Play; the PWA is free.
 

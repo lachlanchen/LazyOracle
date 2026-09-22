@@ -1,5 +1,5 @@
 import { chatWithEndpoint, loadModelSettings, ModelUnavailable } from './llm'
-import { chatOnDevice, deviceModelReady } from './device-model'
+import { chatOnDevice, deviceModelReady, selectedDeviceModel } from './device-model'
 
 export type ReadingSource = 'none' | 'offline' | 'device' | 'model'
 
@@ -19,8 +19,10 @@ export interface ReadingUpdate {
 
 /**
  * Produces a reading and reports progress. Order: the on-device model when
- * one is loaded, then the user's endpoint when enabled, then the offline
- * composition. The offline text is also the fallback for any failure.
+ * one is loaded, then Tianji Cloud when the user switched it on, then the
+ * offline composition. The offline text is also the fallback for any failure.
+ * The cloud is asked for the same tier the user chose on the device, so
+ * 天机专业版 stays 天机专业版 wherever the reading is written.
  */
 export function generateReading(request: ReadingRequest, onUpdate: (update: ReadingUpdate) => void): void {
   const settings = loadModelSettings()
@@ -39,8 +41,9 @@ export function generateReading(request: ReadingRequest, onUpdate: (update: Read
     })
   }
 
+  const tier = selectedDeviceModel()?.id ?? settings.model
   const viaEndpoint = () =>
-    stream('model', (onToken) => chatWithEndpoint(settings, { system: request.system, user: request.user, signal: request.signal, onToken }))
+    stream('model', (onToken) => chatWithEndpoint({ ...settings, model: tier }, { system: request.system, user: request.user, signal: request.signal, onToken }))
 
   const chain = deviceModelReady()
     ? stream('device', (onToken) => chatOnDevice({ system: request.system, user: request.user, signal: request.signal, onToken })).catch((error: unknown) => {

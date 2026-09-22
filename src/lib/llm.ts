@@ -13,6 +13,9 @@ export interface ModelSettings {
   endpointEnabled: boolean
   endpointUrl: string
   endpointToken: string
+  /** Reading tier: `tianji-fast` or `tianji-pro`. The same two names are used for
+   *  the downloadable models and for the cloud tiers, so the tier a user knows
+   *  does not change with where it runs. */
   model: string
 }
 
@@ -25,7 +28,7 @@ export const DEFAULT_MODEL_SETTINGS: ModelSettings = {
   endpointEnabled: false,
   endpointUrl: 'https://oracle.lazying.art/v1',
   endpointToken: '',
-  model: 'tianji',
+  model: 'tianji-fast',
 }
 
 const SETTINGS_KEY = 'lazyoracle.model'

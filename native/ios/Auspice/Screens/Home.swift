@@ -126,7 +126,6 @@ struct HomeScreen: View {
                     tile(practice)
                 }
                 .buttonStyle(TileButtonStyle())
-                .gridCellColumns(practice == .tarot ? 2 : 1)
             }
         }
     }

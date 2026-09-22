@@ -44,4 +44,17 @@ options, and it is the owner's call because it bills their account:
 2. Issue a separate key for LazyOracle, which keeps the two apps' spending
    apart and is the cleaner arrangement if readings ever grow.
 
+The EchoMind session confirmed on the same day where its key lives, without
+reading it: `/etc/echomind/echomind-web.env` on the Aliyun host, root-owned
+and readable only by that service account, consumed through one shared client
+factory so a single key serves enhancements, the assistant and the agent.
+
+Its recommendation, which this session agrees with, is the second option.
+Sharing one key means the two apps share a rate limit and a spend line, and a
+burst of readings would compete with chat, where latency is visible to the
+person typing. Separate keys under the same DeepSeek account give per-app
+usage figures and an independent limit for a few minutes of setup. If the
+owner chooses to share after all, EchoMind asked to be told before it goes
+live so it can watch its provider error rate for a day.
+
 Nothing here reads or reuses another app's credential without that decision.

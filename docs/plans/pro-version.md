@@ -10,7 +10,7 @@ version whose readings are written by DeepSeek.
 | Price | USD 0.99, one purchase | USD 4.99, one purchase (same shape as L & N Pro) |
 | Bundle / package | `art.lazying.lazyoracle` | `art.lazying.lazyoracle.pro` |
 | Where the reading is written | On the device: a downloaded Tianji model, else the deterministic composition | Tianji Cloud by default, with the on-device models still available |
-| Tiers offered | 天机快速版 / Tianji Fast, 天机专业版 / Tianji Pro, both on device | The same two names, served by DeepSeek V4.1 Flash and V4.1 Pro |
+| Tiers offered | 天机快速版 / Tianji Fast, 天机专业版 / Tianji Pro, both on device | The same two names, served by `deepseek-flash` (V4.1 Flash) and `deepseek-v4-pro` |
 | Works with no network | Yes, completely | Yes, it falls back to the same local path |
 
 The tier names do not change between the two apps. That is the point of naming
@@ -51,8 +51,9 @@ filling in `/etc/lazyoracle/gateway.env`:
 
 ```
 DEEPSEEK_API_KEY=<from platform.deepseek.com>
-DEEPSEEK_MODEL_FAST=<the V4.1 Flash model id>
-DEEPSEEK_MODEL_PRO=<the V4.1 Pro model id>
+DEEPSEEK_MODEL_FAST=deepseek-flash
+DEEPSEEK_MODEL_PRO=deepseek-v4-pro
+DEEPSEEK_MODEL_VISION=deepseek-flash
 ```
 
 Three things still have to be built before Pro can ship:
@@ -72,22 +73,36 @@ Three things still have to be built before Pro can ship:
 
 ## Cost sketch
 
-A reading sends roughly 700 to 1,200 tokens of structured facts and returns 400
-to 900 tokens. At DeepSeek's usual pricing that is a small fraction of a cent
-per reading, so a USD 4.99 purchase covers thousands of readings. The risk is
-not the average user, it is an unauthenticated relay, which is why entitlement
-comes before launch.
+A reading sends roughly 1,000 tokens of structured facts and returns about 700.
+At DeepSeek's published prices that is:
 
-## Images stay off DeepSeek
+| Tier | Model | Cost per reading, off-peak | Readings per USD 4.99 |
+| --- | --- | --- | --- |
+| Tianji Fast | `deepseek-flash` | about USD 0.0006 | roughly 8,000 |
+| Tianji Pro | `deepseek-v4-pro` | about USD 0.002 | roughly 2,400 |
 
-DeepSeek's chat API takes text only. 手相 and 面相 can therefore never be sent
-to it as photos. Palmistry keeps its present shape in both apps: MediaPipe Hand
-Landmarker finds 21 points on the device, the engine derives the line and mount
-features, and the model narrates those features as text. If face reading is
-added later it follows the same shape with MediaPipe Face Landmarker. If a real
-vision reading is ever wanted, it goes through the relay to a vision model on
-the workstation (Qwen3-VL through LazyEdge), not to DeepSeek, and it must be an
-explicit opt-in because it uploads a photo.
+Peak hours cost twice that. A photo adds up to 1,024 tokens, so a palm reading
+on Flash stays in the same range. Normal use is nowhere near these numbers, so
+the margin is comfortable, and the real risk is an unauthenticated relay rather
+than a heavy reader. That is why entitlement comes before launch, together with
+the spend ceiling above.
+
+## Photos: Flash can see, Pro cannot
+
+`deepseek-flash` accepts images, up to 32 MiB each and about 1,024 tokens per
+image; `deepseek-v4-pro` is text-only. The relay therefore routes any request
+carrying an image to the vision model regardless of the tier asked for, which
+is already implemented.
+
+That makes a genuine cloud 手相 or 面相 reading possible in Pro: the photo goes
+up with the structured landmark features, and the model reads both. It must be
+an explicit opt-in per reading, with plain wording that the photo leaves the
+device, because everything else in these apps stays local. The free app keeps
+the present shape: MediaPipe Hand Landmarker finds 21 points on the device, the
+engine derives the line and mount features, and the model narrates only those
+features. Face reading, when it is added, uses MediaPipe Face Landmarker the
+same way, with the cloud photo path as the Pro upgrade. A workstation vision
+model (Qwen3-VL through LazyEdge) remains the fallback provider.
 
 ## Order of work
 

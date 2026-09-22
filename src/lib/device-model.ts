@@ -212,6 +212,36 @@ async function checkRoom(option: DeviceModelOption): Promise<void> {
   }
 }
 
+/**
+ * Picks the faster of the two hosts before downloading several hundred
+ * megabytes from one of them.
+ *
+ * Hugging Face is unreachable or very slow on some networks, and its mirror is
+ * unreachable on others; on an iPad here the primary crawled at about 60 KB a
+ * second and then failed outright. Asking both for the first two bytes costs
+ * nothing and settles it. If neither answers, the primary is used and the
+ * existing fallback still applies.
+ */
+async function fasterHost(option: DeviceModelOption): Promise<string> {
+  const probe = async (url: string) => {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), 6000)
+    try {
+      const response = await fetch(url, { headers: { Range: 'bytes=0-1' }, signal: controller.signal })
+      if (!response.ok && response.status !== 206) throw new Error(`${response.status}`)
+      await response.arrayBuffer()
+      return url
+    } finally {
+      clearTimeout(timer)
+    }
+  }
+  try {
+    return await Promise.any([probe(option.url), probe(option.mirror)])
+  } catch {
+    return option.url
+  }
+}
+
 export async function loadDeviceModel(option: DeviceModelOption, onProgress?: LoadProgress): Promise<void> {
   if (loadedId === option.id && instance) return
   if (loading) await loading
@@ -250,6 +280,7 @@ export async function loadDeviceModel(option: DeviceModelOption, onProgress?: Lo
       markAttempt(option.id)
       onProgress?.(1, 'prepare')
     }
+
     const params = {
       n_ctx: option.contextTokens,
       n_batch: 128,
@@ -276,15 +307,17 @@ export async function loadDeviceModel(option: DeviceModelOption, onProgress?: Lo
         }
       },
     }
+    const first = cachedAlready ? option.url : await fasterHost(option)
+    const second = first === option.url ? option.mirror : option.url
     try {
-      await wllama.loadModelFromUrl(option.url, params)
+      await wllama.loadModelFromUrl(first, params)
     } catch (error) {
-      // The mirror is for a download that could not finish. Once the file is
-      // here, a failure comes from starting the model, and downloading the
+      // The other host is for a download that could not finish. Once the file
+      // is here, a failure comes from starting the model, and fetching the
       // same gigabyte again would only repeat it.
       if (downloaded) throw error
-      console.warn('primary model host failed, trying the mirror', error)
-      await wllama.loadModelFromUrl(option.mirror, params)
+      console.warn('first model host failed, trying the other one', error)
+      await wllama.loadModelFromUrl(second, params)
     }
     markAttempt(null)
     instance = wllama

@@ -2,6 +2,8 @@
 // content security policy allows scripts only from this origin, not inline.
 const $ = (id) => document.getElementById(id)
 const log = (line) => { $('log').textContent += line + '\n'; console.log('[check]', line) }
+const mirror = (url) => url.replace('huggingface.co', 'hf-mirror.com')
+
 const MODELS = {
   mini: { name: 'Tianji Mini (Qwen3 0.6B UD-Q2_K_XL, ~302 MB)', url: 'https://huggingface.co/unsloth/Qwen3-0.6B-GGUF/resolve/main/Qwen3-0.6B-UD-Q2_K_XL.gguf' },
   fast: { name: 'Tianji Fast (Qwen3 0.6B UD-Q4_K_XL, ~405 MB)', url: 'https://huggingface.co/unsloth/Qwen3-0.6B-GGUF/resolve/main/Qwen3-0.6B-UD-Q4_K_XL.gguf' },
@@ -53,9 +55,29 @@ try {
   const { Wllama } = await import('/wllama/esm/index.js').catch(() => import('https://cdn.jsdelivr.net/npm/@wllama/wllama@3.6.1/esm/index.js'))
   const wllama = new Wllama({ default: '/wllama/wllama.wasm' })
   wllama.setCompat({ worker: '/wllama/compat/wllama.js', wasm: '/wllama/compat/wllama.wasm' })
-  log('runtime ready, starting the download')
+  // Whichever host answers first gets the download; on some networks one of
+  // the two is unusably slow.
+  const probe = async (url) => {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), 6000)
+    try {
+      const response = await fetch(url, { headers: { Range: 'bytes=0-1' }, signal: controller.signal })
+      if (!response.ok && response.status !== 206) throw new Error(String(response.status))
+      await response.arrayBuffer()
+      return url
+    } finally {
+      clearTimeout(timer)
+    }
+  }
+  let source = model.url
+  try {
+    source = await Promise.any([probe(model.url), probe(mirror(model.url))])
+  } catch {
+    source = model.url
+  }
+  log(`downloading from ${new URL(source).host}`)
   $('state').textContent = 'Downloading…'
-  await wllama.loadModelFromUrl(model.url, {
+  await wllama.loadModelFromUrl(source, {
     n_ctx: 2048,
     n_batch: 128,
     n_threads: Math.max(1, Math.min(4, Math.floor((navigator.hardwareConcurrency || 2) / 2))),

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { ArrowLeft, BookOpen, CalendarDays, Compass, Hand, Hexagon, MessagesSquare, Moon, ScanFace, Settings2, Sparkles, Star } from 'lucide-react'
 import './App.css'
 import { AlmanacScreen } from './components/AlmanacScreen'
+import { TodayStrip } from './components/TodayStrip'
 import { AnswersScreen } from './components/AnswersScreen'
 import { ChatDock } from './components/ChatDock'
 import { ChatScreen } from './components/ChatScreen'
@@ -135,6 +136,7 @@ function App() {
             <h1>{copy.home.title}</h1>
             <p className="tagline">{copy.tagline}</p>
           </header>
+          <TodayStrip copy={copy} language={language} onOpen={() => setView('almanac')} />
           {showPrompt && (
             <ModelPrompt
               copy={copy}

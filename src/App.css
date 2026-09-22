@@ -579,3 +579,9 @@ select {
 .almanac-verdict { margin: 12px 0 4px; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255,255,255,.04); line-height: 1.6; }
 .almanac-verdict.suitable { border-color: rgba(143, 215, 168, .45); }
 .almanac-verdict.avoid { border-color: rgba(255, 155, 138, .45); }
+
+/* Today's almanac, one line on the home screen. */
+.today-strip { display: flex; flex-direction: column; gap: 4px; width: 100%; text-align: left; border: 1px solid var(--line); border-radius: 18px; padding: 12px 14px; margin-bottom: 14px; background: linear-gradient(160deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); color: var(--ink-soft); cursor: pointer; font-size: 13px; line-height: 1.5; }
+.today-strip:hover { border-color: rgba(214, 178, 106, .45); }
+.today-date { color: var(--gold); font-size: 12px; letter-spacing: .1em; }
+.today-line b { margin-right: 6px; font-weight: 700; }

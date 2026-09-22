@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { languageLabels, type UICopy } from '../i18n'
-import { DEVICE_MODELS, deviceModelLoadedId, loadDeviceModel, selectDeviceModel, selectedDeviceModel, unloadDeviceModel } from '../lib/device-model'
+import { DEVICE_MODELS, deviceModelLoadedId, loadDeviceModel, selectDeviceModel, selectedDeviceModel, unloadDeviceModel, type LoadPhase } from '../lib/device-model'
 import { loadModelSettings, saveModelSettings, type ModelSettings } from '../lib/llm'
 import { clearProfile, loadProfile } from '../lib/profile'
 import type { ReadingLanguage } from '../types'
@@ -9,12 +9,15 @@ interface SettingsProps {
   copy: UICopy
   language: ReadingLanguage
   onLanguage: (language: ReadingLanguage) => void
+  /** Name of a model whose last load crashed the app, if that just happened. */
+  modelNotice?: string
+  onDismissNotice?: () => void
 }
 
-export function Settings({ copy, language, onLanguage }: SettingsProps) {
+export function Settings({ copy, language, onLanguage, modelNotice, onDismissNotice }: SettingsProps) {
   const [settings, setSettings] = useState<ModelSettings>(() => loadModelSettings())
   const [deviceId, setDeviceId] = useState<string | null>(() => selectedDeviceModel()?.id ?? null)
-  const [progress, setProgress] = useState<{ id: string; fraction: number } | null>(null)
+  const [progress, setProgress] = useState<{ id: string; fraction: number; phase: LoadPhase } | null>(null)
   const [loadedId, setLoadedId] = useState<string | null>(() => deviceModelLoadedId())
   const [hasProfile, setHasProfile] = useState(() => loadProfile() !== null)
   const [deviceError, setDeviceError] = useState('')
@@ -34,9 +37,9 @@ export function Settings({ copy, language, onLanguage }: SettingsProps) {
     setDeviceError('')
     selectDeviceModel(id)
     setDeviceId(id)
-    setProgress({ id, fraction: 0 })
+    setProgress({ id, fraction: 0, phase: 'download' })
     try {
-      await loadDeviceModel(option, (fraction) => setProgress({ id, fraction }))
+      await loadDeviceModel(option, (fraction, phase) => setProgress({ id, fraction, phase }))
       setLoadedId(id)
     } catch (error) {
       console.warn('device model failed', error)
@@ -90,6 +93,12 @@ export function Settings({ copy, language, onLanguage }: SettingsProps) {
           />
           <span>{t.cloudEnabled}</span>
         </label>
+        {modelNotice && (
+          <p className="status failed">
+            {t.modelCrashed.replace('{model}', modelNotice)}{' '}
+            <button type="button" className="link-button" onClick={onDismissNotice}>{t.dismiss}</button>
+          </p>
+        )}
         <h3 className="sub">{t.deviceModel}</h3>
         <p className="body">{t.deviceModelBody}</p>
         <ul className="model-list" data-testid="device-models">
@@ -110,7 +119,7 @@ export function Settings({ copy, language, onLanguage }: SettingsProps) {
                   <b>{option.name[l]}</b>
                   <small>{option.sizeMb} MB · {option.note[l]}</small>
                   {loading && (
-                    <span className="progress" aria-label={t.downloading}>
+                    <span className="progress" aria-label={progress?.phase === 'prepare' ? t.preparing : t.downloading}>
                       <span style={{ width: `${Math.round((progress?.fraction ?? 0) * 100)}%` }} />
                     </span>
                   )}
@@ -118,7 +127,9 @@ export function Settings({ copy, language, onLanguage }: SettingsProps) {
                 {active && loadedId === option.id && !loading ? (
                   <span className="status ok">{t.loaded}</span>
                 ) : loading ? (
-                  <span className="status">{t.downloading} {Math.round((progress?.fraction ?? 0) * 100)}%</span>
+                  <span className="status">
+                    {progress?.phase === 'prepare' ? t.preparing : `${t.downloading} ${Math.round((progress?.fraction ?? 0) * 100)}%`}
+                  </span>
                 ) : (
                   <button type="button" className="ghost-button" onClick={() => void activateModel(option.id)} data-testid={`use-${option.id}`}>
                     {t.download}

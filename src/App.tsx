@@ -10,7 +10,7 @@ import { PalmScreen } from './components/PalmScreen'
 import { Settings } from './components/Settings'
 import { TarotScreen } from './components/TarotScreen'
 import { initialLanguage, rememberLanguage, uiCopy } from './i18n'
-import { loadDeviceModel, selectedDeviceModel } from './lib/device-model'
+import { loadDeviceModel, selectedDeviceModel, takeCrashedDeviceModel } from './lib/device-model'
 import type { Practice, ReadingLanguage } from './types'
 
 type View = 'home' | 'settings' | Practice
@@ -25,13 +25,26 @@ const PRACTICES: { id: Practice; icon: typeof Sparkles }[] = [
   { id: 'answers', icon: BookOpen },
 ]
 
+/**
+ * Runs once, before the first render. If the last attempt to start an
+ * on-device model ended with the web view being killed (a phone out of
+ * memory reloads the page and shows white), the model is forgotten here so
+ * the app cannot loop through the same crash on every start.
+ */
+const crashedModel = takeCrashedDeviceModel()
+
 function App() {
   const [language, setLanguage] = useState<ReadingLanguage>(initialLanguage)
   const [view, setView] = useState<View>('home')
   const copy = uiCopy(language)
 
+  const [modelNotice, setModelNotice] = useState(() =>
+    crashedModel ? crashedModel.name[language === 'en' ? 'en' : 'zh'] : '',
+  )
+
   useEffect(() => {
-    // Warm the chosen on-device model in the background so the first reading does not wait.
+    // Warm the chosen on-device model in the background so the first reading
+    // does not wait. Skipped after a crash, which left nothing selected.
     const chosen = selectedDeviceModel()
     if (chosen) loadDeviceModel(chosen).catch((error: unknown) => console.warn('device model warm-up failed', error))
   }, [])
@@ -91,7 +104,15 @@ function App() {
       )}
 
       {view !== 'home' && view !== 'settings' && screens[view]()}
-      {view === 'settings' && <Settings copy={copy} language={language} onLanguage={chooseLanguage} />}
+      {view === 'settings' && (
+        <Settings
+          copy={copy}
+          language={language}
+          onLanguage={chooseLanguage}
+          modelNotice={modelNotice}
+          onDismissNotice={() => setModelNotice('')}
+        />
+      )}
     </div>
   )
 }

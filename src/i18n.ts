@@ -59,6 +59,9 @@ export interface UICopy {
     cloudTitle: string
     cloudBody: string
     cloudEnabled: string
+    preparing: string
+    modelCrashed: string
+    dismiss: string
     deviceModel: string
     deviceModelBody: string
     none: string
@@ -127,6 +130,9 @@ const copies: Record<ReadingLanguage, UICopy> = {
       cloudTitle: 'Tianji Cloud',
       cloudBody: 'Off by default. When on, only the computed facts and your question go to our reading service, which forwards them to a language model and keeps nothing. Off means fully offline: readings are composed from the facts, or by a downloaded model.',
       cloudEnabled: 'Use Tianji Cloud when no model is downloaded',
+      preparing: 'Preparing the model…',
+      modelCrashed: '{model} could not start on this phone and the app restarted, so it has been switched off. Try the smaller model, or use Tianji Cloud.',
+      dismiss: 'Dismiss',
       deviceModel: 'On-device models',
       deviceModelBody: 'Downloaded once, then everything stays on the phone. Readings take a little longer on older phones.',
       none: 'No download (use Tianji Cloud)',
@@ -193,6 +199,9 @@ const copies: Record<ReadingLanguage, UICopy> = {
       cloudTitle: '天机云端',
       cloudBody: '默认关闭。开启后，只把推算结果和你的问题发送到我们的解读服务，由它转交给语言模型，服务不保存任何内容。关闭即完全离线：解读由推算结果组合而成，或由已下载的模型生成。',
       cloudEnabled: '未下载模型时使用天机云端',
+      preparing: '正在准备模型……',
+      modelCrashed: '{model} 在这台手机上无法启动，应用已重新载入，因此已将其关闭。可以改用较小的模型，或使用天机云端。',
+      dismiss: '知道了',
       deviceModel: '设备内模型',
       deviceModelBody: '下载一次后，一切都留在手机上。较旧的手机上解读会慢一些。',
       none: '不下载（使用天机云端）',

@@ -145,3 +145,9 @@ what keeps a USD 0.99 one-off price sustainable.
 5. Create the Play and App Store records for Pro, reusing this app's listing
    text, screenshots and icon with a Pro badge.
 6. Ship Pro to internal testing and TestFlight first, then production.
+
+## Two things queued after this release
+
+**Eleven interface languages.** The app is English and Simplified Chinese today, while the README is already in eleven, matching the other LazyingArt projects. The interface strings live in one file (`src/i18n.ts`) and the engines keep their data in Simplified Chinese with English alongside, so adding Arabic, German, Spanish, French, Japanese, Korean, Russian, Vietnamese and Traditional Chinese is a translation job rather than an engineering one. The reading prompts name the language explicitly, so a model answers in whichever is chosen. Right-to-left layout for Arabic is the one real piece of work.
+
+**Optional graphics acceleration.** On-device models now run on the processor, because offloading every layer to the GPU is what killed the web view on phones. A desktop browser has room for it and would be several times faster, so a later version can offer it as a switch that is off on phones, on by default nowhere, and remembered per device.

@@ -7,7 +7,7 @@ version whose readings are written by DeepSeek.
 
 | | LazyOracle (shipping now) | LazyOracle Pro |
 | --- | --- | --- |
-| Price | USD 0.99, one purchase | USD 4.99, one purchase (same shape as L & N Pro) |
+| Price | USD 0.99, one purchase, and no running cost to us | USD 4.99, one purchase (same shape as L & N Pro) |
 | Bundle / package | `art.lazying.lazyoracle` | `art.lazying.lazyoracle.pro` |
 | Where the reading is written | On the device: a downloaded Tianji model, else the deterministic composition | Tianji Cloud by default, with the on-device models still available |
 | Tiers offered | 天机快速版 / Tianji Fast, 天机专业版 / Tianji Pro, both on device | The same two names, served by `deepseek-flash` (V4.1 Flash) and `deepseek-v4-pro` |
@@ -95,7 +95,10 @@ carrying an image to the vision model regardless of the tier asked for, which
 is already implemented.
 
 That makes a genuine cloud 手相 or 面相 reading possible in Pro: the photo goes
-up with the structured landmark features, and the model reads both. It must be
+up with the structured landmark features, and the model reads both. The free
+app already measures a face on the device with MediaPipe Face Landmarker, so
+Pro adds the photo to a reading that is already correct rather than replacing
+it. It must be
 an explicit opt-in per reading, with plain wording that the photo leaves the
 device, because everything else in these apps stays local. The free app keeps
 the present shape: MediaPipe Hand Landmarker finds 21 points on the device, the
@@ -125,6 +128,11 @@ photo is also unproven and likely weaker than the cloud path.
 So the order of preference is: landmarks plus narration on the device for
 everyone, the cloud vision path as the Pro upgrade, and a downloadable vision
 model only if buyers ask for a photo reading that never leaves the phone.
+
+The free app must stay free to run. It ships with no API cost at all: the
+engines are local, the narration is either a downloaded model or the offline
+composition, and Tianji Cloud is off until the reader turns it on. That is
+what keeps a USD 0.99 one-off price sustainable.
 
 ## Order of work
 

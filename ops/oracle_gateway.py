@@ -147,8 +147,14 @@ class Handler(http.server.BaseHTTPRequestHandler):
             images = 0
             for m in messages:
                 # A continued conversation carries the model's own replies back.
-                assert m["role"] in ("system", "user", "assistant")
-                content = m["content"]
+                # A continued conversation carries the model's own replies back,
+                # and an agent turn carries the result of a tool it called.
+                assert m["role"] in ("system", "user", "assistant", "tool")
+                content = m.get("content")
+                if content is None:
+                    # An assistant turn that only asks for a tool has no text.
+                    assert m.get("tool_calls")
+                    continue
                 if isinstance(content, str):
                     assert len(content) <= MAX_TEXT
                     continue
@@ -174,6 +180,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self._reject(503, "no reading provider configured")
             return
         upstream_body = {"messages": messages, "stream": True, "temperature": float(payload.get("temperature", 0.7)), "max_tokens": 900}
+        # Function calling, when the app asks for it, goes through as given.
+        for field in ("tools", "tool_choice", "parallel_tool_calls"):
+            if payload.get(field) is not None:
+                upstream_body[field] = payload[field]
         last_error = "no provider answered"
         for name, url, token, models in PROVIDERS:
             model = models.get(wanted) or models[tier]

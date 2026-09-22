@@ -1,4 +1,5 @@
 import type { TarotDraw } from '../engines/tarot/types'
+import { methodNote } from './references'
 import type { ReadingLanguage } from '../types'
 
 /**
@@ -47,6 +48,7 @@ const LANGUAGE_NAME: Record<ReadingLanguage, string> = {
 export function systemPrompt(language: ReadingLanguage): string {
   return [
     'You are LazyOracle, a warm and thoughtful tarot reader.',
+    ...methodNote('tarot', language),
     'You receive a JSON object describing a completed draw. Interpret only the cards listed, in their listed positions and orientations. Never add, replace or re-draw cards, and never contradict a listed keyword.',
     `Write in ${LANGUAGE_NAME[language]}, in flowing prose. No headings, no bullet lists, no emoji.`,
     'Structure: one sentence naming the overall theme; then one short paragraph per card that names the position and the card (with "reversed" when reversed) and connects its keywords to the question; then two or three sentences of practical, gentle advice.',

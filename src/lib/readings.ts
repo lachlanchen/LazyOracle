@@ -1,4 +1,4 @@
-import { chatWithEndpoint, loadModelSettings, ModelUnavailable, streamMessages, type ChatMessage } from './llm'
+import { chatWithEndpoint, loadModelSettings, ModelUnavailable, streamMessagesFull, type ChatMessage, type ToolCallRequest } from './llm'
 import { chatOnDevice, deviceModelReady, selectedDeviceModel, streamOnDevice } from './device-model'
 
 export type ReadingSource = 'none' | 'offline' | 'device' | 'model'
@@ -72,6 +72,8 @@ export interface ChatUpdate {
   source: 'device' | 'model'
   text: string
   done: boolean
+  /** Tools the model asked for, when the provider supports function calling. */
+  toolCalls?: ToolCallRequest[]
 }
 
 /**
@@ -80,7 +82,12 @@ export interface ChatUpdate {
  * deterministic fallback: a conversation needs a model, so the caller checks
  * `chatAvailable()` first and offers a download when it is false.
  */
-export async function generateChat(messages: ChatMessage[], onUpdate: (update: ChatUpdate) => void, signal?: AbortSignal): Promise<void> {
+export async function generateChat(
+  messages: ChatMessage[],
+  onUpdate: (update: ChatUpdate) => void,
+  signal?: AbortSignal,
+  tools?: unknown[],
+): Promise<void> {
   const settings = loadModelSettings()
   const source: ChatUpdate['source'] = deviceModelReady() ? 'device' : 'model'
   let streamed = ''
@@ -89,11 +96,17 @@ export async function generateChat(messages: ChatMessage[], onUpdate: (update: C
     onUpdate({ source, text: streamed, done: false })
   }
   onUpdate({ source, text: '', done: false })
-  const text =
-    source === 'device'
-      ? await streamOnDevice(messages, { signal, onToken })
-      : await streamMessages({ ...settings, model: selectedDeviceModel()?.id ?? settings.model }, messages, { signal, onToken })
-  onUpdate({ source, text: text || streamed, done: true })
+  if (source === 'device') {
+    const text = await streamOnDevice(messages, { signal, onToken })
+    onUpdate({ source, text: text || streamed, done: true })
+    return
+  }
+  const result = await streamMessagesFull(
+    { ...settings, model: selectedDeviceModel()?.id ?? settings.model },
+    messages,
+    { signal, onToken, tools },
+  )
+  onUpdate({ source, text: result.text || streamed, done: true, toolCalls: result.toolCalls })
 }
 
 

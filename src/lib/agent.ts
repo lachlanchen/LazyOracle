@@ -26,7 +26,7 @@ import { SPREADS } from '../engines/tarot/spreads'
 import { loadProfile } from './profile'
 import type { ReadingLanguage } from '../types'
 
-export const MAX_STEPS = 3
+export const MAX_STEPS = 6
 
 export interface ToolCall {
   name: string
@@ -252,6 +252,48 @@ export const TOOLS: ToolSpec[] = [
     },
   },
 ]
+
+/**
+ * The same tools in the shape a provider's function calling expects. Used
+ * when the reading service supports it; the text protocol below is the
+ * fallback for a model running on the phone.
+ */
+export function toolSchemas(language: ReadingLanguage): unknown[] {
+  const l = language === 'en' ? 'en' : 'zh'
+  const shapes: Record<string, { properties: Record<string, unknown>; required?: string[] }> = {
+    draw_tarot: {
+      properties: {
+        spread: { type: 'string', enum: ['one', 'three', 'celtic'], description: 'How many cards: one, three, or the ten-card Celtic Cross.' },
+        question: { type: 'string', description: 'The question the cards are drawn for.' },
+      },
+    },
+    cast_iching: {
+      properties: {
+        method: { type: 'string', enum: ['coins', 'yarrow'], description: 'Three coins, or yarrow stalks.' },
+        question: { type: 'string', description: 'The question the hexagram is cast for.' },
+      },
+    },
+    four_pillars: { properties: {} },
+    natal_chart: { properties: {} },
+    eight_mansions: { properties: {} },
+    open_book: {
+      properties: {
+        book: { type: 'string', enum: ['answers', 'questions'], description: 'Which of the two books to open.' },
+        question: { type: 'string', description: 'The question held while opening it.' },
+      },
+    },
+    birth_details: { properties: {} },
+    today: { properties: {} },
+  }
+  return TOOLS.map((tool) => ({
+    type: 'function',
+    function: {
+      name: tool.name,
+      description: tool.usage[l],
+      parameters: { type: 'object', properties: shapes[tool.name]?.properties ?? {}, required: shapes[tool.name]?.required ?? [] },
+    },
+  }))
+}
 
 /** The tool instructions appended to the chat's system prompt. */
 export function toolInstructions(language: ReadingLanguage): string {

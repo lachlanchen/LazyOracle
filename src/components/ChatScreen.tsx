@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { History, Plus, Send, Square, Trash2, Wand2 } from 'lucide-react'
 import type { UICopy } from '../i18n'
-import { MAX_STEPS, parseToolCall, runTool, toolInstructions, toolResultMessage } from '../lib/agent'
+import { MAX_STEPS, parseToolCall, runTool, toolInstructions, toolResultMessage, toolSchemas } from '../lib/agent'
 import { conversationTitle, deleteConversation, loadConversations, newConversationId, saveConversation, type Conversation } from '../lib/chat-store'
-import type { ChatMessage } from '../lib/llm'
+import type { ChatMessage, ToolCallRequest } from '../lib/llm'
 import { renderInline } from '../lib/markdown'
 import { chatAvailable, fitToBudget, generateChat, historyBudget, summariseTurns } from '../lib/readings'
 import type { ReadingLanguage } from '../types'
@@ -65,18 +65,25 @@ export function ChatScreen({ copy, language, pending, onPendingConsumed }: ChatS
   const asked = useRef('')
   const t = copy.chat
 
-  /** Streams one reply and returns its full text. A tool call is not shown. */
-  const ask = async (messages: ChatMessage[], signal: AbortSignal): Promise<string> => {
+  /**
+   * Streams one reply. A provider that supports function calling answers with
+   * tool calls; a model on the phone writes them as a line of text instead.
+   * Neither is shown to the reader.
+   */
+  const ask = async (messages: ChatMessage[], signal: AbortSignal): Promise<{ text: string; calls: ToolCallRequest[] }> => {
     let latest = ''
+    let calls: ToolCallRequest[] = []
     await generateChat(
       messages,
       (update) => {
         latest = update.text
+        if (update.toolCalls?.length) calls = update.toolCalls
         setStreaming(update.text.trimStart().startsWith('<tool') ? '' : update.text)
       },
       signal,
+      toolSchemas(language),
     )
-    return latest
+    return { text: latest, calls }
   }
 
   const remember = (finished: Turn[]) => {
@@ -145,21 +152,47 @@ export function ChatScreen({ copy, language, pending, onPendingConsumed }: ChatS
 
     try {
       for (let step = 0; step <= MAX_STEPS; step += 1) {
-        const reply = await ask(working, controller.signal)
+        const { text: reply, calls } = await ask(working, controller.signal)
         if (controller.signal.aborted) break
-        const call = step < MAX_STEPS ? parseToolCall(reply) : null
-        if (!call) {
-          setTurns((current) => {
-            const next: Turn[] = [...current, { role: 'assistant', content: reply }]
-            remember(next)
-            return next
-          })
-          break
+        const last = step >= MAX_STEPS
+
+        // A provider with function calling: run each call it asked for.
+        if (!last && calls.length > 0) {
+          working = [
+            ...working,
+            { role: 'assistant', content: reply || null, tool_calls: calls.map((call) => ({ id: call.id, type: 'function' as const, function: { name: call.name, arguments: call.arguments } })) },
+          ]
+          for (const call of calls) {
+            let args: Record<string, unknown> = {}
+            try {
+              args = call.arguments ? (JSON.parse(call.arguments) as Record<string, unknown>) : {}
+            } catch {
+              args = {}
+            }
+            const result = runTool({ name: call.name, arguments: args }, language)
+            setTurns((current) => [...current, { role: 'tool', content: result.label }])
+            working = [...working, { role: 'tool', content: result.output, tool_call_id: call.id, name: call.name }]
+          }
+          setStreaming('')
+          continue
         }
-        const result = runTool(call, language)
-        setTurns((current) => [...current, { role: 'tool', content: result.label }])
-        setStreaming('')
-        working = [...working, { role: 'assistant', content: reply }, { role: 'user', content: toolResultMessage(result) }]
+
+        // A model on the phone writes the call as a line of text.
+        const written = last ? null : parseToolCall(reply)
+        if (written) {
+          const result = runTool(written, language)
+          setTurns((current) => [...current, { role: 'tool', content: result.label }])
+          setStreaming('')
+          working = [...working, { role: 'assistant', content: reply }, { role: 'user', content: toolResultMessage(result) }]
+          continue
+        }
+
+        setTurns((current) => {
+          const next: Turn[] = [...current, { role: 'assistant', content: reply }]
+          remember(next)
+          return next
+        })
+        break
       }
       // Fold away anything that will not fit next time, before the reader asks again.
       await compact([...visible, { role: 'assistant', content: '' }], controller.signal)

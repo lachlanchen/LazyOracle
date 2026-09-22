@@ -58,15 +58,35 @@ export interface ChatRequest {
   onToken?: (text: string) => void
 }
 
+/** A function call the model asked for, in the shape every provider returns. */
+export interface ToolCallRequest {
+  id: string
+  name: string
+  /** Raw JSON arguments, exactly as the model wrote them. */
+  arguments: string
+}
+
 /** One turn of a conversation, in the shape every provider expects. */
 export interface ChatMessage {
-  role: 'system' | 'user' | 'assistant'
-  content: string
+  role: 'system' | 'user' | 'assistant' | 'tool'
+  content: string | null
+  /** Set on an assistant turn that asked for tools. */
+  tool_calls?: { id: string; type: 'function'; function: { name: string; arguments: string } }[]
+  /** Set on a tool result, matching the call it answers. */
+  tool_call_id?: string
+  name?: string
 }
 
 export interface StreamOptions {
   signal?: AbortSignal
   onToken?: (text: string) => void
+  /** Function definitions the model may call, in OpenAI's shape. */
+  tools?: unknown[]
+}
+
+export interface StreamResult {
+  text: string
+  toolCalls: ToolCallRequest[]
 }
 
 export class ModelUnavailable extends Error {}
@@ -94,8 +114,8 @@ export async function chatWithEndpoint(settings: ModelSettings, request: ChatReq
   )
 }
 
-/** Streams a whole conversation from an OpenAI-compatible endpoint. */
-export async function streamMessages(settings: ModelSettings, messages: ChatMessage[], options: StreamOptions = {}, fetchImpl: typeof fetch = fetch): Promise<string> {
+/** Streams a whole conversation, returning the text and any tools requested. */
+export async function streamMessagesFull(settings: ModelSettings, messages: ChatMessage[], options: StreamOptions = {}, fetchImpl: typeof fetch = fetch): Promise<StreamResult> {
   if (!settings.endpointEnabled || !settings.endpointUrl) throw new ModelUnavailable('endpoint disabled')
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
   if (settings.endpointToken) headers.Authorization = `Bearer ${settings.endpointToken}`
@@ -103,11 +123,18 @@ export async function streamMessages(settings: ModelSettings, messages: ChatMess
     method: 'POST',
     headers,
     signal: options.signal,
-    body: JSON.stringify({ model: settings.model, stream: true, temperature: 0.7, messages }),
+    body: JSON.stringify({
+      model: settings.model,
+      stream: true,
+      temperature: 0.7,
+      messages,
+      ...(options.tools ? { tools: options.tools, tool_choice: 'auto' } : {}),
+    }),
   })
   if (!response.ok || !response.body) throw new ModelUnavailable(`endpoint answered ${response.status}`)
   const reader = response.body.getReader()
   const decoder = new TextDecoder()
+  const calls: { id: string; name: string; arguments: string }[] = []
   let buffer = ''
   let text = ''
   let thinking = false
@@ -123,7 +150,17 @@ export async function streamMessages(settings: ModelSettings, messages: ChatMess
       const payload = trimmed.slice(5).trim()
       if (payload === '[DONE]') continue
       try {
-        const chunk = JSON.parse(payload) as { choices?: { delta?: { content?: string } }[] }
+        const chunk = JSON.parse(payload) as {
+          choices?: { delta?: { content?: string; tool_calls?: { index?: number; id?: string; function?: { name?: string; arguments?: string } }[] } }[]
+        }
+        // Tool calls stream in pieces, one index per call.
+        for (const part of chunk.choices?.[0]?.delta?.tool_calls ?? []) {
+          const at = part.index ?? calls.length
+          calls[at] ??= { id: part.id ?? `call_${at}`, name: '', arguments: '' }
+          if (part.id) calls[at].id = part.id
+          if (part.function?.name) calls[at].name += part.function.name
+          if (part.function?.arguments) calls[at].arguments += part.function.arguments
+        }
         const delta = chunk.choices?.[0]?.delta?.content ?? ''
         if (!delta) continue
         // Hide Qwen3 reasoning that streams inside <think> tags.
@@ -145,5 +182,10 @@ export async function streamMessages(settings: ModelSettings, messages: ChatMess
       }
     }
   }
-  return stripThinking(text)
+  return { text: stripThinking(text), toolCalls: calls.filter((call) => call.name) }
+}
+
+/** The text of a conversation, for callers that do not use tools. */
+export async function streamMessages(settings: ModelSettings, messages: ChatMessage[], options: StreamOptions = {}, fetchImpl: typeof fetch = fetch): Promise<string> {
+  return (await streamMessagesFull(settings, messages, options, fetchImpl)).text
 }

@@ -12,6 +12,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from playwright.async_api import async_playwright
 
 PORT_APP, PORT_LLM = 8795, 8796
+MODE = sys.argv[1] if len(sys.argv) > 1 else "text"
 replies = [
     '<tool>{"name": "draw_tarot", "arguments": {"spread": "three", "question": "work"}}</tool>',
     'Your three cards answer plainly. The draw above is the one the app made, and nothing here was invented.',
@@ -26,14 +27,25 @@ class Stub(BaseHTTPRequestHandler):
     def do_POST(self):
         body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
         seen.append(body)
-        reply = replies[min(len(seen) - 1, len(replies) - 1)]
         self.send_response(200)
         self.send_header("Content-Type", "text/event-stream")
         self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
-        for chunk in [reply[i : i + 12] for i in range(0, len(reply), 12)]:
-            self.wfile.write(b"data: " + json.dumps({"choices": [{"delta": {"content": chunk}}]}).encode() + b"\n\n")
-            self.wfile.flush()
+        first = len(seen) == 1
+        if MODE == "native" and first:
+            # Function calling, streamed in pieces the way a provider sends it.
+            for part in (
+                {"index": 0, "id": "call_1", "function": {"name": "draw_tarot"}},
+                {"index": 0, "function": {"arguments": '{"spread":'}},
+                {"index": 0, "function": {"arguments": ' "three"}'}},
+            ):
+                self.wfile.write(b"data: " + json.dumps({"choices": [{"delta": {"tool_calls": [part]}}]}).encode() + b"\n\n")
+                self.wfile.flush()
+        else:
+            reply = replies[1] if (MODE == "native" or not first) else replies[0]
+            for chunk in [reply[i : i + 12] for i in range(0, len(reply), 12)]:
+                self.wfile.write(b"data: " + json.dumps({"choices": [{"delta": {"content": chunk}}]}).encode() + b"\n\n")
+                self.wfile.flush()
         self.wfile.write(b"data: [DONE]\n\n")
         self.wfile.flush()
 
@@ -80,12 +92,21 @@ async def main():
                 failures.append('the final answer never arrived')
             if '<tool>' in log:
                 failures.append('the raw tool call leaked into the conversation')
+            if len(seen) >= 2:
+                print('second request roles:', [m.get('role') for m in seen[1]['messages']])
+                print('second request keys:', [sorted(m.keys()) for m in seen[1]['messages']][-2:])
+                print('requests seen:', len(seen))
+                for n, req in enumerate(seen):
+                    print(' req', n, [(m.get('role'), (m.get('content') or '')[:40]) for m in req['messages']][-3:], 'tools' in req)
             if len(seen) < 2:
                 failures.append(f'expected two model calls, saw {len(seen)}')
             else:
                 second = json.dumps(seen[1], ensure_ascii=False)
-                if 'TOOL RESULT draw_tarot' not in second:
-                    failures.append('the tool result was not sent back to the model')
+                marker = 'tool_call_id' if MODE == 'native' else 'TOOL RESULT draw_tarot'
+                if marker not in second:
+                    failures.append(f'the tool result was not sent back to the model ({MODE})')
+                if MODE == 'native' and '"tools"' not in json.dumps(seen[0]):
+                    failures.append('the tool definitions were not offered to the model')
                 if 'keywords' not in second:
                     failures.append('the drawn cards were not passed to the model')
 
@@ -98,6 +119,7 @@ async def main():
     finally:
         app.terminate()
         llm.shutdown()
+    print(f'mode: {MODE}')
     print('FAILURES:', failures or 'none')
     return 1 if failures else 0
 

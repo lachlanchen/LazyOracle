@@ -5,6 +5,7 @@ import { linePositionText, type IChingCast } from '../engines/iching/cast'
 import { COURT_TEXT, ELEMENT_TEXT, FACE_PALACE_TEXT, proportionText, symmetryText, type FaceFeatures } from '../engines/face/face'
 import { FINGER_TEXT, LINE_TEXT, opennessText, PALACE_TEXT, SHAPE_TEXT, thumbAngleText, type PalmFeatures } from '../engines/palm/palm'
 import type { Opening } from '../engines/answers/answers'
+import { methodNote } from './references'
 import type { ReadingLanguage } from '../types'
 
 /**
@@ -80,6 +81,7 @@ export function ichingContext(cast: IChingCast, language: ReadingLanguage): IChi
 export function ichingSystemPrompt(language: ReadingLanguage): string {
   return [
     ...common(language, 'a calm reader of the I Ching (周易)'),
+    ...methodNote('iching', language),
     'Structure: name the primary hexagram and quote its judgement; explain its sense for the question; say where the answer is read, following the rule given in the facts, and read it there; then each changing line by position; then, if there is a resulting hexagram, what the situation is moving toward; mention the nuclear hexagram once, as what lies inside the situation; finish with two or three sentences of practical advice.',
     'Follow the reading rule in the facts exactly. Do not move the answer to a different line.',
     'Length: 220 to 380 words.',
@@ -152,6 +154,7 @@ export function baziContext(chart: BaziChart, language: ReadingLanguage, questio
 export function baziSystemPrompt(language: ReadingLanguage): string {
   return [
     ...common(language, 'an experienced but gentle BaZi (四柱八字) reader'),
+    ...methodNote('bazi', language),
     'Structure: describe the day master and the season it was born in; the balance of the five elements and what "strength" means here; the ten gods present and what they suggest about work, relationships and resources; the current luck cycle and this year; then three practical suggestions. If hourKnown is false, say the hour pillar is approximate.',
     'Never invent pillars or gods that are not listed. Length: 250 to 400 words.',
   ].join('\n')
@@ -224,6 +227,7 @@ export function astrologyContext(chart: NatalChart, transits: Transit[], languag
 export function astrologySystemPrompt(language: ReadingLanguage): string {
   return [
     ...common(language, 'a thoughtful astrologer working with a tropical, whole-sign natal chart'),
+    ...methodNote('astrology', language),
     'Structure: the Sun, Moon and Ascendant as the core of the chart; two or three notable placements or aspects that bear on the question; then today\'s transits and what kind of day they suggest; finish with gentle advice.',
     'Length: 250 to 400 words.',
   ].join('\n')
@@ -279,6 +283,7 @@ export function fengshuiContext(m: EightMansions, language: ReadingLanguage, que
 export function fengshuiSystemPrompt(language: ReadingLanguage): string {
   return [
     ...common(language, 'a practical Eight Mansions (八宅) feng shui consultant'),
+    ...methodNote('fengshui', language),
     'Structure: explain the personal trigram and group in one paragraph; then which directions suit the main door, bed, desk and stove and which to avoid, citing the listed sectors; if a facing direction is given, comment on it; finish with three easy adjustments that need no renovation.',
     'Length: 200 to 350 words.',
   ].join('\n')
@@ -348,6 +353,7 @@ export function palmContext(f: PalmFeatures, language: ReadingLanguage, question
 export function palmSystemPrompt(language: ReadingLanguage): string {
   return [
     ...common(language, 'a friendly palm reader who treats palmistry as a mirror for reflection, not prediction'),
+    ...methodNote('palm', language),
     'Structure: the hand shape and what its keywords suggest; the three major lines and the fate line in turn; the fingers and the palaces that stand out, named as the facts name them; how all of it combines; two sentences of encouragement. Say once, lightly, that this is for reflection.',
     'Use only the facts given. Do not invent a line, a finger or a palace that is not listed.',
     'Length: 220 to 360 words.',
@@ -414,6 +420,7 @@ export function faceContext(f: FaceFeatures, language: ReadingLanguage, question
 export function faceSystemPrompt(language: ReadingLanguage): string {
   return [
     ...common(language, 'a reader of Chinese physiognomy (面相) who treats a face as a portrait of habits, not a verdict'),
+    ...methodNote('face', language),
     'Structure: the elemental face type and what it suggests; the three courts and what each period of life is said to carry; the proportions and symmetry; then the palaces that stand out, named as the facts name them; finish with two or three sentences the reader can act on.',
     'Use only the measurements given, and quote a ratio when it supports a point. Never comment on beauty, health, race or worth, and never predict illness or death.',
     'Say once, lightly, that a face is read here as a mirror for reflection.',
@@ -457,6 +464,7 @@ export function bookContext(opening: Opening, language: ReadingLanguage): BookCo
 export function bookSystemPrompt(language: ReadingLanguage): string {
   return [
     ...common(language, 'the quiet voice of a book of answers'),
+    ...methodNote('answers', language),
     'The page text is the answer. Write two or three short sentences that connect the page to the question without changing the answer. Do not add a different answer.',
     'Length: under 80 words.',
   ].join('\n')

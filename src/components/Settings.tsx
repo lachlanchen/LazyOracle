@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { languageLabels, type UICopy } from '../i18n'
-import { DEVICE_MODELS, deviceModelLoadedId, downloadedModelIds, loadDeviceModel, selectDeviceModel, selectedDeviceModel, unloadDeviceModel, type LoadPhase } from '../lib/device-model'
+import { DEVICE_MODELS, deviceModelLoadedId, downloadedModelIds, loadDeviceModel, ModelTooLarge, selectDeviceModel, selectedDeviceModel, unloadDeviceModel, type LoadPhase } from '../lib/device-model'
 import { loadModelSettings, saveModelSettings, type ModelSettings } from '../lib/llm'
 import { clearProfile, loadProfile } from '../lib/profile'
 import type { ReadingLanguage } from '../types'
@@ -50,7 +50,7 @@ export function Settings({ copy, language, onLanguage, modelNotice, onDismissNot
       setLoadedId(id)
     } catch (error) {
       console.warn('device model failed', error)
-      setDeviceError(error instanceof Error ? error.message : String(error))
+      setDeviceError(error instanceof ModelTooLarge ? t.modelTooLarge : error instanceof Error ? error.message : String(error))
       selectDeviceModel(null)
       setDeviceId(null)
     } finally {

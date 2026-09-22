@@ -4,8 +4,8 @@ import { crashedDeviceModelId, DEVICE_MODELS, selectDeviceModel, selectedDeviceM
 const ATTEMPT_KEY = 'lazyoracle.deviceModel.attempt'
 
 describe('on-device model catalogue', () => {
-  it('offers the two Tianji tiers with a small context and a mirror', () => {
-    expect(DEVICE_MODELS.map((m) => m.id)).toEqual(['tianji-fast', 'tianji-pro'])
+  it('offers the three Tianji tiers with a small context and a mirror', () => {
+    expect(DEVICE_MODELS.map((m) => m.id)).toEqual(['tianji-mini', 'tianji-fast', 'tianji-pro'])
     for (const model of DEVICE_MODELS) {
       expect(model.url).toMatch(/^https:\/\/huggingface\.co\/.+\.gguf$/)
       expect(model.mirror).toBe(model.url.replace('huggingface.co', 'hf-mirror.com'))
@@ -16,10 +16,13 @@ describe('on-device model catalogue', () => {
     }
   })
 
-  it('keeps the fast tier small enough for an ordinary phone', () => {
-    const fast = DEVICE_MODELS[0]
-    expect(fast.sizeMb).toBeLessThan(600)
-    expect(fast.sizeMb).toBeLessThan(DEVICE_MODELS[1].sizeMb)
+  it('orders the tiers from smallest to largest, with one that fits a modest phone', () => {
+    const sizes = DEVICE_MODELS.map((model) => model.sizeMb)
+    expect(sizes).toEqual([...sizes].sort((a, b) => a - b))
+    // A four-gigabyte phone gives its web view a fraction of that, and
+    // loading needs several times the file, so the smallest must stay small.
+    expect(sizes[0]).toBeLessThan(320)
+    expect(DEVICE_MODELS[0].contextTokens).toBeLessThanOrEqual(1024)
   })
 })
 

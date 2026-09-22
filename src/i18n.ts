@@ -64,6 +64,7 @@ export interface UICopy {
     cloudEnabled: string
     preparing: string
     modelCrashed: string
+    modelTooLarge: string
     dismiss: string
     deviceModel: string
     deviceModelBody: string
@@ -167,7 +168,8 @@ const copies: Record<ReadingLanguage, UICopy> = {
       cloudBody: 'Off by default. When on, only the computed facts and your question go to our reading service, which forwards them to a language model and keeps nothing. Off means fully offline: readings are composed from the facts, or by a downloaded model.',
       cloudEnabled: 'Use Tianji Cloud when no model is downloaded',
       preparing: 'Preparing the model…',
-      modelCrashed: '{model} could not start on this phone and the app restarted, so it has been switched off. Try the smaller model, or use Tianji Cloud.',
+      modelCrashed: '{model} could not start on this phone and the app restarted, so it has been switched off. Try a smaller model, or use Tianji Cloud.',
+      modelTooLarge: 'This phone does not have enough free memory for that model. Try Tianji Mini, or use Tianji Cloud, which needs none.',
       dismiss: 'Dismiss',
       deviceModel: 'On-device models',
       deviceModelBody: 'Downloaded once, then everything stays on the phone. Readings take a little longer on older phones.',
@@ -270,6 +272,7 @@ const copies: Record<ReadingLanguage, UICopy> = {
       cloudEnabled: '未下载模型时使用天机云端',
       preparing: '正在准备模型……',
       modelCrashed: '{model} 在这台手机上无法启动，应用已重新载入，因此已将其关闭。可以改用较小的模型，或使用天机云端。',
+      modelTooLarge: '这台手机可用内存不足以运行该模型。可以改用天机轻量版，或使用无需内存的天机云端。',
       dismiss: '知道了',
       deviceModel: '设备内模型',
       deviceModelBody: '下载一次后，一切都留在手机上。较旧的手机上解读会慢一些。',

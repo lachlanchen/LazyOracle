@@ -29,6 +29,18 @@ export type LoadProgress = (fraction: number, phase: LoadPhase) => void
 
 export const DEVICE_MODELS: DeviceModelOption[] = [
   {
+    id: 'tianji-mini',
+    name: { en: 'Tianji Mini', zh: '天机轻量版' },
+    sizeMb: 302,
+    url: 'https://huggingface.co/unsloth/Qwen3-0.6B-GGUF/resolve/main/Qwen3-0.6B-UD-Q2_K_XL.gguf',
+    mirror: 'https://hf-mirror.com/unsloth/Qwen3-0.6B-GGUF/resolve/main/Qwen3-0.6B-UD-Q2_K_XL.gguf',
+    note: {
+      en: 'For phones with little memory to spare, such as an iPhone SE. Shorter, plainer readings.',
+      zh: '适合内存较小的手机（例如 iPhone SE）。解读更短、更朴素。',
+    },
+    contextTokens: 1024,
+  },
+  {
     id: 'tianji-fast',
     name: { en: 'Tianji Fast', zh: '天机快速版' },
     sizeMb: 405,
@@ -155,6 +167,30 @@ export function deviceModelLoadedId(): string | null {
 export class ModelTooLarge extends Error {}
 
 /**
+ * Asks the browser to reserve as much memory as the model will need, and
+ * gives it straight back.
+ *
+ * This matters most on iPhones. A web view gets far less memory than the
+ * phone has, and loading a model briefly needs several times the file: the
+ * bytes read from storage, a copy passed to the worker (Safari on iOS cannot
+ * transfer a buffer, so it clones it), and the copy the runtime keeps. When
+ * that exceeds the limit the system kills the web view, which the reader sees
+ * as a white screen and a reload, with no error anywhere. Reserving the space
+ * first turns that into a sentence we can show instead.
+ *
+ * The reservation is not touched, so it costs nothing when it succeeds.
+ */
+export async function canHoldModel(option: DeviceModelOption): Promise<boolean> {
+  const needed = Math.ceil(option.sizeMb * 1.6 * 1024 * 1024)
+  try {
+    const memory = new WebAssembly.Memory({ initial: Math.ceil(needed / 65536) })
+    return memory.buffer.byteLength >= needed
+  } catch {
+    return false
+  }
+}
+
+/**
  * Refuses a download the device cannot finish. A half-written model file is
  * the worst outcome: the runtime rejects it, downloads it again, and the app
  * spins. Browsers report their quota, so ask first.
@@ -180,6 +216,9 @@ export async function loadDeviceModel(option: DeviceModelOption, onProgress?: Lo
   if (loadedId === option.id && instance) return
   loading = (async () => {
     await checkRoom(option)
+    if (!(await canHoldModel(option))) {
+      throw new ModelTooLarge(`this device cannot hold ${option.sizeMb} MB in one piece`)
+    }
     const { Wllama } = await import('@wllama/wllama')
     const base = `${import.meta.env.BASE_URL}wllama/`
     if (instance) {

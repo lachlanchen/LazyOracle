@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Cloud, Download } from 'lucide-react'
-import { DEVICE_MODELS, downloadedModelIds, loadDeviceModel, selectDeviceModel, type LoadPhase } from '../lib/device-model'
+import { DEVICE_MODELS, downloadedModelIds, loadDeviceModel, ModelTooLarge, selectDeviceModel, type LoadPhase } from '../lib/device-model'
 import { loadModelSettings, saveModelSettings } from '../lib/llm'
 import type { UICopy } from '../i18n'
 import type { ReadingLanguage } from '../types'
@@ -42,7 +42,7 @@ export function ModelPrompt({ copy, language, onReady, onDismiss }: ModelPromptP
     } catch (loadError) {
       console.warn('model download failed', loadError)
       selectDeviceModel(null)
-      setError(loadError instanceof Error ? loadError.message : String(loadError))
+      setError(loadError instanceof ModelTooLarge ? s.modelTooLarge : loadError instanceof Error ? loadError.message : String(loadError))
     } finally {
       setProgress(null)
     }

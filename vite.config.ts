@@ -29,6 +29,10 @@ export default defineConfig({
         ],
       },
       workbox: {
+        // Take over as soon as a new version is deployed, so a fix reaches an
+        // installed app on its next launch rather than several launches later.
+        skipWaiting: true,
+        clientsClaim: true,
         navigateFallback: '/index.html',
         globPatterns: ['**/*.{js,css,html,png,svg,json,woff2}'],
         ignoreURLParametersMatching: [/^utm_/, /^fbclid$/, /^v$/],

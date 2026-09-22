@@ -56,6 +56,13 @@ const SELECTED_KEY = 'lazyoracle.deviceModel'
  * reload), so the app must not try that model again by itself.
  */
 const ATTEMPT_KEY = 'lazyoracle.deviceModel.attempt'
+/**
+ * Remembers the model whose last start crashed, after the attempt marker has
+ * been cleared. A crash often means a half-written file in the cache, which
+ * the runtime would reject and download again, so the next deliberate attempt
+ * at that model clears its cached copy first.
+ */
+const CRASHED_KEY = 'lazyoracle.deviceModel.crashed'
 
 function markAttempt(id: string | null): void {
   try {
@@ -85,7 +92,22 @@ export function takeCrashedDeviceModel(): DeviceModelOption | null {
   if (!id) return null
   markAttempt(null)
   selectDeviceModel(null)
+  try {
+    localStorage.setItem(CRASHED_KEY, id)
+  } catch {
+    // Without storage the cache simply is not purged on the next attempt.
+  }
   return DEVICE_MODELS.find((m) => m.id === id) ?? null
+}
+
+function shouldPurgeCache(id: string): boolean {
+  try {
+    if (localStorage.getItem(CRASHED_KEY) !== id) return false
+    localStorage.removeItem(CRASHED_KEY)
+    return true
+  } catch {
+    return false
+  }
 }
 
 export function selectedDeviceModel(): DeviceModelOption | null {
@@ -109,6 +131,7 @@ export function selectDeviceModel(id: string | null): void {
 type WllamaInstance = {
   /** Points wllama at the Safari-compatible build; we host it ourselves. */
   setCompat: (compat: { worker: string; wasm: string } | null, mode?: 'safari' | 'firefox_safari') => void
+  cacheManager: { delete: (url: string) => Promise<void> }
   loadModelFromUrl: (url: string, options: Record<string, unknown>) => Promise<void>
   createChatCompletion: (options: Record<string, unknown>) => Promise<unknown>
   exit: () => Promise<void>
@@ -127,11 +150,35 @@ export function deviceModelLoadedId(): string | null {
 }
 
 /** Loads (downloading if needed) the selected model; progress in 0–1. */
+/** Thrown when the device plainly cannot hold the model. */
+export class ModelTooLarge extends Error {}
+
+/**
+ * Refuses a download the device cannot finish. A half-written model file is
+ * the worst outcome: the runtime rejects it, downloads it again, and the app
+ * spins. Browsers report their quota, so ask first.
+ */
+async function checkRoom(option: DeviceModelOption): Promise<void> {
+  try {
+    const estimate = await navigator.storage?.estimate?.()
+    if (!estimate || typeof estimate.quota !== 'number') return
+    const free = estimate.quota - (estimate.usage ?? 0)
+    const needed = option.sizeMb * 1024 * 1024 * 1.25
+    if (free < needed) {
+      throw new ModelTooLarge(`needs about ${Math.ceil(needed / 1024 / 1024)} MB of free space, ${Math.floor(free / 1024 / 1024)} MB available`)
+    }
+  } catch (error) {
+    if (error instanceof ModelTooLarge) throw error
+    // The estimate is advisory; if the browser will not give one, carry on.
+  }
+}
+
 export async function loadDeviceModel(option: DeviceModelOption, onProgress?: LoadProgress): Promise<void> {
   if (loadedId === option.id && instance) return
   if (loading) await loading
   if (loadedId === option.id && instance) return
   loading = (async () => {
+    await checkRoom(option)
     const { Wllama } = await import('@wllama/wllama')
     const base = `${import.meta.env.BASE_URL}wllama/`
     if (instance) {
@@ -150,6 +197,12 @@ export async function loadDeviceModel(option: DeviceModelOption, onProgress?: Lo
     // We serve that build from our own origin instead, so the app keeps
     // working under its content security policy and with no third party.
     wllama.setCompat({ worker: `${base}compat/wllama.js`, wasm: `${base}compat/wllama.wasm` })
+    if (shouldPurgeCache(option.id)) {
+      // The last attempt at this model brought the app down; start from a
+      // clean file rather than whatever is in the cache.
+      await wllama.cacheManager.delete(option.url).catch(() => undefined)
+      await wllama.cacheManager.delete(option.mirror).catch(() => undefined)
+    }
     // A phone has to hold the weights and the KV cache at once, so the context
     // stays small and only a few threads are used. Too large a context is what
     // makes the web view run out of memory and reload.
@@ -164,13 +217,17 @@ export async function loadDeviceModel(option: DeviceModelOption, onProgress?: Lo
         onProgress?.(fraction, 'download')
         // The runtime starts once the file is in place; that stage has no
         // progress of its own, so it is announced rather than shown as 0%.
-        if (fraction >= 1) {
+        if (fraction >= 1 && !downloaded) {
           downloaded = true
+          // From here on the runtime is starting, which is the step that can
+          // take the whole web view down with it on a small phone. Only now
+          // is the attempt recorded, so an interrupted download is not
+          // mistaken for a crash.
+          markAttempt(option.id)
           onProgress?.(1, 'prepare')
         }
       },
     }
-    markAttempt(option.id)
     try {
       await wllama.loadModelFromUrl(option.url, params)
     } catch (error) {

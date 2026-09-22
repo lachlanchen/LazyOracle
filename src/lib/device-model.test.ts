@@ -34,6 +34,13 @@ describe('crash guard', () => {
     expect(selectedDeviceModel()?.id).toBe('tianji-fast')
   })
 
+  it('remembers the crash so the next attempt can start from a clean file', () => {
+    selectDeviceModel('tianji-fast')
+    localStorage.setItem(ATTEMPT_KEY, 'tianji-fast')
+    takeCrashedDeviceModel()
+    expect(localStorage.getItem('lazyoracle.deviceModel.crashed')).toBe('tianji-fast')
+  })
+
   it('forgets a model whose load left an unfinished attempt behind', () => {
     selectDeviceModel('tianji-pro')
     localStorage.setItem(ATTEMPT_KEY, 'tianji-pro')

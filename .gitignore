@@ -18,3 +18,4 @@ ios/App/Pods/
 
 # Built from src/engine-bridge.ts by tools/build-engine-bundle.mjs
 native/shared/
+native/ios/Auspice/Resources/

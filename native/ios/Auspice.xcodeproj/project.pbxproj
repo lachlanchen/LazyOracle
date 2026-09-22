@@ -6,7 +6,14 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		A1000101 /* MediaPipeTasksVision.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = A1000111 /* MediaPipeTasksVision.xcframework */; };
+		A1000102 /* MediaPipeTasksCommon.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = A1000112 /* MediaPipeTasksCommon.xcframework */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
+		A1000111 /* MediaPipeTasksVision.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = MediaPipeTasksVision.xcframework; path = Frameworks/vision/frameworks/MediaPipeTasksVision.xcframework; sourceTree = "<group>"; };
+		A1000112 /* MediaPipeTasksCommon.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = MediaPipeTasksCommon.xcframework; path = Frameworks/common/frameworks/MediaPipeTasksCommon.xcframework; sourceTree = "<group>"; };
 		A1000001 /* Auspice.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Auspice.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -23,6 +30,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1000101 /* MediaPipeTasksVision.xcframework in Frameworks */,
+				A1000102 /* MediaPipeTasksCommon.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -33,8 +42,18 @@
 			isa = PBXGroup;
 			children = (
 				A1000002 /* Auspice */,
+				A1000022 /* Frameworks */,
 				A1000021 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		A1000022 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A1000111 /* MediaPipeTasksVision.xcframework */,
+				A1000112 /* MediaPipeTasksCommon.xcframework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		A1000021 /* Products */ = {
@@ -173,6 +192,13 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = Q8M2S2FY77;
 				ENABLE_PREVIEWS = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/Frameworks/vision/frameworks",
+					"$(SRCROOT)/Frameworks/common/frameworks",
+				);
+				"OTHER_LDFLAGS[sdk=iphoneos*]" = "$(inherited) -ObjC -lc++ -force_load \"$(SRCROOT)/Frameworks/common/frameworks/graph_libraries/libMediaPipeTasksCommon_device_graph.a\" -framework AudioToolbox -framework Accelerate -framework CoreMedia -framework CoreGraphics -framework CoreImage -framework QuartzCore -framework AVFoundation -framework CoreVideo";
+				"OTHER_LDFLAGS[sdk=iphonesimulator*]" = "$(inherited) -ObjC -lc++ -force_load \"$(SRCROOT)/Frameworks/common/frameworks/graph_libraries/libMediaPipeTasksCommon_simulator_graph.a\" -framework AudioToolbox -framework Accelerate -framework CoreMedia -framework CoreGraphics -framework CoreImage -framework QuartzCore -framework AVFoundation -framework CoreVideo";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = NO;
@@ -197,6 +223,13 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = Q8M2S2FY77;
 				ENABLE_PREVIEWS = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/Frameworks/vision/frameworks",
+					"$(SRCROOT)/Frameworks/common/frameworks",
+				);
+				"OTHER_LDFLAGS[sdk=iphoneos*]" = "$(inherited) -ObjC -lc++ -force_load \"$(SRCROOT)/Frameworks/common/frameworks/graph_libraries/libMediaPipeTasksCommon_device_graph.a\" -framework AudioToolbox -framework Accelerate -framework CoreMedia -framework CoreGraphics -framework CoreImage -framework QuartzCore -framework AVFoundation -framework CoreVideo";
+				"OTHER_LDFLAGS[sdk=iphonesimulator*]" = "$(inherited) -ObjC -lc++ -force_load \"$(SRCROOT)/Frameworks/common/frameworks/graph_libraries/libMediaPipeTasksCommon_simulator_graph.a\" -framework AudioToolbox -framework Accelerate -framework CoreMedia -framework CoreGraphics -framework CoreImage -framework QuartzCore -framework AVFoundation -framework CoreVideo";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = NO;

@@ -51,6 +51,8 @@
 	</array>
 	<key>UIUserInterfaceStyle</key>
 	<string>Dark</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Auspice uses the compass to tell you which of your eight sectors you are facing. Your position is never stored or sent anywhere.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Auspice reads a palm or a face from the camera. The picture stays on this device and is never uploaded.</string>
 </dict>

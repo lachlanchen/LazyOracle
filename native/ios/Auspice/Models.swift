@@ -207,3 +207,169 @@ struct BaziChart: Decodable {
     let luckStart: LuckStart
     let currentYear: CurrentYear
 }
+
+// MARK: - Astrology
+
+struct Placement: Decodable, Identifiable {
+    let body: String
+    let longitude: Double
+    let sign: Int
+    let degree: Double
+    let house: Int
+    let retrograde: Bool
+    var id: String { body }
+}
+
+struct Aspect: Decodable, Identifiable {
+    let a: String
+    let b: String
+    let type: String
+    let orb: Double
+    var id: String { a + b + type }
+}
+
+struct NatalChart: Decodable {
+    let instant: String
+    let latitude: Double
+    let longitude: Double
+    let ascendant: Double
+    let midheaven: Double
+    let ascendantSign: Int
+    let placements: [Placement]
+    let aspects: [Aspect]
+    let moonPhase: Double
+}
+
+struct Transit: Decodable, Identifiable {
+    let transiting: String
+    let natal: String
+    let type: String
+    let orb: Double
+    var id: String { transiting + natal + type }
+}
+
+struct TransitReport: Decodable {
+    let positions: [Placement]
+    let transits: [Transit]
+}
+
+/// The twelve signs. Fixed astronomy, not a rule the engines decide, so the
+/// labels live here rather than crossing the bridge on every draw.
+enum Zodiac {
+    static let signs: [(en: String, zh: String, symbol: String, element: String)] = [
+        ("Aries", "白羊座", "♈", "fire"),
+        ("Taurus", "金牛座", "♉", "earth"),
+        ("Gemini", "双子座", "♊", "air"),
+        ("Cancer", "巨蟹座", "♋", "water"),
+        ("Leo", "狮子座", "♌", "fire"),
+        ("Virgo", "处女座", "♍", "earth"),
+        ("Libra", "天秤座", "♎", "air"),
+        ("Scorpio", "天蝎座", "♏", "water"),
+        ("Sagittarius", "射手座", "♐", "fire"),
+        ("Capricorn", "摩羯座", "♑", "earth"),
+        ("Aquarius", "水瓶座", "♒", "air"),
+        ("Pisces", "双鱼座", "♓", "water")
+    ]
+
+    static let bodySymbols: [String: String] = [
+        "Sun": "☉", "Moon": "☽", "Mercury": "☿", "Venus": "♀", "Mars": "♂",
+        "Jupiter": "♃", "Saturn": "♄", "Uranus": "♅", "Neptune": "♆", "Pluto": "♇"
+    ]
+
+    static func aspectColour(_ type: String) -> String { type }
+}
+
+// MARK: - Feng shui
+
+struct SectorQuality: Decodable {
+    let id: String
+    let name: Bilingual
+    let auspicious: Bool
+    let use: Bilingual
+}
+
+struct MansionSector: Decodable, Identifiable {
+    let direction: String
+    let quality: SectorQuality
+    var id: String { direction }
+}
+
+struct EightMansions: Decodable {
+    let year: Int
+    let guaNumber: Int
+    let gua: String
+    let group: String
+    let sectors: [MansionSector]
+    let best: String
+    let worst: String
+}
+
+// MARK: - Palmistry
+
+struct FingerTrait: Decodable, Identifiable {
+    let finger: String
+    let ratioToSaturn: Double
+    let length: String
+    var id: String { finger }
+}
+
+struct PalaceReading: Decodable, Identifiable {
+    let palace: String
+    let prominence: Double
+    let state: String
+    var id: String { palace }
+}
+
+struct LineTraits: Codable {
+    var heart = "between"
+    var head = "curved"
+    var life = "wide"
+    var fate = "unsure"
+
+    var dictionary: [String: Any] { ["heart": heart, "head": head, "life": life, "fate": fate] }
+}
+
+struct PalmFeatures: Decodable {
+    let shape: String
+    let palmLength: Double
+    let palmWidth: Double
+    let fingerLength: Double
+    let fingerRatio: Double
+    let palmRatio: Double
+    let indexToRing: Double
+    let thumbSpread: Double
+    let thumbAngle: Double
+    let openness: Double
+    let fingers: [FingerTrait]
+    let palaces: [PalaceReading]
+    let strongPalaces: [String]
+}
+
+// MARK: - Face reading
+
+struct Court: Decodable, Identifiable {
+    let court: String
+    let share: Double
+    let state: String
+    var id: String { court }
+}
+
+struct FacePalaceReading: Decodable, Identifiable {
+    let palace: String
+    let value: Double
+    let state: String
+    var id: String { palace }
+}
+
+struct FaceFeatures: Decodable {
+    let element: String
+    let courts: [Court]
+    let eyesAcross: Double
+    let eyeGap: Double
+    let heightRatio: Double
+    let jawRatio: Double
+    let foreheadRatio: Double
+    let symmetry: Double
+    let palaces: [FacePalaceReading]
+    let strongPalaces: [String]
+}

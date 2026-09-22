@@ -58,3 +58,41 @@ owner chooses to share after all, EchoMind asked to be told before it goes
 live so it can watch its provider error rate for a day.
 
 Nothing here reads or reuses another app's credential without that decision.
+
+## The Huanayun mirror, and why Let's Encrypt was never blocked
+
+Checked again on 2026-09-23 after the L & N session relayed a Codex note
+(`~/Nutstore Files/Share/LazyEdit/ORACLE-FAST-HUANAYUN-CLAUDE-HANDOFF.md`).
+
+Huanayun does not filter Let's Encrypt. The earlier certificate failures on
+that host had a mundane cause: `nftables` PREROUTING redirects public 80 to
+18080 and public 443 to 18443, and those high ports belong to
+`lazystudio-caddy.service`, which reads `/etc/lazystudio/Caddyfile` and takes
+its reload through the admin endpoint on `127.0.0.1:12019`. Anything that binds
+80 or 443 itself — a second Caddy, or `certbot --standalone` — holds a socket
+that inbound validation never reaches, which looks exactly like a provider
+block and is not. The owner's instruction is the short form of this: do not use
+80 and 443 directly on that host.
+
+The mirror is already live and correct. `oracle-fast.lazying.art` resolves to
+179.236.105.35, holds its own Let's Encrypt certificate (issued 21 September,
+valid to 20 December, renewed by this same Caddy), and serves the release from
+`/srv/lazyoracle/current/dist` — the same `index-DHXRbLUZ.js` as Aliyun and as
+the local build. `tools/deploy-web-fast.sh` publishes to it. So no move was
+forced and none is needed: `oracle.lazying.art` stays on Aliyun with the relay,
+and Huanayun carries the app and the model downloads.
+
+One gap was closed today. The mirror's SPA fallback answered `POST /v1/...`
+with the app shell and a 200, so a relay call sent to the wrong host would fail
+as a JSON parse error rather than as a request failure. The site block now has
+a `handle /v1/*` above the fallback that returns a 404 with a JSON body naming
+the real endpoint. The change is additive, was validated with `caddy validate`
+before installation, was reloaded through 127.0.0.1:12019, and left
+`edit.lazying.art`, `agent.lightmind.art` and `oracle.lazying.art` answering
+exactly as before. The previous file is kept beside it as
+`/etc/lazystudio/Caddyfile.bak-20260922T162137Z` for a one-command rollback.
+
+The relay itself still runs only on Aliyun. Moving it to Huanayun, which the
+owner suspects is faster, waits on the key decision above: it would need its
+own `/etc/lazyoracle/gateway.env` on that host, and that is the moment to use a
+LazyOracle key rather than EchoMind's.

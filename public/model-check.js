@@ -50,6 +50,16 @@ log(`largest reservable block: ${low} MB`)
 const started = Date.now()
 const since = () => `${((Date.now() - started) / 1000).toFixed(1)}s`
 
+let wakeLock = null
+try {
+  // A phone that locks its screen suspends the transfer, which looks like a
+  // failed download; hold the screen awake while it runs.
+  wakeLock = await navigator.wakeLock?.request('screen')
+  log(wakeLock ? 'screen held awake' : 'no wake lock available')
+} catch (error) {
+  log('wake lock refused: ' + (error && error.message ? error.message : error))
+}
+
 try {
   log('loading the runtime')
   const { Wllama } = await import('/wllama/esm/index.js').catch(() => import('https://cdn.jsdelivr.net/npm/@wllama/wllama@3.6.1/esm/index.js'))
@@ -104,8 +114,10 @@ try {
     },
   })
   $('state').innerHTML = `<span class="ok">Everything works.</span> Total ${since()}.`
+  wakeLock?.release?.().catch(() => {})
   log('completion finished, total ' + since())
 } catch (error) {
   $('state').innerHTML = `<span class="bad">Failed:</span> ${error && error.message ? error.message : error}`
+  wakeLock?.release?.().catch(() => {})
   log('FAILED ' + (error && error.stack ? error.stack : error))
 }

@@ -242,12 +242,30 @@ async function fasterHost(option: DeviceModelOption): Promise<string> {
   }
 }
 
+/**
+ * Holds the screen awake for the length of a download.
+ *
+ * A few hundred megabytes take minutes on a phone, and when the screen locks
+ * the browser suspends the transfer, which surfaces as a failed download with
+ * no explanation. Safari has supported this since iOS 16.4; where it is not
+ * available the call simply does nothing.
+ */
+async function keepAwake(): Promise<{ release: () => void }> {
+  try {
+    const lock = await (navigator as unknown as { wakeLock?: { request: (type: 'screen') => Promise<{ release: () => Promise<void> }> } }).wakeLock?.request('screen')
+    return { release: () => void lock?.release()?.catch(() => undefined) }
+  } catch {
+    return { release: () => undefined }
+  }
+}
+
 export async function loadDeviceModel(option: DeviceModelOption, onProgress?: LoadProgress): Promise<void> {
   if (loadedId === option.id && instance) return
   if (loading) await loading
   if (loadedId === option.id && instance) return
   loading = (async () => {
     await checkRoom(option)
+    const awake = await keepAwake()
     if (!(await canHoldModel(option))) {
       throw new ModelTooLarge(`this device cannot hold ${option.sizeMb} MB in one piece`)
     }
@@ -320,6 +338,7 @@ export async function loadDeviceModel(option: DeviceModelOption, onProgress?: Lo
       await wllama.loadModelFromUrl(second, params)
     }
     markAttempt(null)
+    awake.release()
     instance = wllama
     loadedId = option.id
   })()

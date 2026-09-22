@@ -69,6 +69,14 @@ AUDIT = """(minTap) => {
     const box = wrapper ? wrapper.getBoundingClientRect() : r;
     if (box.height < minTap || box.width < minTap) faults.push(['tap target too small', label(el), Math.round(box.width) + '×' + Math.round(box.height)]);
   });
+  // Safari on iOS zooms the page when a field under 16px is focused, and the
+  // zoom is what makes the interface look wider and scroll sideways.
+  document.querySelectorAll('input, textarea, select').forEach((el) => {
+    const r = el.getBoundingClientRect();
+    if (r.width === 0 || r.height === 0) return;
+    const size = parseFloat(getComputedStyle(el).fontSize);
+    if (size < 16) faults.push(['field under 16px, iOS will zoom', label(el), size + 'px']);
+  });
   document.querySelectorAll('p, span, small, li, dd, dt, label, button, a').forEach((el) => {
     if (!el.textContent || !el.textContent.trim()) return;
     const size = parseFloat(getComputedStyle(el).fontSize);

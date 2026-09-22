@@ -68,7 +68,7 @@ export function ModelPrompt({ copy, language, onReady, onDismiss }: ModelPromptP
                 <small>{cached.includes(option.id) ? `${s.onDevice} · ` : ''}{option.note[l]}</small>
                 {busy && (
                   <span className="progress" aria-label={progress.phase === 'prepare' ? s.preparing : s.downloading}>
-                    <span style={{ width: `${Math.round(progress.fraction * 100)}%` }} />
+                    <span style={{ transform: `scaleX(${progress.fraction})` }} />
                   </span>
                 )}
               </div>

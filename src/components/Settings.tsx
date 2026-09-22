@@ -127,7 +127,7 @@ export function Settings({ copy, language, onLanguage, modelNotice, onDismissNot
                   <small>{cached.includes(option.id) ? t.onDevice : `${option.sizeMb} MB`} · {option.note[l]}</small>
                   {loading && (
                     <span className="progress" aria-label={progress?.phase === 'prepare' ? t.preparing : t.downloading}>
-                      <span style={{ width: `${Math.round((progress?.fraction ?? 0) * 100)}%` }} />
+                      <span style={{ transform: `scaleX(${progress?.fraction ?? 0})` }} />
                     </span>
                   )}
                 </div>

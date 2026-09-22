@@ -81,7 +81,7 @@ export function BaziScreen({ copy, language }: BaziScreenProps) {
                 {(Object.keys(chart.elements) as (keyof typeof chart.elements)[]).map((element) => (
                   <div key={element} className={`element-bar ${ELEMENT_CLASS[element]}`}>
                     <span className="element-name">{en ? ELEMENT_EN[element] : element}</span>
-                    <span className="element-track"><span className="element-fill" style={{ width: `${(chart.elements[element] / 8) * 100}%` }} /></span>
+                    <span className="element-track"><span className="element-fill" style={{ transform: `scaleX(${Math.min(1, chart.elements[element] / 8)})` }} /></span>
                     <span className="element-count">{chart.elements[element]}</span>
                   </div>
                 ))}

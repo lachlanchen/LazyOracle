@@ -176,7 +176,7 @@
 .element-bars { display: grid; gap: 6px; margin-top: 14px; }
 .element-bar { display: grid; grid-template-columns: 52px 1fr 20px; align-items: center; gap: 8px; font-size: 12px; }
 .element-track { height: 8px; border-radius: 4px; background: rgba(255,255,255,.08); overflow: hidden; }
-.element-fill { display: block; height: 100%; border-radius: 4px; background: var(--gold); transition: width .6s ease; }
+.element-fill { display: block; height: 100%; width: 100%; transform-origin: left center; transform: scaleX(0); border-radius: 4px; background: var(--gold); }
 .element-bar.wood .element-fill { background: #8fd18f; } .element-bar.fire .element-fill { background: #ff8f7a; } .element-bar.earth .element-fill { background: #d9b45a; } .element-bar.metal .element-fill { background: #e6e6f0; } .element-bar.water .element-fill { background: #7fb8ff; }
 .element-count { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink-soft); }
 .luck-cycles ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
@@ -242,7 +242,7 @@
 .model-list b { display: block; font-size: 15px; }
 .model-list small { display: block; color: var(--ink-mute); font-size: 12px; margin-top: 2px; }
 .model-list .progress { display: block; height: 6px; border-radius: 3px; background: rgba(255,255,255,.08); margin-top: 8px; overflow: hidden; width: 160px; }
-.model-list .progress span { display: block; height: 100%; background: var(--gold); transition: width .3s; }
+.model-list .progress span { display: block; height: 100%; width: 100%; transform-origin: left center; transform: scaleX(0); background: var(--gold); }
 .about { color: var(--ink-mute); font-size: 12px; }
 
 /* Ask Tianji: a conversation with whichever model is available. */
@@ -455,11 +455,12 @@ select {
 .reading-text { animation: fade-in .3s var(--ease-out) both; }
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 
-/* Facts count themselves in: the element bars grow from nothing. */
-.element-fill { transition: width .8s var(--ease-in-out); }
+/* Facts count themselves in: the element bars grow from nothing. A scale
+   is composited on the GPU, where a width is laid out again every frame. */
+.element-fill { transition: transform .8s var(--ease-in-out); }
 
 /* Progress while a model downloads should feel continuous, not stepped. */
-.model-list .progress span { transition: width .45s var(--ease-in-out); }
+.model-list .progress span { transition: transform .45s var(--ease-in-out); }
 
 /* The starfield gains a slow shimmer over the drift it already had. */
 .sky::after {

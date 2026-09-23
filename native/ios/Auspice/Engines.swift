@@ -110,7 +110,10 @@ final class Engines {
                 throw Failure.engineFailed("rules bundle speaks version \(version), this app expects \(Self.expectedVersion)")
             }
             guard let body = envelope["data"] else { throw Failure.badResult }
-            return try JSONSerialization.data(withJSONObject: body, options: [])
+            // Some engines return a scalar: fengshui.sector returns "N", etc.
+            // Without fragmentsAllowed, Foundation raises an Objective-C
+            // exception here (not a Swift Error that try?/catch can handle).
+            return try JSONSerialization.data(withJSONObject: body, options: [.fragmentsAllowed])
         }
     }
 

@@ -25,7 +25,7 @@ android {
                     .takeIf { it.exists() }?.readText()?.trim() ?: ""
                 storeFile = store
                 storePassword = secret
-                keyAlias = System.getenv("AUSPICE_KEY_ALIAS") ?: "upload"
+                keyAlias = System.getenv("AUSPICE_KEY_ALIAS") ?: "lazyoracle-upload"
                 keyPassword = secret
             }
         }

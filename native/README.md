@@ -1,32 +1,83 @@
-# Native apps: shared engines
+# Auspice 宜时 — the native apps
 
-The native iOS and Android apps draw their own screens, but they do not
-re-implement the rules. `shared/lazyoracle-engines.js` is built from the same
-TypeScript the web app runs, and exposes one function:
+Auspice is the native sibling of LazyOracle: the same nine practices, drawn in
+SwiftUI on iOS and Jetpack Compose on Android, with no web view anywhere in
+either app. It is a separate product with its own name, its own bundle
+identifier (`art.lazying.auspice`) and its own store records, so work here
+never disturbs a LazyOracle review in flight.
+
+```
+native/
+  shared/    the payload both apps carry (generated, not tracked)
+  ios/       the SwiftUI app, and the Xcode project
+  android/   the Compose app, and its Gradle build
+```
+
+## The one thing that is shared
+
+The rules. `shared/lazyoracle-engines.js` is built from the same TypeScript the
+web app runs — `src/engines/`, with its golden-file tests — into one bundle
+with no DOM and no network:
 
 ```js
-LazyOracle.evaluateJson('{"engine":"almanac.day","input":{"date":"2026-09-23","activity":"marry"}}')
+LazyOracle.evaluateJson('{"engine":"almanac.day","input":{"date":"2026-09-23"}}')
 // {"ok":true,"version":1,"engine":"almanac.day","data":{ ... }}
 ```
 
-Load it into JavaScriptCore on iOS or QuickJS on Android, call it, decode the
-JSON. It has no DOM, no storage and no network: every engine is a pure
-function, which is what makes a second implementation unnecessary and a second
-set of bugs avoidable.
+iOS loads it into **JavaScriptCore**; Android into **androidx.javascriptengine**,
+a sandbox in its own process. Both call one function with JSON in and JSON out.
 
-Rebuild it whenever an engine changes:
+Writing the four pillars or the almanac a second time in Swift and a third in
+Kotlin would look like less work for a week and then quietly disagree with the
+web app about someone's day master, with no test able to catch it. So: native
+interface, native camera, native model runtime when it lands — one set of rules.
+
+Rebuild the bundle whenever an engine changes:
 
 ```bash
 node tools/build-engine-bundle.mjs
 ```
 
-`src/engine-bridge.test.ts` checks that the bridge returns exactly what the
-app's own code returns for the same inputs, so the two can never drift.
+## Building
 
-Engines available: tarot draws and spreads, the I Ching cast and any hexagram
-by number, BaZi charts, natal charts and transits, Eight Mansions and the
-sector for a compass heading, palm and face features from landmarks, the
-almanac for a date with its activity judgement, and the two books.
+**iOS** — the project is hand-written and needs no generator. MediaPipe's
+frameworks live outside the tree (they are 1.2 GB) and are fetched once on the
+Mac build host:
 
-The plan for what to build natively, and in what order, is in
+```bash
+tools/auspice-sync.sh      # rules into Resources, then rsync to the Mac
+ssh echomind-kvm-macos 'cd ~/Projects/Auspice && xcodebuild -scheme Auspice \
+  -destination "generic/platform=iOS" -configuration Release build'
+```
+
+**Android** — everything is local:
+
+```bash
+cp native/shared/lazyoracle-engines.js native/android/app/src/main/assets/
+cp native/shared/models/*.task native/android/app/src/main/assets/
+cd native/android && ./gradlew :app:assembleDebug     # or :app:bundleRelease
+```
+
+The release bundle is signed with the LazyOracle upload key
+(`~/.config/lazyoracle/android/`, alias `lazyoracle-upload`); one publisher key
+serves both apps, and Play distinguishes them by application id.
+
+## What each app carries
+
+| | iOS | Android |
+| --- | --- | --- |
+| Interface | SwiftUI | Jetpack Compose |
+| Rules | JavaScriptCore | androidx.javascriptengine |
+| Camera | AVFoundation | CameraX |
+| Landmarks | MediaPipeTasksVision | com.google.mediapipe:tasks-vision |
+| Compass | CoreLocation | `TYPE_ROTATION_VECTOR` |
+| Readings | our relay at `oracle-fast.lazying.art/v1` | the same |
+
+## Distribution
+
+TestFlight and Play internal testing while the app grows; no formal store
+release yet. Paid from the first day at USD 0.99 and the equivalent tier
+elsewhere, as every LazyingArt app is.
+
+The remaining plan, and what is deliberately not done yet, is in
 `../docs/plans/native-apps.md`.

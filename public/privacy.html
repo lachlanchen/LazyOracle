@@ -15,19 +15,18 @@
 
 <h2>What we collect</h2>
 <p>LazyOracle has no account system and no analytics. LazyingArt LLC does not store your questions, your birth details, your photos or your readings.</p>
-<p><strong>Tianji Cloud (off by default).</strong> If you switch it on in Settings and no on-device model is downloaded, the narrative reading is written by a language model through our reading relay at oracle.lazying.art. The app sends only the structured facts of the reading (for example the cards drawn, or the four pillars) and your question; the relay forwards them to the model provider and does not log or retain the content. While it is off, nothing leaves the device.</p>
+<p><strong>Tianji Cloud (on by default, and switchable off).</strong> The reading written in words is composed by a language model through our own relay at oracle.lazying.art or oracle-fast.lazying.art, which holds the provider key so the app does not have to. The app sends your question, relevant conversation history or its summary, and the structured facts the engines computed. These may include birth details supplied for a chart or in chat, and measured hand or face features. Photos are not uploaded. The relay forwards this content to the model provider without retaining request content. Switch it off in Settings and the app composes the reading itself, on the device, and no cloud reading requests are sent.</p>
 
 <h2>What stays on your device</h2>
 <ul>
-<li><strong>Birth details</strong> (date, time, sex at birth, birthplace) that you enter for BaZi, astrology and feng shui. They are stored in the app's local storage and can be deleted at any time from Settings.</li>
+<li><strong>Birth details</strong> (date, time, sex at birth, birthplace) that you enter for BaZi, astrology and feng shui. They are saved in the app's local storage and can be deleted at any time from Settings. Details included in a cloud reading or chat are also sent with that request.</li>
 <li><strong>Interface language and model settings.</strong></li>
-<li><strong>A downloaded language model</strong>, if you choose one in Settings. It is cached by the app so readings work offline.</li>
 <li><strong>Palm and face photos are not stored.</strong> A photo is measured in memory on the device, to find the hand outline or the points of the face, and is discarded when you leave the screen. No photo is uploaded, and no face is recognised or matched against anything.</li>
 </ul>
 
 <h2>Network use</h2>
 <ul>
-<li>Downloading an on-device model (optional) fetches a file from <code>oracle.lazying.art</code>. The request contains no personal data.</li>
+<li>Loading the app fetches it from <code>oracle.lazying.art</code>. The request contains no personal data.</li>
 <li><strong>Tianji Cloud</strong> as described above, only while it is switched on.</li>
 <li>Camera and motion sensors are used only on the device, for the palm or face photo and for the compass heading.</li>
 </ul>

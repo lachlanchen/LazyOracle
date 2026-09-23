@@ -12,7 +12,7 @@
 
 <p align="center"><img src="docs/screenshots/home-practices.png" width="30%" alt="The eight practices"> <img src="docs/screenshots/tarot-three-model-reading.png" width="30%" alt="A three-card reading"> <img src="docs/screenshots/chat-agent.png" width="30%" alt="Ask Tianji casting a hexagram"></p>
 
-Tarot, BaZi, the I Ching, astrology, feng shui, palmistry and face reading each rest on a body of rules that is precise, even where it is not science. LazyOracle implements those rules exactly, on the device, and then lets a language model put the result into sentences. The model narrates; it never decides. The web app is free. The phone apps are a one-off US$0.99, with no subscription and no running cost, because nothing has to be computed on a server.
+Tarot, BaZi, the I Ching, astrology, feng shui, palmistry and face reading each rest on a body of rules that is precise, even where it is not science. LazyOracle implements those rules exactly, on the device, and then lets a language model put the result into sentences. The model narrates; it never decides. The web app is free. The phone apps are a one-off US$0.99, with no subscription. Charts run on the device; cloud narration is provided through our reading relay.
 
 ## What it does
 
@@ -30,17 +30,18 @@ Tarot, BaZi, the I Ching, astrology, feng shui, palmistry and face reading each 
 
 Every practice produces a structured set of facts: the cards drawn in their positions, the pillars and their relations, the hexagram and its moving lines. Those facts are computed by ordinary, tested code, so they are identical on every device and every run. Only then is a model asked for prose, with the facts as its only source and instructions not to add, replace or contradict any of them. When no model is available, the app composes the reading from the same facts itself, so a reading always appears.
 
-Three sources are tried in order:
+The current testing builds use two reading sources:
 
 | Source | What it is | When it runs |
 | --- | --- | --- |
-| A downloaded Tianji model | 天机快速版 / Tianji Fast (about 400 MB) or 天机专业版 / Tianji Pro (about 1.1 GB), running in the app through llama.cpp compiled to WebAssembly | Whenever one has been downloaded |
-| Tianji Cloud (天机云端) | Our own relay, which holds the provider key and keeps nothing | Only when switched on in Settings; off by default |
-| The offline composition | The deterministic engine writing the reading itself | Whenever neither of the above is available |
+| Tianji Cloud (天机云端) | DeepSeek Flash through our relay; provider credentials stay on the server | Enabled by default; can be switched off in Settings |
+| The offline composition | A reading composed from the deterministic facts | When the cloud is disabled or unavailable; chat needs a connection |
 
 ## Privacy
 
-Cards, charts, hexagrams and measurements are computed on the device. Photos for palmistry and face reading are measured in memory and never stored, uploaded or matched against anything. Birth details stay in the browser's local storage on that device. There is no account, no analytics and no advertising identifier. With Tianji Cloud switched on, one request carries the structured facts and your question to our relay, which forwards them to a language model and keeps no copy; with it off, nothing leaves the device at all. The full policy is at [oracle.lazying.art/privacy.html](https://oracle.lazying.art/privacy.html).
+Cards, charts, hexagrams and measurements are computed on the device. Photos for palmistry and face reading are measured in memory and never stored, uploaded or matched against anything. Birth profiles are saved in local storage. There is no account, no analytics and no advertising identifier. With Tianji Cloud switched on, requests carry your question, relevant conversation history or its summary, and structured reading facts (which may include birth details) through our relay to the model provider. Turning it off stops cloud reading requests. The full policy is at [oracle.lazying.art/privacy.html](https://oracle.lazying.art/privacy.html).
+
+Auspice / 宜时 is the separate native sibling: SwiftUI on iOS and Compose on Android, the same tested engines, eleven interface languages, and live hand/face landmarks. See [the takeover recap](docs/handoffs/2026-09-23-codex-takeover.md) for the current decisions and release boundaries.
 
 ## Platforms
 

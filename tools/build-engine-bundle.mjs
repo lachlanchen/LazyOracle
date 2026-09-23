@@ -22,7 +22,8 @@ await build({
   logLevel: 'warn',
   build: {
     outDir,
-    emptyOutDir: true,
+    // Shared landmark weights are reused by both native apps.
+    emptyOutDir: false,
     target: 'es2020',
     lib: {
       entry: resolve(root, 'src/engine-bridge.ts'),

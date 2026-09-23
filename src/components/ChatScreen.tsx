@@ -270,7 +270,7 @@ export function ChatScreen({ copy, language, pending, onPendingConsumed }: ChatS
         )}
       </header>
 
-      {!ready && <ModelPrompt copy={copy} language={language} onReady={() => setReady(true)} />}
+      {!ready && <ModelPrompt copy={copy} onReady={() => setReady(true)} />}
 
       {ready && showHistory && (
         <section className="panel" data-testid="chat-history-list">

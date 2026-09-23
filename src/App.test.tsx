@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
 
 vi.mock('./lib/hand-detect', () => ({
@@ -18,6 +18,14 @@ vi.mock('./lib/hand-detect', () => ({
     return points
   }),
 }))
+
+// These tests are about the deterministic reading the app composes without a
+// model — the one that still answers when the network is gone. The cloud
+// reader is on by default in the app itself, so it is switched off here rather
+// than letting the tests reach for a service that is not there.
+beforeEach(() => {
+  localStorage.setItem('lazyoracle.model', JSON.stringify({ endpointEnabled: false }))
+})
 
 afterEach(() => {
   cleanup()

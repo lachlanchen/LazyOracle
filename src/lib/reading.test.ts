@@ -42,8 +42,9 @@ describe('reading context', () => {
 describe('endpoint client', () => {
   it('refuses when the endpoint is disabled', async () => {
     await expect(chatWithEndpoint({ ...DEFAULT_MODEL_SETTINGS, endpointEnabled: false }, { system: 's', user: 'u' })).rejects.toBeInstanceOf(ModelUnavailable)
-    expect(DEFAULT_MODEL_SETTINGS.endpointUrl).toBe('https://oracle.lazying.art/v1')
-    expect(DEFAULT_MODEL_SETTINGS.endpointEnabled).toBe(false)
+    expect(DEFAULT_MODEL_SETTINGS.endpointUrl).toBe('https://oracle-fast.lazying.art/v1')
+    // The reader works the first time the app is opened, without a switch.
+    expect(DEFAULT_MODEL_SETTINGS.endpointEnabled).toBe(true)
   })
 
   it('streams OpenAI-style chunks, hides <think> blocks, and returns the text', async () => {

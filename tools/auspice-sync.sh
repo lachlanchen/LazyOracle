@@ -11,5 +11,5 @@ cd "$REPO"
 node tools/build-engine-bundle.mjs
 mkdir -p native/ios/Auspice/Resources
 cp native/shared/lazyoracle-engines.js native/ios/Auspice/Resources/
-rsync -az --delete -e ssh native/ios/ echomind-kvm-macos:~/Projects/Auspice/
+rsync -az --delete --exclude Frameworks --exclude build.sh --exclude release -e ssh native/ios/ echomind-kvm-macos:~/Projects/Auspice/
 echo "synced $(wc -c < native/ios/Auspice/Resources/lazyoracle-engines.js) bytes of rules"

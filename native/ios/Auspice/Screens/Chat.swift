@@ -46,29 +46,6 @@ final class ChatStore {
     var error: String?
     var tier = "tianji-fast"
 
-    /// Which reader answers. The on-device one is free, private and needs no
-    /// download, so it is preferred wherever the phone can run it.
-    enum Reader: String, CaseIterable {
-        case automatic, onDevice, cloud
-    }
-
-    var reader: Reader = .automatic {
-        didSet { UserDefaults.standard.set(reader.rawValue, forKey: "auspice.reader") }
-    }
-
-    /// The one actually used for the next answer.
-    var effectiveReader: Reader {
-        switch reader {
-        case .automatic:
-            // The relay. It is the only reader whose readings have been
-            // measured against the engines and found faithful; a reader that
-            // gets 宜 and 忌 the wrong way round is worse than no reader.
-            return .cloud
-        case .onDevice: return LocalModel.isReady ? .onDevice : .cloud
-        case .cloud: return .cloud
-        }
-    }
-
     private let file: URL = {
         let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("Auspice", isDirectory: true)
@@ -81,10 +58,6 @@ final class ChatStore {
     private let budgetCharacters = 24_000
 
     private init() {
-        if let stored = UserDefaults.standard.string(forKey: "auspice.reader"),
-           let known = Reader(rawValue: stored) {
-            reader = known
-        }
         load()
         if sessions.isEmpty {
             sessions = [ChatSession()]
@@ -109,9 +82,6 @@ final class ChatStore {
     }
 
     func delete(_ id: UUID) {
-        #if canImport(FoundationModels)
-        if #available(iOS 26.0, *) { LocalModel.forget(id) }
-        #endif
         sessions.removeAll { $0.id == id }
         if sessions.isEmpty { sessions = [ChatSession()] }
         if currentId == id { currentId = sessions[0].id }
@@ -133,9 +103,6 @@ final class ChatStore {
     }
 
     func clearCurrent() {
-        #if canImport(FoundationModels)
-        if #available(iOS 26.0, *) { LocalModel.forget(current.id) }
-        #endif
         var session = current
         session.turns = []
         session.summary = nil
@@ -179,10 +146,7 @@ final class ChatStore {
         streaming = true
         error = nil
         defer { streaming = false }
-        switch effectiveReader {
-        case .onDevice: await runOnDevice()
-        default: await runInCloud()
-        }
+        await runInCloud()
     }
 
     @MainActor
@@ -287,46 +251,6 @@ final class ChatStore {
                 return
             }
         }
-    }
-
-    /// The on-device reader runs its own tool loop, so all this has to do is
-    /// hand it the conversation and append what it writes.
-    /// The on-device reader runs its own tool loop, so all this has to do is
-    /// hand it the conversation and append what it writes.
-    @MainActor
-    private func runOnDevice() async {
-        #if canImport(FoundationModels)
-        if #available(iOS 26.0, *) {
-            let asked = current.turns.last(where: { $0.kind == .reader })?.text ?? ""
-            let holder = Turn(kind: .oracle, text: "")
-            var opened = false
-            do {
-                _ = try await LocalModel.answer(conversation: current.id, question: asked) { [weak self] piece in
-                    guard let self else { return }
-                    var session = self.current
-                    if !opened {
-                        opened = true
-                        session.turns.append(holder)
-                    }
-                    if let index = session.turns.lastIndex(where: { $0.id == holder.id }) {
-                        session.turns[index].text += piece
-                    }
-                    self.current = session
-                }
-                save()
-                return
-            } catch {
-                // A refusal or a context overflow on the device is not a dead
-                // end: the relay can still answer, and the reader is told which
-                // one did.
-                var session = current
-                session.turns.removeAll { $0.id == holder.id }
-                session.turns.append(Turn(kind: .note, text: t("local.fellBack"), ok: false))
-                current = session
-            }
-        }
-        #endif
-        await runInCloud()
     }
 
     /// The history, fitted to the budget, with anything older folded into a
@@ -445,9 +369,6 @@ struct ChatScreen: View {
         }
         .sheet(isPresented: $showingSessions) { SessionList(store: store) }
         .onAppear {
-            #if canImport(FoundationModels)
-            if #available(iOS 26.0, *) { LocalModel.prewarm(store.current.id) }
-            #endif
             if !opening.trimmingCharacters(in: .whitespaces).isEmpty, store.current.turns.isEmpty {
                 store.send(opening)
             }
@@ -642,7 +563,6 @@ private struct SessionList: View {
 struct SettingsScreen: View {
     @State private var store = ProfileStore.shared
     @State private var localisation = Localisation.shared
-    @State private var chat = ChatStore.shared
     @State private var editing = false
 
     var body: some View {
@@ -660,18 +580,6 @@ struct SettingsScreen: View {
                         }
                     }
                 }
-            }
-
-            Panel(title: t("local.reader")) {
-                FlowRow(spacing: 8) {
-                    Chip(label: t("local.automatic"), active: chat.reader == .automatic) { chat.reader = .automatic }
-                    Chip(label: t("local.onDevice"), active: chat.reader == .onDevice) { chat.reader = .onDevice }
-                    Chip(label: t("local.cloud"), active: chat.reader == .cloud) { chat.reader = .cloud }
-                }
-                Text(LocalModel.readiness.explanation)
-                    .font(Typeface.serif(16))
-                    .foregroundStyle(LocalModel.isReady ? Palette.inkSoft : Palette.inkMute)
-                    .fixedSize(horizontal: false, vertical: true)
             }
 
             Panel(title: t("settings.readings")) {

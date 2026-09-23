@@ -1,5 +1,11 @@
 # LazyOracle Pro: DeepSeek as the backend model
 
+> Historical plan. The owner's 2026-09-23 decision defers local LLMs and uses
+> DeepSeek Flash for both apps. Auspice is a separate native testing product;
+> replacement of LazyOracle and a formal Auspice release remain undecided.
+> See [the current recap](../handoffs/2026-09-23-codex-takeover.md).
+
+
 Status: plan, not started. Written 2026-09-22, after the owner asked for a Pro
 version whose readings are written by DeepSeek.
 

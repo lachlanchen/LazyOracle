@@ -16,7 +16,7 @@ export default defineConfig({
       manifest: {
         name: 'LazyOracle — Tarot, BaZi, I Ching',
         short_name: 'LazyOracle',
-        description: 'Tarot, BaZi, I Ching, astrology, feng shui and palmistry readings, computed and explained on your own device.',
+        description: 'Tarot, BaZi, I Ching, astrology, feng shui and palmistry charts computed on your device, with cloud narration and offline readings.',
         theme_color: '#0b0d1f',
         background_color: '#0b0d1f',
         display: 'standalone',

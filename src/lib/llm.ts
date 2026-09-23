@@ -1,32 +1,22 @@
-/**
- * Model access. Three sources, tried in this order when enabled:
- *
- * 1. `device`: an on-device engine (llama.cpp through the native shells; not
- *    yet wired on the PWA, so it reports unavailable).
- * 2. `endpoint`: Tianji Cloud, our reading relay (OpenAI-compatible). Used only
- *    when the user turned it on in Settings.
- * 3. `offline`: the deterministic composition from card meanings. Always works.
- */
+/** Tianji Cloud narration, with deterministic offline readings in readings.ts. */
 
 export interface ModelSettings {
-  /** The cloud reading service (Tianji Cloud); off until the user turns it on. */
+  /** The cloud reading service (Tianji Cloud); enabled by default, with an explicit opt-out. */
   endpointEnabled: boolean
   endpointUrl: string
   endpointToken: string
-  /** Reading tier: `tianji-fast` or `tianji-pro`. The same two names are used for
-   *  the downloadable models and for the cloud tiers, so the tier a user knows
-   *  does not change with where it runs. */
+  /** Reading tier sent to our relay. */
   model: string
 }
 
-/**
- * Tianji Cloud: our own relay at oracle.lazying.art; it holds the provider keys and
- * keeps no content. Off by default: the first release is the fully local version
- * (downloaded Tianji model, else the deterministic composition).
- */
+/** Provider credentials stay on the relay, never in the app. */
 export const DEFAULT_MODEL_SETTINGS: ModelSettings = {
-  endpointEnabled: false,
-  endpointUrl: 'https://oracle.lazying.art/v1',
+  endpointEnabled: true,
+  // Hosted PWAs use their own relay so the site's self-only connection policy
+  // remains effective. Packaged apps use Huanayun directly.
+  endpointUrl: typeof location !== 'undefined'
+    && ['https://oracle.lazying.art', 'https://oracle-fast.lazying.art'].includes(location.origin)
+    ? `${location.origin}/v1` : 'https://oracle-fast.lazying.art/v1',
   endpointToken: '',
   model: 'tianji-fast',
 }
@@ -37,7 +27,13 @@ export function loadModelSettings(): ModelSettings {
   try {
     const raw = localStorage.getItem(SETTINGS_KEY)
     if (!raw) return DEFAULT_MODEL_SETTINGS
-    return { ...DEFAULT_MODEL_SETTINGS, ...(JSON.parse(raw) as Partial<ModelSettings>) }
+    const stored: unknown = JSON.parse(raw)
+    // Keep an explicit cloud opt-out. Legacy URLs, tokens and downloaded-model
+    // tiers must not select an obsolete host or revive a local reader.
+    const endpointEnabled = stored !== null && typeof stored === 'object'
+      && 'endpointEnabled' in stored && typeof stored.endpointEnabled === 'boolean'
+      ? stored.endpointEnabled : DEFAULT_MODEL_SETTINGS.endpointEnabled
+    return { ...DEFAULT_MODEL_SETTINGS, endpointEnabled }
   } catch {
     return DEFAULT_MODEL_SETTINGS
   }

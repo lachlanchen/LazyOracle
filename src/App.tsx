@@ -15,9 +15,6 @@ import { PalmScreen } from './components/PalmScreen'
 import { Settings } from './components/Settings'
 import { TarotScreen } from './components/TarotScreen'
 import { initialLanguage, rememberLanguage, uiCopy } from './i18n'
-import { loadDeviceModel, selectedDeviceModel, takeCrashedDeviceModel } from './lib/device-model'
-import { ModelPrompt } from './components/ModelPrompt'
-import { chatAvailable } from './lib/readings'
 import type { Practice, ReadingLanguage } from './types'
 
 type View = 'home' | 'settings' | Practice
@@ -35,34 +32,12 @@ const PRACTICES: { id: Practice; icon: typeof Sparkles }[] = [
   { id: 'chat', icon: MessagesSquare },
 ]
 
-/**
- * Runs once, before the first render. If the last attempt to start an
- * on-device model ended with the web view being killed (a phone out of
- * memory reloads the page and shows white), the model is forgotten here so
- * the app cannot loop through the same crash on every start.
- */
-const crashedModel = takeCrashedDeviceModel()
-
-const PROMPT_KEY = 'lazyoracle.modelPromptDismissed'
-
-function promptDismissed(): boolean {
-  try {
-    return localStorage.getItem(PROMPT_KEY) === 'yes'
-  } catch {
-    return false
-  }
-}
-
 function App() {
   const [language, setLanguage] = useState<ReadingLanguage>(initialLanguage)
   const [view, setView] = useState<View>('home')
   const copy = uiCopy(language)
 
   const [pendingQuestion, setPendingQuestion] = useState('')
-  const [showPrompt, setShowPrompt] = useState(() => !chatAvailable() && !promptDismissed())
-  const [modelNotice, setModelNotice] = useState(() =>
-    crashedModel ? crashedModel.name[language === 'en' ? 'en' : 'zh'] : '',
-  )
 
   useEffect(() => {
     // How much of the window the on-screen keyboard covers, so the ask bar
@@ -81,13 +56,6 @@ function App() {
       viewport.removeEventListener('resize', measure)
       viewport.removeEventListener('scroll', measure)
     }
-  }, [])
-
-  useEffect(() => {
-    // Warm the chosen on-device model in the background so the first reading
-    // does not wait. Skipped after a crash, which left nothing selected.
-    const chosen = selectedDeviceModel()
-    if (chosen) loadDeviceModel(chosen).catch((error: unknown) => console.warn('device model warm-up failed', error))
   }, [])
 
   const chooseLanguage = (next: ReadingLanguage) => {
@@ -144,21 +112,6 @@ function App() {
             <p className="tagline">{copy.tagline}</p>
           </header>
           <TodayStrip copy={copy} language={language} onOpen={() => setView('almanac')} />
-          {showPrompt && (
-            <ModelPrompt
-              copy={copy}
-              language={language}
-              onReady={() => setShowPrompt(false)}
-              onDismiss={() => {
-                try {
-                  localStorage.setItem(PROMPT_KEY, 'yes')
-                } catch {
-                  // Storage may be blocked; the card then returns next launch.
-                }
-                setShowPrompt(false)
-              }}
-            />
-          )}
           <div className="practice-grid">
             {PRACTICES.map(({ id, icon: Icon }) => (
               <button key={id} type="button" className={`practice-tile ${id}`} onClick={() => setView(id)} data-testid={`practice-${id}`}>
@@ -178,8 +131,6 @@ function App() {
           copy={copy}
           language={language}
           onLanguage={chooseLanguage}
-          modelNotice={modelNotice}
-          onDismissNotice={() => setModelNotice('')}
         />
       )}
 

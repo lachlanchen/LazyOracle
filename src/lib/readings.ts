@@ -1,7 +1,6 @@
 import { chatWithEndpoint, loadModelSettings, ModelUnavailable, streamMessagesFull, type ChatMessage, type ToolCallRequest } from './llm'
-import { chatOnDevice, deviceModelReady, selectedDeviceModel, streamOnDevice } from './device-model'
 
-export type ReadingSource = 'none' | 'offline' | 'device' | 'model'
+export type ReadingSource = 'none' | 'offline' | 'model'
 
 export interface ReadingRequest {
   system: string
@@ -17,18 +16,12 @@ export interface ReadingUpdate {
   done: boolean
 }
 
-/**
- * Produces a reading and reports progress. Order: the on-device model when
- * one is loaded, then Tianji Cloud when the user switched it on, then the
- * offline composition. The offline text is also the fallback for any failure.
- * The cloud is asked for the same tier the user chose on the device, so
- * 天机专业版 stays 天机专业版 wherever the reading is written.
- */
+/** Streams a cloud reading, with the deterministic composition as fallback. */
 export function generateReading(request: ReadingRequest, onUpdate: (update: ReadingUpdate) => void): void {
   const settings = loadModelSettings()
   const finishOffline = () => onUpdate({ source: 'offline', text: request.offline, done: true })
 
-  const stream = (source: 'device' | 'model', run: (onToken: (t: string) => void) => Promise<string>) => {
+  const stream = (source: 'model', run: (onToken: (t: string) => void) => Promise<string>) => {
     let streamed = ''
     onUpdate({ source, text: '', done: false })
     return run((token) => {
@@ -41,20 +34,11 @@ export function generateReading(request: ReadingRequest, onUpdate: (update: Read
     })
   }
 
-  const tier = selectedDeviceModel()?.id ?? settings.model
-  const viaEndpoint = () =>
-    stream('model', (onToken) => chatWithEndpoint({ ...settings, model: tier }, { system: request.system, user: request.user, signal: request.signal, onToken }))
-
-  const chain = deviceModelReady()
-    ? stream('device', (onToken) => chatOnDevice({ system: request.system, user: request.user, signal: request.signal, onToken })).catch((error: unknown) => {
-        if (request.signal.aborted) return
-        console.warn('on-device reading failed', error)
-        if (settings.endpointEnabled) return viaEndpoint()
-        finishOffline()
-      })
-    : settings.endpointEnabled
-      ? viaEndpoint()
-      : Promise.resolve(finishOffline())
+  const chain = settings.endpointEnabled
+    ? stream('model', (onToken) => chatWithEndpoint(settings, {
+        system: request.system, user: request.user, signal: request.signal, onToken,
+      }))
+    : Promise.resolve(finishOffline())
 
   chain.catch((error: unknown) => {
     if (request.signal.aborted) return
@@ -63,25 +47,20 @@ export function generateReading(request: ReadingRequest, onUpdate: (update: Read
   })
 }
 
-/** Whether a conversation can be held at all: a model on the device, or the cloud. */
+/** Chat requires the cloud; individual practices also have offline readings. */
 export function chatAvailable(): boolean {
-  return deviceModelReady() || loadModelSettings().endpointEnabled
+  return loadModelSettings().endpointEnabled
 }
 
 export interface ChatUpdate {
-  source: 'device' | 'model'
+  source: 'model'
   text: string
   done: boolean
   /** Tools the model asked for, when the provider supports function calling. */
   toolCalls?: ToolCallRequest[]
 }
 
-/**
- * Streams an answer to a conversation, from the on-device model when one is
- * loaded and otherwise from Tianji Cloud. Unlike a reading there is no
- * deterministic fallback: a conversation needs a model, so the caller checks
- * `chatAvailable()` first and offers a download when it is false.
- */
+/** Streams a cloud conversation, including requests for deterministic tools. */
 export async function generateChat(
   messages: ChatMessage[],
   onUpdate: (update: ChatUpdate) => void,
@@ -89,20 +68,15 @@ export async function generateChat(
   tools?: unknown[],
 ): Promise<void> {
   const settings = loadModelSettings()
-  const source: ChatUpdate['source'] = deviceModelReady() ? 'device' : 'model'
+  const source: ChatUpdate['source'] = 'model'
   let streamed = ''
   const onToken = (token: string) => {
     streamed += token
     onUpdate({ source, text: streamed, done: false })
   }
   onUpdate({ source, text: '', done: false })
-  if (source === 'device') {
-    const text = await streamOnDevice(messages, { signal, onToken })
-    onUpdate({ source, text: text || streamed, done: true })
-    return
-  }
   const result = await streamMessagesFull(
-    { ...settings, model: selectedDeviceModel()?.id ?? settings.model },
+    settings,
     messages,
     { signal, onToken, tools },
   )
@@ -110,13 +84,9 @@ export async function generateChat(
 }
 
 
-/**
- * How much conversation may travel with a question, in characters. A model
- * running on the phone has a small window, so it gets a small budget; the
- * cloud can hold far more. Anything older is compacted rather than dropped.
- */
+/** Older conversation turns are compacted to fit this character budget. */
 export function historyBudget(): number {
-  return deviceModelReady() ? 1600 : 16000
+  return 16000
 }
 
 /** Splits turns into what fits in the budget (from the end) and what does not. */

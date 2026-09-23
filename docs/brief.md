@@ -2,6 +2,23 @@
 
 Written 2026-09-21 from the owner's request (chat with the L & N session). Treat this as the contract; refine it in place as decisions are made and record the date of each change.
 
+## Current owner decisions — 2026-09-23
+
+These supersede older local-model and native-migration plans below. The full
+request history and outstanding work are in
+[the takeover recap](handoffs/2026-09-23-codex-takeover.md).
+
+- DeepSeek Flash is the default reader for both products. Downloadable LLMs
+  and Apple's optional on-device LLM are deferred; camera landmark models stay.
+- LazyOracle is the PWA/Capacitor product. Auspice / 宜时 is the separate
+  SwiftUI/Compose app, sharing the deterministic engine bundle.
+- Push current builds of both products to TestFlight and Play internal testing.
+  Wait for LazyOracle's existing formal review. Do not submit Auspice for
+  production; replacing LazyOracle with Auspice remains an owner decision.
+- Auspice uses Huanayun's `oracle-fast.lazying.art` relay and eleven interface
+  languages with a Settings dropdown. LazyOracle currently has English and
+  Simplified Chinese; this is a remaining parity gap.
+
 ## 1. What we are building
 
 A fortune-telling app that is **beautiful first, simple second, complete third**: one screen per practice, no clutter, every common practice included.

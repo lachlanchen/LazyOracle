@@ -33,6 +33,7 @@ struct PalmScreen: View {
                 }
                 .frame(height: 320)
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .overlay(alignment: .topTrailing) { CameraFlipButton(session: camera) }
                 .overlay(
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .strokeBorder(camera.detecting ? Palette.goldLine : Palette.line, lineWidth: 1)
@@ -167,11 +168,13 @@ struct PalmScreen: View {
         let points = camera.landmarks
         guard points.count >= 21 else { error = "No hand is in view."; return }
         do {
-            features = try Engines.shared.evaluate(
+            let measured = try Engines.shared.evaluate(
                 "palm.features",
                 ["landmarks": points, "lines": lines.dictionary],
                 as: PalmFeatures.self
             )
+            features = measured
+            Router.shared.palm = measured
             error = nil
             captured = true
         } catch {

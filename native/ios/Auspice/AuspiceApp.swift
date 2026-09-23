@@ -76,7 +76,7 @@ enum Practice: String, CaseIterable, Hashable, Identifiable {
 
 struct RootView: View {
     @State private var path: [Practice] = []
-    @State private var showingSettings = false
+    @State private var router = Router.shared
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -86,6 +86,13 @@ struct RootView: View {
                 }
         }
         .background(Sky())
+        // The conversation can send the reader to a screen — the camera, most
+        // often, because a palm cannot be read without one.
+        .onChange(of: router.requested) { _, requested in
+            guard let requested else { return }
+            if path.last != requested { path.append(requested) }
+            router.requested = nil
+        }
     }
 }
 
@@ -144,6 +151,7 @@ struct ScreenScaffold<Content: View>: View {
                 .frame(maxWidth: 560)
                 .frame(maxWidth: .infinity)
             }
+            .scrollDismissesKeyboard(.interactively)
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)

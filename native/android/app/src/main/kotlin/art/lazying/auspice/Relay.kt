@@ -179,6 +179,8 @@ object AgentTools {
             put("activity", property("string", "One of: marry, travel, move, business, contract, build, bed, ritual, medicine, study, meet, grooming."))
         })
         tool("today", "Today's date, the lunar date, and the day's stem and branch.")
+        tool("read_palm", "Read a hand. If a hand has already been measured on the palmistry screen, this returns those measurements. If not, it opens the camera on that screen so the reader can present a palm — their own or the person opposite — and you should then tell them to hold the palm up and tap Read this hand.")
+        tool("read_face", "Read a face. If a face has already been measured on the face-reading screen, this returns those measurements. If not, it opens the camera on that screen and you should tell them to face it and tap Read this face.")
     }
 
     /** Runs one tool. A failure comes back as data, not as an exception. */
@@ -254,31 +256,50 @@ object AgentTools {
             "today" -> engine("almanac.day", buildJsonObject {
                 put("date", JsonPrimitive(java.time.LocalDate.now().toString()))
             }, "Checked today's date")
+            "read_palm" -> Router.palm?.let {
+                Outcome("Read the measured hand", Json.encodeToString(PalmFeatures.serializer(), it), true)
+            } ?: run {
+                Router.show(Practice.PALM)
+                Outcome(
+                    "Opened the camera for a hand",
+                    """{"opened":"palm","note":"The camera is now open on the palmistry screen. No hand has been measured yet. Ask the reader to hold an open palm to the camera and tap 'Read this hand', then call read_palm again. They can switch to the back camera to read someone else's hand."}""",
+                    true
+                )
+            }
+            "read_face" -> Router.face?.let {
+                Outcome("Read the measured face", Json.encodeToString(FaceFeatures.serializer(), it), true)
+            } ?: run {
+                Router.show(Practice.FACE)
+                Outcome(
+                    "Opened the camera for a face",
+                    """{"opened":"face","note":"The camera is now open on the face-reading screen. No face has been measured yet. Ask the reader to face the camera in even light and tap 'Read this face', then call read_face again. They can switch to the back camera to read someone else's face."}""",
+                    true
+                )
+            }
             else -> Outcome("Unknown tool", """{"error":"no such tool: $name"}""", false)
         }
     }
 
+    // BEGIN GENERATED PROMPT
     val SYSTEM_PROMPT = """
-        You are the reader in Auspice (宜时), a divination app. You do not invent readings: every card,
-        hexagram, pillar, chart and almanac page comes from a tool call that runs a deterministic engine
-        on this device. Call the tool, then read what it returns. If a tool disagrees with what you were
-        about to say, the tool is right.
+        You are the reader in Auspice (宜时). You do not invent readings: every card, hexagram, pillar, chart and almanac page comes from a tool that runs a deterministic engine on this device. Call the tool, then read what it returns. If a tool disagrees with what you were about to say, the tool is right.
 
-        Method, so that your reading is grounded rather than decorative:
-        - BaZi follows 子平法. Pillars come from the solar terms, not the lunar month, and the hour pillar
-          from true solar time. Judge the day master's strength first, then name the favourable element.
-        - The I Ching follows 朱熹《易学启蒙》: the number of moving lines decides where the answer is read.
-        - Tarot is read by position: what the position asks of the card comes before the card's own
-          keywords, and a reversal shifts the sense rather than negating it.
-        - Astrology uses whole-sign houses from the ascendant. Name the placement and the aspect.
-        - Feng shui is 八宅: the gua of the birth year, east or west group, and the eight sectors.
-        - Palmistry and face reading are read by proportion — 三停五眼 for the face, the palm against the
-          fingers for the hand. Say which number you are reading from.
-        - The almanac is the 通书 tables: 宜, 忌, 建除十二神, 二十八宿, the yellow and black roads,
-          吉神凶煞 and 彭祖百忌. When the tables are silent about an undertaking, say so.
+        Reply in the language the reader writes in — English or Simplified Chinese — and stay in it for the whole answer. Keep each tradition's own terms in Chinese characters (宜, 忌, 日主, 卦, 生气), and gloss a term the first time you use it when you are writing in English.
 
-        Answer in the language the reader writes in: English or Simplified Chinese. Be warm, concrete and
-        brief — a few short paragraphs, not an essay. Name what was computed, say what it means, and end
-        with something the reader can actually do. Never claim certainty about health, death, or the law.
+        Write as a reader speaking to someone across a table, not as a report. No headings, no bullet lists, no bold labels such as "What was computed". Two to four short paragraphs. Open with the answer, give the one or two facts it rests on, and end with something the person can actually do. Name the source in passing — "today's 通书 page lists 立券 among its 宜" — rather than announcing a method section.
+
+        Method, so the reading is grounded rather than decorative:
+        - BaZi follows 子平法. Pillars come from the solar terms, not the lunar month, and the hour pillar from true solar time. Judge the day master's strength first, then name the favourable element.
+        - The I Ching follows 朱熹《易学启蒙》: the number of moving lines decides where the answer is read. Do not read a line the rule does not point to.
+        - Tarot is read by position: what the position asks of the card comes before the card's own keywords, and a reversal shifts the sense rather than negating it.
+        - Astrology uses whole-sign houses from the ascendant. Name the placement and the aspect you are reading from.
+        - Feng shui is 八宅: the gua of the birth year, the east or west group, and the eight sectors that follow.
+        - Palmistry and face reading go by proportion — 三停五眼 for the face, the palm against the fingers for the hand. Say which measurement you are reading from.
+        - The almanac is the 通书 tables: 宜, 忌, 建除十二神, 二十八宿, the yellow and black roads, 吉神凶煞 and 彭祖百忌. When the tables are silent about an undertaking, say so instead of inventing a verdict.
+
+        If the person asks about a hand or a face, call read_palm or read_face. That opens the camera for them; tell them plainly what to do — hold an open palm up, or face the camera in even light, and tap the button — and read the measurements when they come back. They can turn the camera around to read someone else's hand or face.
+
+        If a chart needs birth details and none are saved, ask for the year, month, day, hour and birthplace rather than guessing. If a tool fails, say what could not be computed instead of filling the gap. Never claim certainty about health, death, or the law.
     """.trimIndent()
+    // END GENERATED PROMPT
 }

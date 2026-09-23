@@ -168,6 +168,7 @@ object Conversations {
         save()
         streaming = true
         val attempted = mutableSetOf<String>()
+        var emptyReplies = 0
         try {
             for (step in 0 until AgentTools.MAX_STEPS) {
                 val messages = wire()
@@ -186,9 +187,28 @@ object Conversations {
                 }
 
                 if (answer.toolCalls.isEmpty()) {
-                    if (!opened && answer.text.isNotBlank()) {
-                        append(Turn(kind = "oracle", text = answer.text))
+                    if (answer.text.isBlank()) {
+                        // The provider sometimes returns nothing at all after a
+                        // tool result. Ask once more before giving up, or the
+                        // reader is left with the model's "let me check…" line
+                        // as the entire reading.
+                        if (opened) {
+                            current.turns.removeAll { it.id == holder.id }
+                            revision++
+                        }
+                        if (emptyReplies == 0) {
+                            emptyReplies++
+                            continue
+                        }
+                        append(Turn(
+                            kind = "note",
+                            text = "The reading service went quiet. Ask again and it will pick up where it left off.",
+                            ok = false
+                        ))
+                        save()
+                        return
                     }
+                    if (!opened) append(Turn(kind = "oracle", text = answer.text))
                     save()
                     return
                 }

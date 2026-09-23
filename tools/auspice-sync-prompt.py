@@ -1,0 +1,53 @@
+"""Put the one system prompt into both native apps.
+
+The reader's voice is the product. Keeping it in three places — this file, a
+Swift string and a Kotlin string — guarantees that two of them go stale, so
+the text lives in `tools/auspice-system-prompt.txt` and this copies it in
+between the markers. Run it after editing the prompt; the build is unchanged
+if nothing moved.
+"""
+import pathlib
+import re
+import sys
+
+REPO = pathlib.Path(__file__).resolve().parent.parent
+PROMPT = (REPO / "tools/auspice-system-prompt.txt").read_text().strip()
+
+TARGETS = [
+    (
+        REPO / "native/ios/Auspice/Screens/Chat.swift",
+        "    // BEGIN GENERATED PROMPT\n",
+        "    // END GENERATED PROMPT\n",
+        lambda text: '    static let systemPrompt = """\n'
+        + "".join("    " + line + "\n" if line else "\n" for line in text.split("\n"))
+        + '    """\n',
+    ),
+    (
+        REPO / "native/android/app/src/main/kotlin/art/lazying/auspice/Relay.kt",
+        "    // BEGIN GENERATED PROMPT\n",
+        "    // END GENERATED PROMPT\n",
+        lambda text: '    val SYSTEM_PROMPT = """\n'
+        + "".join("        " + line + "\n" if line else "\n" for line in text.split("\n"))
+        + '    """.trimIndent()\n',
+    ),
+]
+
+
+def main() -> int:
+    changed = []
+    for path, begin, end, render in TARGETS:
+        source = path.read_text()
+        if begin not in source or end not in source:
+            print(f"{path.name}: markers missing", file=sys.stderr)
+            return 1
+        head, rest = source.split(begin, 1)
+        _, tail = rest.split(end, 1)
+        updated = head + begin + render(PROMPT) + end + tail
+        if updated != source:
+            path.write_text(updated)
+            changed.append(path.name)
+    print("prompt synced" + (": " + ", ".join(changed) if changed else " (already current)"))
+    return 0
+
+
+sys.exit(main())

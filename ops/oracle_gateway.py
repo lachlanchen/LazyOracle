@@ -42,6 +42,8 @@ MAX_IMAGES = 4
 # conversation is many; this is the ceiling, not the expectation.
 MAX_MESSAGES = 200
 MAX_TEXT = 12000
+# A reading runs to a few short paragraphs; this is the ceiling, not the target.
+MAX_OUTPUT_TOKENS = 2400
 RATE_WINDOW = 600
 RATE_LIMIT = 40
 TIMEOUT = 90
@@ -179,7 +181,20 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if not PROVIDERS:
             self._reject(503, "no reading provider configured")
             return
-        upstream_body = {"messages": messages, "stream": True, "temperature": float(payload.get("temperature", 0.7)), "max_tokens": 900}
+        # 900 tokens cut readings off mid-sentence once the model had named
+        # the tables it read from; a reading needs room to finish. The app may
+        # ask for less, never for more than the ceiling.
+        wanted_tokens = payload.get("max_tokens")
+        try:
+            wanted_tokens = int(wanted_tokens)
+        except (TypeError, ValueError):
+            wanted_tokens = MAX_OUTPUT_TOKENS
+        upstream_body = {
+            "messages": messages,
+            "stream": True,
+            "temperature": float(payload.get("temperature", 0.7)),
+            "max_tokens": max(256, min(wanted_tokens, MAX_OUTPUT_TOKENS)),
+        }
         # Function calling, when the app asks for it, goes through as given.
         for field in ("tools", "tool_choice", "parallel_tool_calls"):
             if payload.get(field) is not None:

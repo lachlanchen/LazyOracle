@@ -201,7 +201,9 @@ enum AgentTools {
                 "date": ["type": "string", "description": "ISO date, e.g. 2026-09-23. Defaults to today."],
                 "activity": ["type": "string", "description": "One of: marry, travel, move, business, contract, build, bed, ritual, medicine, study, meet, grooming."]
             ]),
-            tool("today", "Today's date, the lunar date, and the day's stem and branch.")
+            tool("today", "Today's date, the lunar date, and the day's stem and branch."),
+            tool("read_palm", "Read a hand. If a hand has already been measured on the palmistry screen, this returns those measurements. If not, it opens the camera on that screen so the reader can present a palm — yours or the person sitting opposite — and you should then ask them to hold the palm up and tap Read this hand."),
+            tool("read_face", "Read a face. If a face has already been measured on the face-reading screen, this returns those measurements. If not, it opens the camera on that screen and you should ask the reader to face it and tap Read this face.")
         ]
     }
 
@@ -263,6 +265,26 @@ enum AgentTools {
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy-MM-dd"
             return engine("almanac.day", ["date": formatter.string(from: Date())], "Checked today's date")
+        case "read_palm":
+            if let features = Router.shared.palm, let data = try? JSONEncoder().encode(features) {
+                return Outcome(label: "Read the measured hand", output: String(data: data, encoding: .utf8) ?? "{}", ok: true)
+            }
+            Task { @MainActor in Router.shared.show(.palm) }
+            return Outcome(
+                label: "Opened the camera for a hand",
+                output: "{\"opened\":\"palm\",\"note\":\"The camera is now open on the palmistry screen. No hand has been measured yet. Ask the reader to hold an open palm to the camera and tap 'Read this hand', then call read_palm again. They can switch to the back camera to read someone else's hand.\"}",
+                ok: true
+            )
+        case "read_face":
+            if let features = Router.shared.face, let data = try? JSONEncoder().encode(features) {
+                return Outcome(label: "Read the measured face", output: String(data: data, encoding: .utf8) ?? "{}", ok: true)
+            }
+            Task { @MainActor in Router.shared.show(.face) }
+            return Outcome(
+                label: "Opened the camera for a face",
+                output: "{\"opened\":\"face\",\"note\":\"The camera is now open on the face-reading screen. No face has been measured yet. Ask the reader to face the camera in even light and tap 'Read this face', then call read_face again. They can switch to the back camera to read someone else's face.\"}",
+                ok: true
+            )
         default:
             return Outcome(label: "Unknown tool", output: "{\"error\":\"no such tool: \(name)\"}", ok: false)
         }

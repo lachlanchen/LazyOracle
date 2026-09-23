@@ -92,7 +92,9 @@ fun ChatScreen(navController: NavController, opening: String) {
         // One scroll: the log fills what is left, the composer is pinned below.
         LazyColumn(
             state = listState,
-            modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 16.dp),
+            modifier = Modifier.weight(1f).fillMaxWidth()
+                .dismissKeyboardOnScroll()
+                .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             if (turns.size > VISIBLE_TURNS) {

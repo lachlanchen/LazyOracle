@@ -82,6 +82,14 @@ fun AuspiceApp() {
         val navController = rememberNavController()
         Box(Modifier.fillMaxSize()) {
             Sky()
+            // The conversation can send the reader to a screen — the camera,
+            // most often, because a palm cannot be read without one.
+            LaunchedEffect(Router.requested) {
+                Router.requested?.let {
+                    navController.navigate(it.route)
+                    Router.consumed()
+                }
+            }
             NavHost(navController, startDestination = "home") {
                 composable("home") {
                     HomeScreen(

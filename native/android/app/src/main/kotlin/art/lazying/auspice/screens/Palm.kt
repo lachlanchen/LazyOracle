@@ -64,7 +64,7 @@ fun PalmScreen(navController: NavController) {
                     put("fate", JsonPrimitive(lines.fate))
                 })
             })
-        }.onSuccess { features = it; error = null }.onFailure { error = it.message }
+        }.onSuccess { features = it; Router.palm = it; error = null }.onFailure { error = it.message }
     }
 
     ScreenScaffold(
@@ -99,6 +99,7 @@ fun PalmScreen(navController: NavController) {
                                 .padding(horizontal = 14.dp, vertical = 8.dp)
                         )
                     }
+                    CameraFlipButton(session, owner, Modifier.align(Alignment.TopEnd))
                 } else {
                     Text(
                         "Auspice needs the camera to read a hand.",

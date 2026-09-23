@@ -27,6 +27,16 @@ final class LandmarkSession: NSObject {
     let kind: Kind
     let session = AVCaptureSession()
 
+    /// Which camera is running. The front one reads your own hand or face;
+    /// the back one reads the person sitting opposite, which is how a reading
+    /// is actually given.
+    private(set) var position: AVCaptureDevice.Position = .front
+    private(set) var canFlip = false
+
+    /// The capture queue's own copy, so it never reads observable state from
+    /// off the main thread.
+    private var activePosition: AVCaptureDevice.Position = .front
+
     private let queue = DispatchQueue(label: "art.lazying.auspice.camera")
     private var handLandmarker: HandLandmarker?
     private var faceLandmarker: FaceLandmarker?
@@ -62,15 +72,22 @@ final class LandmarkSession: NSObject {
             return
         }
 
+        let hasBack = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) != nil
+        let hasFront = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) != nil
+        Task { @MainActor in self.canFlip = hasBack && hasFront }
+
         session.beginConfiguration()
         session.sessionPreset = .high
-        guard let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front),
+        guard let device = camera(at: activePosition) ?? camera(at: .back) ?? camera(at: .front),
               let input = try? AVCaptureDeviceInput(device: device),
               session.canAddInput(input) else {
             session.commitConfiguration()
             Task { @MainActor in self.message = "No camera is available on this device." }
             return
         }
+        activePosition = device.position
+        let settled = device.position
+        Task { @MainActor in self.position = settled }
         session.addInput(input)
 
         let output = AVCaptureVideoDataOutput()
@@ -78,13 +95,49 @@ final class LandmarkSession: NSObject {
         output.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA]
         output.setSampleBufferDelegate(self, queue: queue)
         if session.canAddOutput(output) { session.addOutput(output) }
-        if let connection = output.connection(with: .video) {
-            if connection.isVideoMirroringSupported { connection.isVideoMirrored = true }
-            if #available(iOS 17.0, *) {
-                connection.videoRotationAngle = 90
-            }
-        }
+        applyGeometry(to: output)
         session.commitConfiguration()
+    }
+
+    private func camera(at position: AVCaptureDevice.Position) -> AVCaptureDevice? {
+        AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: position)
+    }
+
+    /// Only the front camera is mirrored; a hand held up to the back camera
+    /// must not be flipped, or left and right swap and the palm engine reads
+    /// the wrong one.
+    private func applyGeometry(to output: AVCaptureOutput) {
+        guard let connection = output.connection(with: .video) else { return }
+        if connection.isVideoMirroringSupported {
+            connection.automaticallyAdjustsVideoMirroring = false
+            connection.isVideoMirrored = (activePosition == .front)
+        }
+        if #available(iOS 17.0, *) {
+            connection.videoRotationAngle = 90
+        }
+    }
+
+    /// Turn the camera round. The landmarker keeps running; only the input
+    /// changes, so there is no pause and no reload of the model.
+    func flip() {
+        queue.async { [weak self] in
+            guard let self else { return }
+            let wanted: AVCaptureDevice.Position = (self.activePosition == .front) ? .back : .front
+            guard let device = self.camera(at: wanted), let input = try? AVCaptureDeviceInput(device: device) else { return }
+            self.session.beginConfiguration()
+            self.session.inputs.forEach { self.session.removeInput($0) }
+            if self.session.canAddInput(input) {
+                self.session.addInput(input)
+                self.activePosition = wanted
+                Task { @MainActor in self.position = wanted }
+            } else if let previous = self.camera(at: self.activePosition),
+                      let restore = try? AVCaptureDeviceInput(device: previous) {
+                self.session.addInput(restore)
+            }
+            self.session.outputs.forEach { self.applyGeometry(to: $0) }
+            self.session.commitConfiguration()
+            self.clear()
+        }
     }
 
     private func makeLandmarker() throws {
@@ -226,5 +279,30 @@ struct LandmarkOverlay: View {
             }
         }
         .allowsHitTesting(false)
+    }
+}
+
+/// The flip control, sitting over the preview. Only shown when the device
+/// actually has both cameras.
+struct CameraFlipButton: View {
+    let session: LandmarkSession
+
+    var body: some View {
+        if session.canFlip {
+            Button { session.flip() } label: {
+                Label(
+                    session.position == .front ? "Front" : "Back",
+                    systemImage: "arrow.triangle.2.circlepath.camera"
+                )
+                .font(Typeface.sans(13, weight: .semibold))
+                .foregroundStyle(Palette.ink)
+                .padding(.horizontal, 12)
+                .frame(minHeight: 40)
+                .background(Capsule().fill(.black.opacity(0.45)))
+                .overlay(Capsule().strokeBorder(Palette.goldLine, lineWidth: 1))
+            }
+            .padding(10)
+            .accessibilityLabel(session.position == .front ? "Switch to the back camera" : "Switch to the front camera")
+        }
     }
 }

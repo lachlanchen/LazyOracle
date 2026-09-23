@@ -59,6 +59,7 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .windowInsetsPadding(WindowInsets.systemBars)
+                .dismissKeyboardOnScroll()
                 .padding(horizontal = 18.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),

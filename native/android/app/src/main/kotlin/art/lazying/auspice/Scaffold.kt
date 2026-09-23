@@ -48,6 +48,7 @@ fun ScreenScaffold(
         Modifier
             .fillMaxSize()
             .windowInsetsPadding(WindowInsets.systemBars)
+            .dismissKeyboardOnScroll()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 18.dp)
             .padding(bottom = 40.dp),

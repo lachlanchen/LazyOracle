@@ -28,6 +28,7 @@ struct HomeScreen: View {
                 .frame(maxWidth: 560)
                 .frame(maxWidth: .infinity)
             }
+            .scrollDismissesKeyboard(.interactively)
             askBar
         }
         .navigationBarTitleDisplayMode(.inline)

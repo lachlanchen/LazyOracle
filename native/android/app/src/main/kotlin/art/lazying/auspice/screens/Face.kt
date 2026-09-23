@@ -58,7 +58,7 @@ fun FaceScreen(navController: NavController) {
         if (points.size < 400) { error = "No face is in view."; return@LaunchedEffect }
         runCatching {
             Engines.evaluateAs<FaceFeatures>("face.features", buildJsonObject { put("landmarks", points) })
-        }.onSuccess { features = it; error = null }.onFailure { error = it.message }
+        }.onSuccess { features = it; Router.face = it; error = null }.onFailure { error = it.message }
     }
 
     ScreenScaffold(
@@ -93,6 +93,7 @@ fun FaceScreen(navController: NavController) {
                                 .padding(horizontal = 14.dp, vertical = 8.dp)
                         )
                     }
+                    CameraFlipButton(session, owner, Modifier.align(Alignment.TopEnd))
                 } else {
                     Text(
                         "Auspice needs the camera to read a face.",

@@ -33,6 +33,7 @@ struct FaceScreen: View {
                 }
                 .frame(height: 360)
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .overlay(alignment: .topTrailing) { CameraFlipButton(session: camera) }
                 .overlay(
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .strokeBorder(camera.detecting ? Palette.goldLine : Palette.line, lineWidth: 1)
@@ -165,7 +166,9 @@ struct FaceScreen: View {
         let points = camera.landmarks
         guard points.count >= 400 else { error = "No face is in view."; return }
         do {
-            features = try Engines.shared.evaluate("face.features", ["landmarks": points], as: FaceFeatures.self)
+            let measured = try Engines.shared.evaluate("face.features", ["landmarks": points], as: FaceFeatures.self)
+            features = measured
+            Router.shared.face = measured
             error = nil
             captured = true
         } catch {

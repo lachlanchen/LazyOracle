@@ -9,11 +9,23 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.composed
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.viewinterop.AndroidView
@@ -40,7 +52,17 @@ import java.util.concurrent.Executors
  * photograph.
  */
 class LandmarkSession(private val hands: Boolean) {
-    val overlay = mutableStateListOf<Offset>()
+    /** One state object for the whole set: 478 face points as 478 separate
+     *  state writes would recompose the overlay four hundred times a frame. */
+    var overlay by mutableStateOf<List<Offset>>(emptyList())
+        private set
+
+    /** The front camera reads your own hand or face; the back one reads the
+     *  person sitting opposite, which is how a reading is actually given. */
+    var front by mutableStateOf(true)
+        private set
+    var canFlip by mutableStateOf(false)
+        private set
     var points: List<List<Double>> = emptyList()
         private set
     var detecting by mutableStateOf(false)
@@ -102,20 +124,28 @@ class LandmarkSession(private val hands: Boolean) {
             return
         }
 
+        surface = previewView.surfaceProvider
+        bind(context, owner)
+    }
+
+    private var surface: Preview.SurfaceProvider? = null
+
+    private fun bind(context: Context, owner: LifecycleOwner) {
         val providerFuture = ProcessCameraProvider.getInstance(context)
         providerFuture.addListener({
             val provider = providerFuture.get()
-            val preview = Preview.Builder().build().also {
-                it.surfaceProvider = previewView.surfaceProvider
-            }
+            canFlip = provider.hasCamera(CameraSelector.DEFAULT_FRONT_CAMERA) &&
+                provider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA)
+            val preview = Preview.Builder().build().also { it.surfaceProvider = surface }
             val analysis = ImageAnalysis.Builder()
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
                 .build()
             analysis.setAnalyzer(executor) { proxy -> analyse(proxy) }
+            val lens = if (front) CameraSelector.DEFAULT_FRONT_CAMERA else CameraSelector.DEFAULT_BACK_CAMERA
             runCatching {
                 provider.unbindAll()
-                provider.bindToLifecycle(owner, CameraSelector.DEFAULT_FRONT_CAMERA, preview, analysis)
+                provider.bindToLifecycle(owner, lens, preview, analysis)
             }.onFailure { message = "The camera would not open: ${it.message}" }
         }, ContextCompat.getMainExecutor(context))
     }
@@ -136,14 +166,20 @@ class LandmarkSession(private val hands: Boolean) {
 
     private fun publish(values: List<List<Double>>) {
         points = values
-        overlay.clear()
-        values.forEach { overlay.add(Offset(it[0].toFloat(), it[1].toFloat())) }
+        overlay = values.map { Offset(it[0].toFloat(), it[1].toFloat()) }
         detecting = true
     }
 
     private fun clear() {
-        overlay.clear()
+        overlay = emptyList()
         detecting = false
+    }
+
+    /** Turn the camera round, rebinding the same analyser to the other lens. */
+    fun flip(context: Context, owner: LifecycleOwner) {
+        front = !front
+        clear()
+        bind(context, owner)
     }
 
     fun stop(context: Context) {
@@ -192,4 +228,45 @@ fun LandmarkOverlay(points: List<Offset>, joined: Boolean, modifier: Modifier = 
             )
         }
     }
+}
+
+/** The flip control, sitting over the preview; only shown if both lenses exist. */
+@Composable
+fun CameraFlipButton(
+    session: LandmarkSession,
+    owner: LifecycleOwner,
+    modifier: Modifier = Modifier
+) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    if (session.canFlip) {
+        androidx.compose.material3.Text(
+            if (session.front) "Front" else "Back",
+            style = Type.sans(13, androidx.compose.ui.text.font.FontWeight.SemiBold),
+            color = Palette.ink,
+            modifier = modifier
+                .padding(10.dp)
+                .clip(androidx.compose.foundation.shape.CircleShape)
+                .background(Color(0x73000000))
+                .border(1.dp, Palette.goldLine, androidx.compose.foundation.shape.CircleShape)
+                .clickable { session.flip(context, owner) }
+                .padding(horizontal = 14.dp, vertical = 9.dp)
+        )
+    }
+}
+
+/** Scrolling puts the keyboard away, the way every other chat app behaves. */
+fun Modifier.dismissKeyboardOnScroll(): Modifier = composed {
+    val keyboard = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
+    val focus = androidx.compose.ui.platform.LocalFocusManager.current
+    nestedScroll(remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                if (kotlin.math.abs(available.y) > 6f) {
+                    keyboard?.hide()
+                    focus.clearFocus()
+                }
+                return Offset.Zero
+            }
+        }
+    })
 }

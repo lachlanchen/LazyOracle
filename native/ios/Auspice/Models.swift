@@ -306,14 +306,14 @@ struct EightMansions: Decodable {
 
 // MARK: - Palmistry
 
-struct FingerTrait: Decodable, Identifiable {
+struct FingerTrait: Codable, Identifiable {
     let finger: String
     let ratioToSaturn: Double
     let length: String
     var id: String { finger }
 }
 
-struct PalaceReading: Decodable, Identifiable {
+struct PalaceReading: Codable, Identifiable {
     let palace: String
     let prominence: Double
     let state: String
@@ -329,7 +329,7 @@ struct LineTraits: Codable {
     var dictionary: [String: Any] { ["heart": heart, "head": head, "life": life, "fate": fate] }
 }
 
-struct PalmFeatures: Decodable {
+struct PalmFeatures: Codable {
     let shape: String
     let palmLength: Double
     let palmWidth: Double
@@ -347,21 +347,21 @@ struct PalmFeatures: Decodable {
 
 // MARK: - Face reading
 
-struct Court: Decodable, Identifiable {
+struct Court: Codable, Identifiable {
     let court: String
     let share: Double
     let state: String
     var id: String { court }
 }
 
-struct FacePalaceReading: Decodable, Identifiable {
+struct FacePalaceReading: Codable, Identifiable {
     let palace: String
     let value: Double
     let state: String
     var id: String { palace }
 }
 
-struct FaceFeatures: Decodable {
+struct FaceFeatures: Codable {
     let element: String
     let courts: [Court]
     let eyesAcross: Double

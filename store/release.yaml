@@ -1,29 +1,58 @@
+# Current checkpoint; historical submissions remain in apple/ and google-play/.
+verified_date: 2026-09-23
 app: LazyOracle
 version: 1.0.0
+price_usd: 0.99
+source_commit: 9dad9ef08ac65a0213aec9143f63462236c384f2
+evidence: store/artifacts/takeover-2026-09-23.json
 web:
-  host: sshem-admin (Aliyun 47.84.190.118); Caddy site /etc/lazyedge/lazyoracle.caddy (HTTP + HTTPS, certificate from certbot webroot, group certread like the other sites)
   domain: oracle.lazying.art
-  dns: 47.84.190.118 (Aliyun) since 2026-09-22; the Huanayun edge keeps an HTTP-only redirect and is unused
-  release_root: /opt/lazyoracle-web/releases/<sha>, current symlink switched by tools/deploy-web.sh
-  live_release: 22f3bbac249a32258e0b1ad530f4a96071c12dd282ba21aae26d6097987a5a7b (source 147a9bb, index-CFzpinSd.js), https://oracle.lazying.art live 2026-09-22
-  apk: /opt/lazyoracle-web/current/dist/downloads/LazyOracle-1.0.0-build1.apk
+  host: sshem-admin (Aliyun)
+  release_root: /opt/lazyoracle-web/releases
+  live_release: c8cabf9ecb9f7b0c3042afcdad4b1981ab9ea5b0eff7982135972982867ac732
+  mirror: https://oracle-fast.lazying.art
+  mirror_release: /srv/lazyoracle/releases/9dad9ef08ac65a02
+  live_asset: assets/index-B5Y-0n7g.js
+  verification: both sites HTTP 200, identical index, expected asset present
 android:
   package: art.lazying.lazyoracle
-  versionCode: 1
+  versionCode: 12
   versionName: 1.0.0
-  keystore: ~/.config/lazyoracle/android/upload-keystore.jks (alias lazyoracle-upload; password file beside it, mode 600)
-  bundle_sha256: bf4bc97346de215ba75f9c040a554680dc857d2964fde3d31e22af7a79d01b09
-  apk_sha256: bb0012bdf4515c4f92ccaea9b166bcb99cd7e0c980e4f22bf8d3cefdcb4b74a7
-  play_app_id: 4975413590951100628 (created 2026-09-21 as a paid app)
-  internal_testing: release 1 (1.0.0) published 2026-09-21; join link https://play.google.com/apps/internaltest/4701677916092886102
-  production: release 1 (1.0.0), 172 countries, USD 0.99, sent for review 2026-09-21 (Changes in review)
+  artifact: android/app/build/outputs/bundle/release/app-release.aab
+  bundle_sha256: 03e34a456c49399eef7091c2079140c637cebcba01fbe67397d661fdcb0421ca
+  play_app_id: '4975413590951100628'
+  internal_testing: build 12 signed and verified; superseded by chat-fix rebuild; upload pending
+  internal_testing_link: https://play.google.com/apps/internaltest/4701677916092886102
+  previous_internal: build 11 per recovered session; not freshly verified in Play Console
+  production: build 11 in review per recovered session; untouched in this takeover
+  keystore: ~/.config/lazyoracle/android/upload-keystore.jks
+  key_alias: lazyoracle-upload
 ios:
-  bundle_id: art.lazying.lazyoracle (ASC bundle id VA743K7MV2)
-  profile: LazyOracle App Store 1 (f4ada587-2332-4afd-a8f0-725f3238f27c, certificate JTPG5D9562)
+  bundle_id: art.lazying.lazyoracle
+  app_id: '6814663937'
+  profile: LazyOracle App Store 1
   marketing_version: 1.0.0
-  build: 1
-  ipa_sha256: b0a8ead096ac58683e55661038b598dc72f2ef0364dca2bfb939f62838ac4d83
-  mac: ~/Projects/LazyOracle/release/build1.sh + upload1.sh on echomind-kvm-macos
-  app_id: 6814663937
-  testflight: build 1 in internal group; public link https://testflight.apple.com/join/JZJM3PFb (beta review waiting)
-  app_store: version 1.0.0 submitted 2026-09-22, review submission dfc3a1fa-8043-49a9-a77b-281e8a58e1b0 WAITING_FOR_REVIEW, tier US$0.99, automatic release
+  build: 13
+  ipa_sha256: c0c74a70a0ede2af496d352c291bd2b607522ab6e9cd787d8c4b893182368da8
+  delivery: 91c33549-0cb8-4d5b-833a-69ec9c242296
+  testflight: uploaded; VALID; superseded by build 14 chat-navigation update
+  public_beta: https://testflight.apple.com/join/JZJM3PFb
+  app_store: 1.0.0 with build 12 WAITING_FOR_REVIEW; verified by API and untouched
+auspice:
+  package: art.lazying.auspice
+  site: https://auspice.lazying.art
+  version: 0.1.0
+  price_usd: 0.99
+  app_store_id: '6815034620'
+  play_app_id: '4973267996880132777'
+  ios_build: 6
+  ios_delivery: 63de329a-49ea-41a4-8e0b-5afdc07f9c53
+  ios_sha256: d79b43c443e97ef50aac5008fc83195cc924ab1ba6874da748d3f20f369699ce
+  testflight: IN_BETA_TESTING in Auspice internal; verified by API
+  android_versionCode: 5
+  android_artifact: native/android/app/build/outputs/bundle/release/app-release.aab
+  android_sha256: 0f9fe3279aa03180855457c2b53436010995283365e23a3195c7676625bd4482
+  internal_testing: build 5 signed and verified; superseded by chat-fix rebuild; upload pending
+  internal_testing_link: https://play.google.com/apps/internaltest/4701649823136226500
+  previous_internal: build 4 per recovered session; not freshly verified in Play Console
+  app_store: version 1.0 PREPARE_FOR_SUBMISSION, no build attached; formal release not authorized

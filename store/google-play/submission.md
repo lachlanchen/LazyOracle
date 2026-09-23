@@ -15,3 +15,17 @@
 - Production: release `1 (1.0.0)` promoted from internal, 172 countries/regions added, saved.
 - Advertising ID declaration: does not use the advertising ID (Play's quick check required it).
 - 2026-09-21 23:40: **Submit 10 changes for review → Send changes for review** confirmed; Publishing overview shows "Changes in review" (Play forwards them once its quick checks finish). This is the first, paid production submission; the internal track stays available to the tester lists meanwhile.
+
+## 2026-09-23 — takeover test artifacts
+
+LazyOracle build 12 (1.0.0) and Auspice build 5 (0.1.0) built successfully;
+both signed AABs pass `jarsigner -verify`. Package/version identities were
+checked in their merged manifests; the native engine bundles match between
+iOS and Android. Hashes are in `store/artifacts/takeover-2026-09-23.json`.
+
+At this checkpoint uploads await browser access. The takeover session's
+browser tool reports no available browser; the existing shared CDP desktop
+belongs to L & N. Do not describe these artifacts as published. The recovered
+history says LazyOracle build 11 was in internal testing and formal review,
+and Auspice build 4 was internal-only. Those Play states still require a
+fresh Console/API check. No production action is authorized for Auspice.

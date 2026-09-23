@@ -1,0 +1,81 @@
+{
+  "date": "2026-09-23",
+  "sourceCommit": "9dad9ef08ac65a0213aec9143f63462236c384f2",
+  "validation": {
+    "unitTests": 97,
+    "lint": "passed",
+    "productionBuild": "passed",
+    "liveAlmanacCases": 2,
+    "physicalDeviceTesting": "not performed in this takeover"
+  },
+  "web": {
+    "web-main": {
+      "url": "https://oracle.lazying.art/",
+      "status": 200,
+      "sha256": "44acea0c7414907b2059b525466aa61accb1ee14d0851af8579f88eed8cc86e2",
+      "currentAsset": true
+    },
+    "web-mirror": {
+      "url": "https://oracle-fast.lazying.art/",
+      "status": 200,
+      "sha256": "44acea0c7414907b2059b525466aa61accb1ee14d0851af8579f88eed8cc86e2",
+      "currentAsset": true
+    },
+    "auspice-privacy": {
+      "url": "https://auspice.lazying.art/privacy.html",
+      "status": 200,
+      "sha256": "7ad61565852c0e81618943e405d459719406de16da47456d140f720523044c39",
+      "matchesSource": true
+    }
+  },
+  "iosArtifacts": [
+    {
+      "name": "Auspice",
+      "bundle": "art.lazying.auspice",
+      "build": "6",
+      "version": "0.1.0",
+      "bytes": 27254542,
+      "sha256": "d79b43c443e97ef50aac5008fc83195cc924ab1ba6874da748d3f20f369699ce"
+    },
+    {
+      "name": "LazyOracle",
+      "bundle": "art.lazying.lazyoracle",
+      "build": "13",
+      "version": "1.0.0",
+      "bytes": 23913495,
+      "sha256": "c0c74a70a0ede2af496d352c291bd2b607522ab6e9cd787d8c4b893182368da8"
+    }
+  ],
+  "androidArtifacts": {
+    "LazyOracle": {
+      "version": "1.0.0",
+      "versionCode": 12,
+      "sha256": "03e34a456c49399eef7091c2079140c637cebcba01fbe67397d661fdcb0421ca",
+      "bytes": 24516917,
+      "path": "android/app/build/outputs/bundle/release/app-release.aab",
+      "signature": "jarsigner verified",
+      "playUpload": "pending browser access"
+    },
+    "Auspice": {
+      "version": "0.1.0",
+      "versionCode": 5,
+      "sha256": "0f9fe3279aa03180855457c2b53436010995283365e23a3195c7676625bd4482",
+      "bytes": 42995733,
+      "path": "native/android/app/build/outputs/bundle/release/app-release.aab",
+      "signature": "jarsigner verified",
+      "playUpload": "pending browser access"
+    }
+  },
+  "formalReviews": {
+    "LazyOracle": {
+      "version": "1.0.0",
+      "state": "WAITING_FOR_REVIEW",
+      "build": "12"
+    },
+    "Auspice": {
+      "version": "1.0",
+      "state": "PREPARE_FOR_SUBMISSION",
+      "build": null
+    }
+  }
+}

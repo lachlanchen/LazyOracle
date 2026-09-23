@@ -9,3 +9,17 @@
 - Review submission `dfc3a1fa-8043-49a9-a77b-281e8a58e1b0` submitted; version state **WAITING_FOR_REVIEW**, automatic release after approval.
 
 - 2026-09-22 07:35: the account holder (lachlan.mia.chan@gmail.com) was added to `LazyOracle Internal` through the App Store Connect TestFlight page (internal groups take team members, not API beta-tester records; the API returned "Tester(s) cannot be assigned"), and as an external tester of `LazyOracle Public Beta`. Internal groups only notify people who are in the group, which is why no TestFlight mail had arrived; the external invite is sent once beta review approves build 1.
+
+## 2026-09-23 — recovered review state and cloud-default test build
+
+- Read-only API verification: App Store 1.0.0 still `WAITING_FOR_REVIEW`,
+  attached to build 12. The takeover did not cancel, replace or resubmit it.
+- Build 13 (1.0.0) validates and uploaded successfully, delivery
+  `91c33549-0cb8-4d5b-833a-69ec9c242296`. It makes cloud narration the fresh-install
+  default, removes local LLM startup/download paths, and keeps deterministic
+  offline readings and existing explicit cloud opt-outs.
+- `ios/App/ExportOptions.plist` is now retained in source so sync cannot remove
+  the manual export configuration. The export reused the successful archive
+  after restoring the plist and unlocking the existing release keychain.
+- Final processing/group state and hashes are in `store/release.yaml` and
+  `store/artifacts/takeover-2026-09-23.json`.

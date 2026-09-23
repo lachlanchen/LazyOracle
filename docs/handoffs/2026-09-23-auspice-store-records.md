@@ -122,3 +122,18 @@ Two lessons worth carrying:
 If this is revisited, the bar is a 4B-class model or better, and the test
 harness above is how to decide rather than by reading the output once and
 liking it.
+
+## 2026-09-23 — Codex takeover, cloud-only reader
+
+The owner subsequently deferred Apple's system model as well. Build 6
+(0.1.0), delivery `63de329a-49ea-41a4-8e0b-5afdc07f9c53`, removes that
+remaining reader choice. It is `VALID` and `IN_BETA_TESTING` in the manual
+internal group `24b67fe2-ec14-40f3-a40c-04a2bb68a032`; upload alone would not
+have added it. Android build 5 is signed and verified, with Play upload pending
+browser access in the takeover session. No formal release was submitted.
+
+The live privacy page now correctly mentions relevant conversation context
+and birth details in cloud requests, instead of claiming conversations are
+never uploaded. Camera images remain local. Full decisions and pending work:
+[the takeover recap](2026-09-23-codex-takeover.md). Build hashes and precise
+current state: `store/artifacts/takeover-2026-09-23.json`, `store/release.yaml`.

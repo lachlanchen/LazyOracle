@@ -43,7 +43,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions { jvmTarget = "17" }
-    buildFeatures { compose = true }
+    buildFeatures { compose = true; buildConfig = true }
     sourceSets["main"].java.srcDirs("src/main/kotlin")
     packaging { resources.excludes += "/META-INF/{AL2.0,LGPL2.1}" }
 }
@@ -65,7 +65,7 @@ dependencies {
     implementation("androidx.concurrent:concurrent-futures-ktx:1.2.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
-    implementation("io.ktor:ktor-client-okhttp:3.0.3")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     // Camera and the same landmark models the iOS app and the web app use.
     implementation("androidx.camera:camera-camera2:1.4.1")

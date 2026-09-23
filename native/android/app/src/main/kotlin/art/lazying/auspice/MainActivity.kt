@@ -66,6 +66,7 @@ fun AuspiceApp() {
     LaunchedEffect(Unit) {
         Engines.start(context)
         Profiles.load(context)
+        Conversations.load(context)
         loaded = true
     }
 

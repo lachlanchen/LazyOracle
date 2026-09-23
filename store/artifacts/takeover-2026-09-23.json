@@ -1,24 +1,27 @@
 {
   "date": "2026-09-23",
-  "sourceCommit": "9dad9ef08ac65a0213aec9143f63462236c384f2",
+  "sourceCommit": "50c4a0c927642ec8bb98667de183320373b653c0",
   "validation": {
-    "unitTests": 97,
+    "unitTests": 99,
+    "androidChatRegressionTests": 4,
+    "swiftChatRegressionCases": 4,
+    "liveNativeChat": "Reported question completed through actual iOS ChatStore, SSE relay and JSCore engine",
     "lint": "passed",
     "productionBuild": "passed",
-    "liveAlmanacCases": 2,
+    "browserScroll": "390x844: initial bottom and return button passed; streamed-reading position regression passed",
     "physicalDeviceTesting": "not performed in this takeover"
   },
   "web": {
     "web-main": {
       "url": "https://oracle.lazying.art/",
       "status": 200,
-      "sha256": "44acea0c7414907b2059b525466aa61accb1ee14d0851af8579f88eed8cc86e2",
+      "sha256": "6e643b93c280977dd1ab910de00eaeb7e255d1c74fb4bf7e8b8071d3e7452675",
       "currentAsset": true
     },
     "web-mirror": {
       "url": "https://oracle-fast.lazying.art/",
       "status": 200,
-      "sha256": "44acea0c7414907b2059b525466aa61accb1ee14d0851af8579f88eed8cc86e2",
+      "sha256": "6e643b93c280977dd1ab910de00eaeb7e255d1c74fb4bf7e8b8071d3e7452675",
       "currentAsset": true
     },
     "auspice-privacy": {
@@ -32,38 +35,42 @@
     {
       "name": "Auspice",
       "bundle": "art.lazying.auspice",
-      "build": "6",
+      "build": "7",
       "version": "0.1.0",
-      "bytes": 27254542,
-      "sha256": "d79b43c443e97ef50aac5008fc83195cc924ab1ba6874da748d3f20f369699ce"
+      "bytes": 27287556,
+      "sha256": "2c7a539ebc1584d7b8fa02209b6b94abf8ef4286bb494369e5f380efe4060858",
+      "delivery": "21ccf2ca-caad-4d83-b11d-f2558536ade3",
+      "testflight": "IN_BETA_TESTING: Auspice internal"
     },
     {
       "name": "LazyOracle",
       "bundle": "art.lazying.lazyoracle",
-      "build": "13",
+      "build": "14",
       "version": "1.0.0",
-      "bytes": 23913495,
-      "sha256": "c0c74a70a0ede2af496d352c291bd2b607522ab6e9cd787d8c4b893182368da8"
+      "bytes": 23913891,
+      "sha256": "9a4f527ac791c32986b0dc21f31ff2216abaa75cf523ab7ff82d747d6fbcbb30",
+      "delivery": "764e1235-3be3-4779-a4ea-7982e639bc00",
+      "testflight": "IN_BETA_TESTING: internal; public beta attached, WAITING_FOR_REVIEW"
     }
   ],
   "androidArtifacts": {
     "LazyOracle": {
       "version": "1.0.0",
       "versionCode": 12,
-      "sha256": "03e34a456c49399eef7091c2079140c637cebcba01fbe67397d661fdcb0421ca",
-      "bytes": 24516917,
+      "sha256": "6984b58828edf0d39ad7f75b7b88ea9c4b601703999bfee0949e7f54425d9a4a",
+      "bytes": 24517292,
       "path": "android/app/build/outputs/bundle/release/app-release.aab",
       "signature": "jarsigner verified",
-      "playUpload": "pending browser access"
+      "playUpload": "Available to internal testers"
     },
     "Auspice": {
       "version": "0.1.0",
       "versionCode": 5,
-      "sha256": "0f9fe3279aa03180855457c2b53436010995283365e23a3195c7676625bd4482",
-      "bytes": 42995733,
+      "sha256": "6c83d4a75ef5bf167092b627af7fe0ba6d7b0bec899e43b62fb1b4870bda2d04",
+      "bytes": 42999740,
       "path": "native/android/app/build/outputs/bundle/release/app-release.aab",
       "signature": "jarsigner verified",
-      "playUpload": "pending browser access"
+      "playUpload": "Available to internal testers"
     }
   },
   "formalReviews": {
@@ -77,5 +84,8 @@
       "state": "PREPARE_FOR_SUBMISSION",
       "build": null
     }
-  }
+  },
+  "openIssues": [
+    "Owner reported an Auspice crash after these releases. Affected build/device/action not yet confirmed; no crash submissions returned by Apple API at 17:10 HKT. Investigation is open."
+  ]
 }

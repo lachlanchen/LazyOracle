@@ -3,28 +3,28 @@ verified_date: 2026-09-23
 app: LazyOracle
 version: 1.0.0
 price_usd: 0.99
-source_commit: 9dad9ef08ac65a0213aec9143f63462236c384f2
+source_commit: 50c4a0c927642ec8bb98667de183320373b653c0
 evidence: store/artifacts/takeover-2026-09-23.json
 web:
   domain: oracle.lazying.art
   host: sshem-admin (Aliyun)
   release_root: /opt/lazyoracle-web/releases
-  live_release: c8cabf9ecb9f7b0c3042afcdad4b1981ab9ea5b0eff7982135972982867ac732
+  live_release: cd36d9f1811b0c8e49f8be494e957c6e126ef5867404e2e716c0be22c3a1c9ea
   mirror: https://oracle-fast.lazying.art
-  mirror_release: /srv/lazyoracle/releases/9dad9ef08ac65a02
-  live_asset: assets/index-B5Y-0n7g.js
+  mirror_release: /srv/lazyoracle/releases/50c4a0c927642ec8
+  live_asset: assets/index-DXA3nq6E.js
   verification: both sites HTTP 200, identical index, expected asset present
 android:
   package: art.lazying.lazyoracle
   versionCode: 12
   versionName: 1.0.0
   artifact: android/app/build/outputs/bundle/release/app-release.aab
-  bundle_sha256: 03e34a456c49399eef7091c2079140c637cebcba01fbe67397d661fdcb0421ca
+  bundle_sha256: 6984b58828edf0d39ad7f75b7b88ea9c4b601703999bfee0949e7f54425d9a4a
   play_app_id: '4975413590951100628'
-  internal_testing: build 12 signed and verified; superseded by chat-fix rebuild; upload pending
+  internal_testing: build 12 available to internal testers; verified in Play Console
   internal_testing_link: https://play.google.com/apps/internaltest/4701677916092886102
-  previous_internal: build 11 per recovered session; not freshly verified in Play Console
-  production: build 11 in review per recovered session; untouched in this takeover
+  previous_internal: build 8 observed in Play Console before this update
+  production: build 11 in Changes in review; freshly verified in Play Console and untouched
   keystore: ~/.config/lazyoracle/android/upload-keystore.jks
   key_alias: lazyoracle-upload
 ios:
@@ -32,10 +32,10 @@ ios:
   app_id: '6814663937'
   profile: LazyOracle App Store 1
   marketing_version: 1.0.0
-  build: 13
-  ipa_sha256: c0c74a70a0ede2af496d352c291bd2b607522ab6e9cd787d8c4b893182368da8
-  delivery: 91c33549-0cb8-4d5b-833a-69ec9c242296
-  testflight: uploaded; VALID; superseded by build 14 chat-navigation update
+  build: 14
+  ipa_sha256: 9a4f527ac791c32986b0dc21f31ff2216abaa75cf523ab7ff82d747d6fbcbb30
+  delivery: 764e1235-3be3-4779-a4ea-7982e639bc00
+  testflight: IN_BETA_TESTING internally; public beta attached and WAITING_FOR_REVIEW
   public_beta: https://testflight.apple.com/join/JZJM3PFb
   app_store: 1.0.0 with build 12 WAITING_FOR_REVIEW; verified by API and untouched
 auspice:
@@ -45,14 +45,17 @@ auspice:
   price_usd: 0.99
   app_store_id: '6815034620'
   play_app_id: '4973267996880132777'
-  ios_build: 6
-  ios_delivery: 63de329a-49ea-41a4-8e0b-5afdc07f9c53
-  ios_sha256: d79b43c443e97ef50aac5008fc83195cc924ab1ba6874da748d3f20f369699ce
+  ios_build: 7
+  ios_delivery: 21ccf2ca-caad-4d83-b11d-f2558536ade3
+  ios_sha256: 2c7a539ebc1584d7b8fa02209b6b94abf8ef4286bb494369e5f380efe4060858
   testflight: IN_BETA_TESTING in Auspice internal; verified by API
   android_versionCode: 5
   android_artifact: native/android/app/build/outputs/bundle/release/app-release.aab
-  android_sha256: 0f9fe3279aa03180855457c2b53436010995283365e23a3195c7676625bd4482
-  internal_testing: build 5 signed and verified; superseded by chat-fix rebuild; upload pending
+  android_sha256: 6c83d4a75ef5bf167092b627af7fe0ba6d7b0bec899e43b62fb1b4870bda2d04
+  internal_testing: build 5 available to internal testers; verified in Play Console
   internal_testing_link: https://play.google.com/apps/internaltest/4701649823136226500
-  previous_internal: build 4 per recovered session; not freshly verified in Play Console
+  previous_internal: build 4 observed in Play Console before this update
   app_store: version 1.0 PREPARE_FOR_SUBMISSION, no build attached; formal release not authorized
+
+open_issues:
+  - Auspice crash reported by owner after these updates; build/device/action and Apple crash report pending; investigate before another Auspice release.

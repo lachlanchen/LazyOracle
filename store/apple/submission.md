@@ -23,3 +23,19 @@
   after restoring the plist and unlocking the existing release keychain.
 - Final processing/group state and hashes are in `store/release.yaml` and
   `store/artifacts/takeover-2026-09-23.json`.
+
+
+## 2026-09-23 — latest-message navigation, TestFlight build 14
+
+- LazyOracle **14 (1.0.0)**, delivery `764e1235-3be3-4779-a4ea-7982e639bc00`,
+  is `VALID` and `IN_BETA_TESTING` in the automatic internal group. The API
+  rejects manual assignment to that automatic group; its build list confirms
+  build 14 is already included.
+- Build 14 is attached to the existing public beta group and submitted for
+  beta review (`WAITING_FOR_REVIEW`). Existing public build 12 remains usable.
+- Its chat opens at the latest message, offers a return button, and leaves
+  the reading position alone while reviewing older messages.
+- The formal App Store submission remains build 12, WAITING_FOR_REVIEW.
+  Auspice's formal version still has no build attached and was not submitted.
+- The owner subsequently reported an Auspice crash. That investigation is
+  open; do not treat passing build/chat tests as proof that the crash is fixed.

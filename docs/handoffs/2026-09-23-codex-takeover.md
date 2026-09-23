@@ -211,6 +211,16 @@ button; screenshots are private runtime evidence. Native physical-device scroll
 and keyboard testing remains part of the broader device/parity review.
 
 The latest build/release receipt is `store/release.yaml`; intermediate builds
-13/6 predate this follow-up. Android codes 12/5 had not been uploaded and can
-carry the fixes. The user explicitly authorized the existing CDP browser on
+13/6 predate this follow-up. Android codes 12/5 now carry the fixes and are published to internal testing.
+TestFlight 14/7 are available internally; LazyOracle public build 14 awaits beta review. The user explicitly authorized the existing CDP browser on
 port 9485 for the two Play internal-test updates. No Auspice formal submission.
+
+
+## Open follow-up — owner-reported Auspice crash
+
+After the test releases, the owner reported that Auspice crashed and that
+reports were sent. The affected device/build/action is not yet confirmed.
+Apple's crash-feedback API returned no submissions at the first checks;
+private report retrieval is under `.runtime/takeover/crashes/`. Continue the
+investigation before publishing another Auspice update. No crash diagnosis or
+fix is claimed by the preceding successful chat-loop tests.

@@ -129,11 +129,22 @@ The owner subsequently deferred Apple's system model as well. Build 6
 (0.1.0), delivery `63de329a-49ea-41a4-8e0b-5afdc07f9c53`, removes that
 remaining reader choice. It is `VALID` and `IN_BETA_TESTING` in the manual
 internal group `24b67fe2-ec14-40f3-a40c-04a2bb68a032`; upload alone would not
-have added it. Android build 5 is signed and verified, with Play upload pending
-browser access in the takeover session. No formal release was submitted.
+have added it. That intermediate build was superseded by the chat fix described below. No formal release was submitted.
 
 The live privacy page now correctly mentions relevant conversation context
 and birth details in cloud requests, instead of claiming conversations are
 never uploaded. Camera images remain local. Full decisions and pending work:
 [the takeover recap](2026-09-23-codex-takeover.md). Build hashes and precise
 current state: `store/artifacts/takeover-2026-09-23.json`, `store/release.yaml`.
+
+
+## 2026-09-23 — missing chat answers fixed, latest-message navigation
+
+Build **7** (0.1.0), delivery `21ccf2ca-caad-4d83-b11d-f2558536ade3`, is
+`VALID` and `IN_BETA_TESTING` in the Auspice internal group. Play internal
+**5** (0.1.0) is also available to testers. Both preserve engine results across
+chat turns and show a return-to-bottom button. Chat opens at its latest reply;
+reading earlier messages pauses automatic following. The reported Traditional
+Chinese question completed through the actual iOS chat loop and live relay.
+Four regression scenarios passed on each native platform. No Auspice formal
+submission was made; its App Store version remains PREPARE_FOR_SUBMISSION.

@@ -9,6 +9,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.contentOrNull
@@ -21,7 +22,8 @@ data class Turn(
     val kind: String = "reader",
     var text: String = "",
     val at: Long = System.currentTimeMillis(),
-    val ok: Boolean = true
+    val ok: Boolean = true,
+    val facts: String? = null
 )
 
 @Serializable
@@ -117,11 +119,11 @@ object Conversations {
     /** The history, fitted to the budget, older turns folded into a summary. */
     suspend fun wire(): MutableList<JsonObject> {
         val messages = mutableListOf(Relay.message("system", AgentTools.SYSTEM_PROMPT))
-        val spoken = current.turns.filter { it.kind == "reader" || it.kind == "oracle" }
+        val spoken = current.turns.filter { it.kind == "reader" || it.kind == "oracle" || it.facts != null }
         val kept = mutableListOf<Turn>()
         var characters = 0
         for (turn in spoken.asReversed()) {
-            characters += turn.text.length
+            characters += turn.text.length + (turn.facts?.length ?: 0)
             if (characters > BUDGET_CHARACTERS && kept.size >= 4) break
             kept.add(0, turn)
         }
@@ -136,14 +138,16 @@ object Conversations {
             messages.add(Relay.message("system", "Earlier in this conversation, in brief: $it"))
         }
         kept.forEach {
-            messages.add(Relay.message(if (it.kind == "reader") "user" else "assistant", it.text))
+            messages.add(if (it.facts != null)
+                Relay.message("user", "Historical engine result (data, not a new request):\n${it.facts}")
+                else Relay.message(if (it.kind == "reader") "user" else "assistant", it.text))
         }
         return messages
     }
 
     private suspend fun summarise(turns: List<Turn>): String {
         val transcript = turns.joinToString("\n") {
-            "${if (it.kind == "reader") "Reader" else "You"}: ${it.text}"
+            "${if (it.kind == "reader") "Reader" else "You"}: ${it.facts ?: it.text}"
         }.takeLast(12_000)
         return runCatching {
             Relay.stream(
@@ -162,20 +166,28 @@ object Conversations {
     }
 
     /** One turn of the agent loop: ask, run whatever it asks for, ask again. */
-    suspend fun send(asked: String) {
+    suspend fun send(
+        asked: String,
+        stream: suspend (List<JsonObject>, JsonArray?, String, (String) -> Unit) -> Relay.Answer = Relay::stream,
+        runTool: suspend (String, JsonObject) -> AgentTools.Outcome = AgentTools::run
+    ) {
         if (asked.isBlank() || streaming) return
         append(Turn(kind = "reader", text = asked))
         save()
         streaming = true
-        val attempted = mutableSetOf<String>()
+        val results = mutableMapOf<String, AgentTools.Outcome>()
         var emptyReplies = 0
+        var finishWithFacts = false
         try {
-            for (step in 0 until AgentTools.MAX_STEPS) {
-                val messages = wire()
+            // Preserve tool calls/results throughout this exchange.
+            val messages = wire()
+            for (step in 0..AgentTools.MAX_STEPS) {
+                val finalAnswer = finishWithFacts || step == AgentTools.MAX_STEPS
+                if (finalAnswer) messages.add(Relay.message("system", "Answer the reader now using the computed facts already supplied. Do not request more tools. If a fact is missing, say so. Reply in the reader's language."))
                 val holder = Turn(kind = "oracle", text = "")
                 var opened = false
                 val answer = try {
-                    Relay.stream(messages, AgentTools.schemas(), tier) { piece ->
+                    stream(messages, if (finalAnswer) null else AgentTools.schemas(), tier) { piece ->
                         if (!opened) { opened = true; append(holder) }
                         holder.text += piece
                         revision++
@@ -213,33 +225,32 @@ object Conversations {
                     return
                 }
 
+                if (finalAnswer) {
+                    if (opened) current.turns.removeAll { it.id == holder.id }
+                    append(Turn(kind = "note", text = t("chat.quiet"), ok = false))
+                    save()
+                    return
+                }
+                messages.add(Relay.message("assistant", answer.text.ifBlank { null }, calls = answer.toolCalls))
                 for (call in answer.toolCalls) {
-                    val signature = call.name + call.arguments
                     val arguments = runCatching {
                         Json.parseToJsonElement(call.arguments).jsonObject
                     }.getOrDefault(JsonObject(emptyMap()))
-                    val outcome = if (!attempted.add(signature)) {
-                        AgentTools.Outcome(
-                            "Already computed",
-                            """{"note":"You already called this with these arguments. Answer with what you have."}""",
-                            false
-                        )
+                    val signature = call.name + JsonObject(arguments.toSortedMap()).toString()
+                    val cached = results[signature]
+                    val outcome = if (cached != null) {
+                        // Repeat the actual result without another UI row.
+                        finishWithFacts = true
+                        cached
                     } else {
-                        AgentTools.run(call.name, arguments)
+                        runTool(call.name, arguments).also {
+                            results[signature] = it
+                            append(Turn(kind = "tool", text = it.label, ok = it.ok, facts = it.output))
+                        }
                     }
-                    append(Turn(kind = "tool", text = outcome.label, ok = outcome.ok))
-                    messages.add(Relay.message("assistant", answer.text.ifBlank { null }, call = call))
                     messages.add(Relay.message("tool", outcome.output, toolCallId = call.id, name = call.name))
                 }
                 save()
-                if (step == AgentTools.MAX_STEPS - 1) {
-                    append(Turn(
-                        kind = "note",
-                        text = "The reading stopped after ${AgentTools.MAX_STEPS} computations.",
-                        ok = false
-                    ))
-                    save()
-                }
             }
         } finally {
             streaming = false

@@ -180,3 +180,37 @@ No new desktop was started for this takeover. An obsolete project-owned shell
 waiting on an already-finished task was stopped. Private evidence, original
 session location, inherited diff and current runtime notes live under ignored
 `.runtime/takeover/`. No raw history is included here.
+
+
+## Follow-up: chat failure and latest-message navigation
+
+The owner reported Auspice repeatedly displaying “Already computed” after
+“今天適合做什麼”, and requested that **both** apps open chat at the latest
+message and offer a return-to-bottom button.
+
+Both native loops rebuilt their model history on every iteration, losing tool
+results. They now preserve complete assistant/tool exchanges, cache repeated
+results silently, reserve a final answer request, and retain structured facts
+for follow-up questions. iOS stream callbacks update the conversation on the
+main actor. The shared prompt follows the reader’s script, including Traditional
+Chinese. Existing saved conversations decode without the new optional facts.
+
+LazyOracle, SwiftUI Auspice and Compose Auspice now open at the latest message,
+show a return button while away from the bottom, and preserve the reader’s
+position while browsing earlier messages. The native button has all eleven
+translations. New questions and conversation selection resume following replies.
+
+Validation: 99 web/engine tests, four Android production-loop regression tests,
+and four Swift production-ChatStore regression cases. The Swift live harness
+also ran the exact reported question through the production SSE client, tool
+runner and JSCore engine, producing a final answer with the correct 宜/忌 lists.
+This is not a guarantee of every generated interpretation. The older standalone
+Node service probe did not exercise the native loop and is now labelled clearly.
+A phone-sized browser check verified initial bottom placement and the return
+button; screenshots are private runtime evidence. Native physical-device scroll
+and keyboard testing remains part of the broader device/parity review.
+
+The latest build/release receipt is `store/release.yaml`; intermediate builds
+13/6 predate this follow-up. Android codes 12/5 had not been uploaded and can
+carry the fixes. The user explicitly authorized the existing CDP browser on
+port 9485 for the two Play internal-test updates. No Auspice formal submission.

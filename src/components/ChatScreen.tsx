@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
-import { History, Plus, Send, Square, Trash2, Wand2 } from 'lucide-react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { ArrowDown, History, Plus, Send, Square, Trash2, Wand2 } from 'lucide-react'
 import type { UICopy } from '../i18n'
 import { MAX_STEPS, parseToolCall, runTool, toolInstructions, toolResultMessage, toolSchemas } from '../lib/agent'
 import { conversationTitle, deleteConversation, loadConversations, newConversationId, saveConversation, type Conversation } from '../lib/chat-store'
@@ -63,7 +63,38 @@ export function ChatScreen({ copy, language, pending, onPendingConsumed }: ChatS
   const conversationId = useRef(loadConversations()[0]?.id ?? newConversationId())
   const abort = useRef<AbortController | null>(null)
   const asked = useRef('')
+  const log = useRef<HTMLElement>(null)
+  const followLatest = useRef(true)
+  const earlierHeight = useRef<number | null>(null)
+  const [awayFromBottom, setAwayFromBottom] = useState(false)
   const t = copy.chat
+
+  const goToBottom = () => {
+    followLatest.current = true
+    if (log.current) log.current.scrollTop = log.current.scrollHeight
+    setAwayFromBottom(false)
+  }
+
+  useLayoutEffect(() => {
+    const element = log.current
+    if (!element) return
+    if (earlierHeight.current !== null) {
+      element.scrollTop += element.scrollHeight - earlierHeight.current
+      earlierHeight.current = null
+    } else if (followLatest.current) {
+      element.scrollTop = element.scrollHeight
+    }
+  }, [turns, streaming, busy, ready, shown, showHistory])
+
+  // Keyboard/viewport changes should also keep the latest reply in view.
+  useEffect(() => {
+    if (!log.current || typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver(() => {
+      if (followLatest.current && log.current) log.current.scrollTop = log.current.scrollHeight
+    })
+    observer.observe(log.current)
+    return () => observer.disconnect()
+  }, [ready])
 
   /**
    * Streams one reply. A provider that supports function calling answers with
@@ -128,6 +159,7 @@ export function ChatScreen({ copy, language, pending, onPendingConsumed }: ChatS
   const send = async (text?: string) => {
     const question = (text ?? draft).trim()
     if (!question || busy) return
+    goToBottom()
     const visible: Turn[] = [...turns, { role: 'user', content: question }]
     setTurns(visible)
     setDraft('')
@@ -241,6 +273,7 @@ export function ChatScreen({ copy, language, pending, onPendingConsumed }: ChatS
   }
 
   const startNew = () => {
+    goToBottom()
     setTurns([])
     setStreaming('')
     setError('')
@@ -284,6 +317,7 @@ export function ChatScreen({ copy, language, pending, onPendingConsumed }: ChatS
                     type="button"
                     className="link-button"
                     onClick={() => {
+                      goToBottom()
                       setTurns(conversation.turns as Turn[])
                       conversationId.current = conversation.id
                       summary.current = conversation.summary ?? ''
@@ -305,10 +339,20 @@ export function ChatScreen({ copy, language, pending, onPendingConsumed }: ChatS
       )}
 
       {ready && (
-        <section className="panel chat-log" data-testid="chat-log">
+        <section ref={log} className="panel chat-log" data-testid="chat-log" onScroll={() => {
+          const element = log.current
+          if (!element) return
+          const away = element.scrollHeight - element.scrollTop - element.clientHeight > 48
+          followLatest.current = !away
+          setAwayFromBottom(away)
+        }}>
           {turns.length === 0 && !streaming && !busy && <p className="body">{t.opening}</p>}
           {turns.length > shown && (
-            <button type="button" className="link-button" onClick={() => setShown((count) => count + VISIBLE_TURNS)} data-testid="chat-earlier">
+            <button type="button" className="link-button" onClick={() => {
+              earlierHeight.current = log.current?.scrollHeight ?? null
+              followLatest.current = false
+              setShown((count) => count + VISIBLE_TURNS)
+            }} data-testid="chat-earlier">
               {t.earlier}
             </button>
           )}
@@ -331,6 +375,7 @@ export function ChatScreen({ copy, language, pending, onPendingConsumed }: ChatS
 
       {ready && (
         <section className="panel chat-compose">
+          {awayFromBottom && <button type="button" className="chip chat-latest" onClick={goToBottom} data-testid="chat-latest"><ArrowDown size={16} /> {t.latest}</button>}
           <label className="field">
             <span className="sr-only">{t.placeholder}</span>
             <textarea

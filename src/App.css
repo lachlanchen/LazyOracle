@@ -639,6 +639,7 @@ select {
   .chat-clear { flex: 0 0 22%; }
 }
 .chat-send { flex: 1 1 auto; justify-content: center; }
+.chat-latest { margin: 0 auto 8px; }
 .chat-clear:disabled { opacity: .35; }
 
 /* The chat screen owns the bottom of the window, so the page itself does not

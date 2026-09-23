@@ -2170,6 +2170,19 @@
    "de": "wählt, was zu berechnen ist …",
    "ru": "выбирает, что вычислить…",
    "ar": "يختار ما يحسبه…"
+  },
+  "chat.latest": {
+   "en": "Latest messages",
+   "zh-Hans": "回到底部",
+   "zh-Hant": "回到底部",
+   "ja": "最新のメッセージ",
+   "ko": "최신 메시지",
+   "vi": "Tin nhắn mới nhất",
+   "es": "Últimos mensajes",
+   "fr": "Derniers messages",
+   "de": "Neueste Nachrichten",
+   "ru": "Последние сообщения",
+   "ar": "أحدث الرسائل"
   }
  }
 }

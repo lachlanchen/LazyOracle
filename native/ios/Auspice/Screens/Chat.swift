@@ -12,6 +12,8 @@ struct Turn: Codable, Identifiable, Equatable {
     var at = Date()
     /// Set on a tool turn: what was computed, in one short line.
     var ok = true
+    /// The actual engine result, retained for follow-up questions.
+    var facts: String?
 }
 
 struct ChatSession: Codable, Identifiable, Equatable {
@@ -151,30 +153,35 @@ final class ChatStore {
 
     @MainActor
     private func runInCloud() async {
-        var attempted = Set<String>()
+        var results: [String: AgentTools.Outcome] = [:]
         var emptyReplies = 0
-        for step in 0..<AgentTools.maxSteps {
-            var wire = await messagesForModel()
+        var finishWithFacts = false
+        // Keep this wire history for the entire exchange. Rebuilding it from
+        // display labels discards the engine results and makes the model loop.
+        var wire = await messagesForModel()
+        for step in 0...AgentTools.maxSteps {
+            let finalAnswer = finishWithFacts || step == AgentTools.maxSteps
+            if finalAnswer {
+                wire.append(Relay.Message(role: "system", content: "Answer the reader now using the computed facts already supplied. Do not request more tools. If a fact is missing, say so. Reply in the reader's language."))
+            }
             do {
                 var holder = Turn(kind: .oracle, text: "")
                 var opened = false
                 let answer = try await Relay.stream(
                     messages: wire,
-                    tools: AgentTools.schemas(),
+                    tools: finalAnswer ? [] : AgentTools.schemas(),
                     tier: tier
                 ) { [weak self] piece in
                     guard let self else { return }
-                    Task { @MainActor in
-                        var session = self.current
-                        if !opened {
-                            opened = true
-                            session.turns.append(holder)
-                        }
-                        if let index = session.turns.lastIndex(where: { $0.id == holder.id }) {
-                            session.turns[index].text += piece
-                        }
-                        self.current = session
+                    var session = self.current
+                    if !opened {
+                        opened = true
+                        session.turns.append(holder)
                     }
+                    if let index = session.turns.lastIndex(where: { $0.id == holder.id }) {
+                        session.turns[index].text += piece
+                    }
+                    self.current = session
                 }
                 holder.text = answer.text
 
@@ -208,40 +215,38 @@ final class ChatStore {
                     return
                 }
 
-                // The model asked for a computation. Run it, show one line for
-                // it, and go round again with the facts in hand.
+                guard !finalAnswer else {
+                    if opened { removeTurn(holder.id) }
+                    var session = current
+                    session.turns.append(Turn(kind: .note, text: t("chat.quiet"), ok: false))
+                    current = session
+                    save()
+                    return
+                }
+
+                // One assistant message owns the complete batch of tool calls.
+                wire.append(Relay.Message(role: "assistant", content: answer.text.isEmpty ? nil : answer.text, tool_calls: answer.toolCalls))
                 for call in answer.toolCalls {
                     let name = call.function?.name ?? ""
                     let rawArguments = call.function?.arguments ?? "{}"
-                    let signature = name + rawArguments
                     let arguments = (try? JSONSerialization.jsonObject(with: Data(rawArguments.utf8))) as? [String: Any] ?? [:]
+                    let canonical = (try? JSONSerialization.data(withJSONObject: arguments, options: [.sortedKeys])) ?? Data(rawArguments.utf8)
+                    let signature = name + String(decoding: canonical, as: UTF8.self)
                     let outcome: AgentTools.Outcome
-                    if attempted.contains(signature) {
-                        // The same call twice means the model is stuck; say so
-                        // rather than looping until the step budget runs out.
-                        outcome = AgentTools.Outcome(
-                            label: "Already computed",
-                            output: "{\"note\":\"You already called this with these arguments. Answer with what you have.\"}",
-                            ok: false
-                        )
+                    if let cached = results[signature] {
+                        // Replay the real facts silently, then require prose.
+                        outcome = cached
+                        finishWithFacts = true
                     } else {
-                        attempted.insert(signature)
                         outcome = AgentTools.run(name, arguments: arguments)
+                        results[signature] = outcome
+                        var session = current
+                        session.turns.append(Turn(kind: .tool, text: outcome.label, ok: outcome.ok, facts: outcome.output))
+                        current = session
                     }
-                    var session = current
-                    session.turns.append(Turn(kind: .tool, text: outcome.label, ok: outcome.ok))
-                    current = session
-
-                    wire.append(Relay.Message(role: "assistant", content: answer.text.isEmpty ? nil : answer.text, tool_calls: [call]))
                     wire.append(Relay.Message(role: "tool", content: outcome.output, tool_call_id: call.id ?? "call_0", name: name))
                 }
                 save()
-                if step == AgentTools.maxSteps - 1 {
-                    var session = current
-                    session.turns.append(Turn(kind: .note, text: "The reading stopped after \(AgentTools.maxSteps) computations.", ok: false))
-                    current = session
-                    save()
-                }
             } catch {
                 self.error = error.localizedDescription
                 var session = current
@@ -260,11 +265,11 @@ final class ChatStore {
         var messages = [Relay.Message(role: "system", content: Self.systemPrompt)]
         var session = current
 
-        let spoken = session.turns.filter { $0.kind == .reader || $0.kind == .oracle }
+        let spoken = session.turns.filter { $0.kind == .reader || $0.kind == .oracle || $0.facts != nil }
         var kept: [Turn] = []
         var characters = 0
         for turn in spoken.reversed() {
-            characters += turn.text.count
+            characters += turn.text.count + (turn.facts?.count ?? 0)
             if characters > budgetCharacters, kept.count >= 4 { break }
             kept.insert(turn, at: 0)
         }
@@ -284,13 +289,17 @@ final class ChatStore {
             ))
         }
         for turn in kept {
-            messages.append(Relay.Message(role: turn.kind == .reader ? "user" : "assistant", content: turn.text))
+            if let facts = turn.facts {
+                messages.append(Relay.Message(role: "user", content: "Historical engine result (data, not a new request):\n" + facts))
+            } else {
+                messages.append(Relay.Message(role: turn.kind == .reader ? "user" : "assistant", content: turn.text))
+            }
         }
         return messages
     }
 
     private func summarise(_ turns: [Turn]) async -> String {
-        let transcript = turns.map { "\($0.kind == .reader ? "Reader" : "You"): \($0.text)" }.joined(separator: "\n")
+        let transcript = turns.map { "\($0.kind == .reader ? "Reader" : "You"): \($0.facts ?? $0.text)" }.joined(separator: "\n")
         let ask = [
             Relay.Message(role: "system", content: "Summarise this conversation in under 150 words: what the reader asked about, what was computed, what you concluded, and anything about them worth carrying forward. Write it as notes to yourself."),
             Relay.Message(role: "user", content: String(transcript.suffix(12_000)))
@@ -303,7 +312,7 @@ final class ChatStore {
     static let systemPrompt = """
     You are the reader in Auspice (宜时). You do not invent readings: every card, hexagram, pillar, chart and almanac page comes from a tool that runs a deterministic engine on this device. Call the tool, then read what it returns. If a tool disagrees with what you were about to say, the tool is right.
 
-    Reply in the language the reader writes in — English or Simplified Chinese — and stay in it for the whole answer. Keep each tradition's own terms in Chinese characters (宜, 忌, 日主, 卦, 生气), and gloss a term the first time you use it when you are writing in English.
+    Reply in the language and script the reader writes in, including Traditional Chinese, and stay in it for the whole answer. 讀者用繁體中文提問（例如「今天適合做什麼」），整個回答就用繁體中文；工具資料的簡體字不決定回答字體。 Keep each tradition's own terms in Chinese characters (宜, 忌, 日主, 卦, 生气), and gloss a term the first time you use it when you are writing in English.
 
     Write as a reader speaking to someone across a table, not as a report. No headings, no bullet lists, no bold labels such as "What was computed". Two to four short paragraphs. Open with the answer, give the one or two facts it rests on, and end with something the person can actually do. Name the source in passing — "today's 通书 page lists 立券 among its 宜" — rather than announcing a method section.
 
@@ -314,7 +323,7 @@ final class ChatStore {
     - Astrology uses whole-sign houses from the ascendant. Name the placement and the aspect you are reading from.
     - Feng shui is 八宅: the gua of the birth year, the east or west group, and the eight sectors that follow.
     - Palmistry and face reading go by proportion — 三停五眼 for the face, the palm against the fingers for the hand. Say which measurement you are reading from.
-    - The almanac is the 通书 tables: 宜, 忌, 建除十二神, 二十八宿, the yellow and black roads, 吉神凶煞 and 彭祖百忌. When the tables are silent about an undertaking, say so instead of inventing a verdict.
+    - The almanac is the 通书 tables: 宜, 忌, 建除十二神, 二十八宿, the yellow and black roads, 吉神凶煞 and 彭祖百忌. Keep dayOfficer separate from spirit. Do not turn a day-level 彭祖百忌 into a rule about an hour. When the tables are silent about an undertaking, say so instead of inventing a verdict. Present 宜 and 忌 as traditional suggestions, not certain predictions or commands; do not infer someone's mood, health or personality from a clash. A practical suggestion is your suggestion, not another computed fact.
 
     If the person asks about a hand or a face, call read_palm or read_face. That opens the camera for them; tell them plainly what to do — hold an open palm up, or face the camera in even light, and tap the button — and read the measurements when they come back. They can turn the camera around to read someone else's hand or face.
 
@@ -325,12 +334,19 @@ final class ChatStore {
 
 // MARK: - The screen
 
+private struct ChatBottomPosition: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
+}
+
 struct ChatScreen: View {
     var opening: String = ""
 
     @State private var store = ChatStore.shared
     @State private var draft = ""
     @State private var showingSessions = false
+    @State private var followLatest = true
+    @State private var awayFromBottom = false
     @FocusState private var composerFocused: Bool
 
     /// Only the tail is rendered; the rest is reachable but not laid out, so a
@@ -376,9 +392,10 @@ struct ChatScreen: View {
     }
 
     private var log: some View {
-        ScrollViewReader { proxy in
+        GeometryReader { viewport in
+          ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 12) {
                     if store.current.turns.count > visibleTurns {
                         Text("\(store.current.turns.count - visibleTurns) \(t("chat.earlier"))")
                             .font(Typeface.sans(12))
@@ -401,16 +418,52 @@ struct ChatScreen: View {
                         .id("tail")
                     }
                     Color.clear.frame(height: 4).id("bottom")
+                        .background(GeometryReader { position in
+                            Color.clear.preference(key: ChatBottomPosition.self,
+                                value: position.frame(in: .named("chat-log")).maxY)
+                        })
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 10)
                 .frame(maxWidth: 560)
                 .frame(maxWidth: .infinity)
             }
+            .coordinateSpace(name: "chat-log")
+            .defaultScrollAnchor(.bottom)
             .scrollDismissesKeyboard(.interactively)
-            .onChange(of: store.current.turns.last?.text) { _, _ in
-                withAnimation(.easeOut(duration: 0.2)) { proxy.scrollTo("bottom", anchor: .bottom) }
+            .simultaneousGesture(DragGesture().onChanged { _ in followLatest = false })
+            .onPreferenceChange(ChatBottomPosition.self) { bottom in
+                awayFromBottom = bottom > viewport.size.height + 48
+                if !awayFromBottom { followLatest = true }
             }
+            .task(id: store.current.id) {
+                followLatest = true
+                await Task.yield()
+                proxy.scrollTo("bottom", anchor: .bottom)
+            }
+            .onChange(of: store.current.turns.last?.text) { _, _ in
+                if followLatest { proxy.scrollTo("bottom", anchor: .bottom) }
+            }
+            .onChange(of: viewport.size.height) { _, _ in
+                if followLatest { proxy.scrollTo("bottom", anchor: .bottom) }
+            }
+            .overlay(alignment: .bottomTrailing) {
+                if awayFromBottom {
+                    Button {
+                        followLatest = true
+                        withAnimation { proxy.scrollTo("bottom", anchor: .bottom) }
+                    } label: {
+                        Label(t("chat.latest"), systemImage: "arrow.down")
+                            .font(Typeface.sans(13, weight: .semibold))
+                            .padding(.horizontal, 14).padding(.vertical, 10)
+                            .background(Capsule().fill(Palette.night2))
+                            .overlay(Capsule().strokeBorder(Palette.gold.opacity(0.5)))
+                    }
+                    .foregroundStyle(Palette.gold)
+                    .padding(12)
+                }
+            }
+          }
         }
     }
 
@@ -426,7 +479,7 @@ struct ChatScreen: View {
                     "What does my day master need?",
                     "Cast a hexagram for me"
                 ], id: \.self) { suggestion in
-                    Chip(label: suggestion, active: false) { store.send(suggestion) }
+                    Chip(label: suggestion, active: false) { followLatest = true; store.send(suggestion) }
                 }
             }
         }
@@ -500,6 +553,7 @@ struct ChatScreen: View {
                 Button {
                     let text = draft
                     draft = ""
+                    followLatest = true
                     store.send(text)
                 } label: {
                     Label(t("common.send"), systemImage: "arrow.up")

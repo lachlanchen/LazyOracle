@@ -1,9 +1,9 @@
 /**
  * Ask the reading service real questions and check what it actually does.
  *
- * This runs the same agent loop the apps run — the same system prompt, the
- * same tool schemas, the same engine bundle — against the same relay, so a
- * pass here is evidence about the app and not about a mock. It reports which
+ * This standalone service probe uses the shared prompt and engine bundle.
+ * It does not exercise the native conversation loops. Use the Android JVM
+ * tests and auspice-chat-swift-test.py for native-loop regression coverage. It reports which
  * tools each question reached, how long the answer took, and prints the answer
  * so its quality can be judged rather than assumed.
  *

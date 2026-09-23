@@ -7,15 +7,18 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -41,6 +44,10 @@ fun ChatScreen(navController: NavController, opening: String) {
     var showingSessions by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
     val revision = Conversations.revision
+    val sessionId = Conversations.current.id
+    var followLatest by remember(sessionId) { mutableStateOf(true) }
+    val dragged by listState.interactionSource.collectIsDraggedAsState()
+    val atBottom by remember { derivedStateOf { !listState.canScrollForward } }
 
     LaunchedEffect(Unit) {
         if (opening.isNotBlank() && Conversations.current.turns.isEmpty()) {
@@ -49,8 +56,16 @@ fun ChatScreen(navController: NavController, opening: String) {
     }
 
     val turns = remember(revision) { Conversations.current.turns.toList() }
-    LaunchedEffect(revision) {
-        if (turns.isNotEmpty()) listState.animateScrollToItem(maxOf(0, minOf(turns.size, VISIBLE_TURNS) - 1))
+    // Include the earlier-message row, activity row and final spacer.
+    val bottomIndex = minOf(turns.size, VISIBLE_TURNS) +
+        (if (turns.size > VISIBLE_TURNS || turns.isEmpty()) 1 else 0) +
+        (if (Conversations.streaming) 1 else 0)
+    LaunchedEffect(dragged, atBottom) {
+        if (dragged) followLatest = atBottom
+        else if (atBottom) followLatest = true
+    }
+    LaunchedEffect(revision, sessionId, listState.layoutInfo.viewportSize.height) {
+        if (followLatest) listState.scrollToItem(bottomIndex)
     }
 
     if (showingSessions) {
@@ -118,7 +133,7 @@ fun ChatScreen(navController: NavController, opening: String) {
                                 "What does my day master need?",
                                 "Cast a hexagram for me"
                             ).forEach { suggestion ->
-                                Chip(suggestion, null, false) { scope.launch { Conversations.send(suggestion) } }
+                                Chip(suggestion, null, false) { followLatest = true; scope.launch { Conversations.send(suggestion) } }
                             }
                         }
                     }
@@ -143,6 +158,16 @@ fun ChatScreen(navController: NavController, opening: String) {
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            if (!atBottom) {
+                FilledTonalButton(
+                    onClick = { followLatest = true; scope.launch { listState.animateScrollToItem(bottomIndex) } },
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                ) {
+                    Icon(Icons.Default.ArrowDownward, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text(t("chat.latest"))
+                }
+            }
             Box(
                 Modifier
                     .fillMaxWidth()
@@ -181,6 +206,7 @@ fun ChatScreen(navController: NavController, opening: String) {
                     PrimaryButton(t("common.send"), enabled = !Conversations.streaming && draft.isNotBlank()) {
                         val text = draft
                         draft = ""
+                        followLatest = true
                         scope.launch { Conversations.send(text) }
                     }
                 }

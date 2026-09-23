@@ -71,6 +71,7 @@ enum Relay {
 
     /// One streamed completion. `onDelta` receives text as it arrives, so the
     /// reading appears a few words at a time rather than all at once.
+    @MainActor
     static func stream(
         messages: [Message],
         tools: [[String: Any]],

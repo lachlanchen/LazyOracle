@@ -30,7 +30,7 @@ a sandbox in its own process. Both call one function with JSON in and JSON out.
 Writing the four pillars or the almanac a second time in Swift and a third in
 Kotlin would look like less work for a week and then quietly disagree with the
 web app about someone's day master, with no test able to catch it. So: native
-interface, native camera, native model runtime when it lands — one set of rules.
+interface, native camera, DeepSeek Flash narration through the relay — one set of rules.
 
 Rebuild the bundle whenever an engine changes:
 
@@ -79,5 +79,6 @@ TestFlight and Play internal testing while the app grows; no formal store
 release yet. Paid from the first day at USD 0.99 and the equivalent tier
 elsewhere, as every LazyingArt app is.
 
-The remaining plan, and what is deliberately not done yet, is in
-`../docs/plans/native-apps.md`.
+Current decisions and unfinished work are in
+[`docs/handoffs/2026-09-23-codex-takeover.md`](../docs/handoffs/2026-09-23-codex-takeover.md).
+The older native/local-model roadmap is historical; on-device LLM work is deferred.

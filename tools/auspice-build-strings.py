@@ -16,6 +16,10 @@ CATALOGUE = json.loads((REPO / "i18n/app/strings.json").read_text())
 LANGS = CATALOGUE["languages"]
 STRINGS = CATALOGUE["strings"]
 
+# The 通书's own vocabulary, glossed rather than replaced: the term itself is
+# always shown, with a short explanation beside it outside Chinese.
+GLOSSARY = json.loads((REPO / "i18n/app/almanac-terms.json").read_text())["terms"]
+
 NAMES = {
     "en": "English", "zh-Hans": "简体中文", "zh-Hant": "繁體中文", "ja": "日本語",
     "ko": "한국어", "vi": "Tiếng Việt", "es": "Español", "fr": "Français",
@@ -53,6 +57,10 @@ def build_swift() -> str:
     for key in sorted(STRINGS):
         pairs = ", ".join(f"{swift_quote(code)}: {swift_quote(STRINGS[key][code])}" for code in LANGS)
         lines.append(f"        {swift_quote(key)}: [{pairs}],")
+    lines += ["    ]", "", "    static let glossary: [String: [String: String]] = ["]
+    for term in sorted(GLOSSARY):
+        pairs = ", ".join(f"{swift_quote(code)}: {swift_quote(GLOSSARY[term][code])}" for code in LANGS)
+        lines.append(f"        {swift_quote(term)}: [{pairs}],")
     lines += ["    ]", "}", ""]
     return "\n".join(lines)
 
@@ -78,6 +86,10 @@ def build_kotlin() -> str:
     for key in sorted(STRINGS):
         pairs = ", ".join(f"{kotlin_quote(code)} to {kotlin_quote(STRINGS[key][code])}" for code in LANGS)
         lines.append(f"        {kotlin_quote(key)} to mapOf({pairs}),")
+    lines += ["    )", "", "    val glossary: Map<String, Map<String, String>> = mapOf("]
+    for term in sorted(GLOSSARY):
+        pairs = ", ".join(f"{kotlin_quote(code)} to {kotlin_quote(GLOSSARY[term][code])}" for code in LANGS)
+        lines.append(f"        {kotlin_quote(term)} to mapOf({pairs}),")
     lines += ["    )", "}", ""]
     return "\n".join(lines)
 

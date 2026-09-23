@@ -196,7 +196,7 @@ private fun MiniTerms(mark: String, terms: List<String>, colour: Color) {
     Row(horizontalArrangement = Arrangement.spacedBy(7.dp)) {
         Text(mark, style = Type.display(15), color = colour)
         Text(
-            terms.take(3).joinToString(" ") + if (terms.size > 3) " …" else "",
+            terms.take(3).joinToString(" · ") { glossed(it) } + if (terms.size > 3) " …" else "",
             style = Type.serif(15),
             color = Palette.inkSoft,
             maxLines = 1

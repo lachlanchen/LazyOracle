@@ -113,7 +113,7 @@ struct HomeScreen: View {
             Text(mark)
                 .font(Typeface.display(15))
                 .foregroundStyle(colour)
-            Text(terms.prefix(3).joined(separator: " ") + (terms.count > 3 ? " …" : ""))
+            Text(terms.prefix(3).map(glossed).joined(separator: " · ") + (terms.count > 3 ? " …" : ""))
                 .font(Typeface.serif(15))
                 .foregroundStyle(Palette.inkSoft)
                 .lineLimit(1)

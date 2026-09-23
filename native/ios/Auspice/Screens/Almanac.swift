@@ -261,7 +261,7 @@ struct AlmanacScreen: View {
                     .foregroundStyle(Palette.inkMute)
             }
             ForEach(terms.isEmpty ? ["—"] : terms, id: \.self) { term in
-                Text(term)
+                Text(glossed(term))
                     .font(Typeface.serif(17))
                     .foregroundStyle(Palette.inkSoft)
             }

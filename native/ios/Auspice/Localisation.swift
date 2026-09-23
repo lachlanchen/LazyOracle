@@ -64,3 +64,17 @@ final class Localisation {
 func t(_ key: String) -> String {
     Catalogue.table[key]?[Localisation.shared.code] ?? Catalogue.table[key]?["en"] ?? key
 }
+
+/// A 通书 term with its explanation beside it.
+///
+/// The term itself is never replaced — 纳采 stays 纳采 — because that is what a
+/// reader would look up. Outside Chinese it is followed by a short gloss, so
+/// the almanac can be used without reading Chinese. In Chinese the term needs
+/// no gloss and gets none.
+func glossed(_ term: String) -> String {
+    let code = Localisation.shared.code
+    guard !code.hasPrefix("zh"), let gloss = Catalogue.glossary[term]?[code], gloss != term else {
+        return term
+    }
+    return "\(term) · \(gloss)"
+}

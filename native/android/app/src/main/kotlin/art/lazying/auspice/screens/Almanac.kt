@@ -169,7 +169,7 @@ private fun TermColumn(mark: String, label: String, terms: List<String>, colour:
             )
         }
         (terms.ifEmpty { listOf("—") }).forEach {
-            Text(it, style = Type.serif(17), color = Palette.inkSoft)
+            Text(glossed(it), style = Type.serif(17), color = Palette.inkSoft)
         }
     }
 }

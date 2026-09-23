@@ -68,3 +68,17 @@ fun t(key: String): String =
     Catalogue.table[key]?.get(Localisation.code)
         ?: Catalogue.table[key]?.get("en")
         ?: key
+
+/**
+ * A 通书 term with its explanation beside it.
+ *
+ * The term itself is never replaced — 纳采 stays 纳采 — because that is what a
+ * reader would look up. Outside Chinese it is followed by a short gloss, so the
+ * almanac can be used without reading Chinese.
+ */
+fun glossed(term: String): String {
+    val code = Localisation.code
+    if (code.startsWith("zh")) return term
+    val gloss = Catalogue.glossary[term]?.get(code) ?: return term
+    return if (gloss == term) term else "$term · $gloss"
+}

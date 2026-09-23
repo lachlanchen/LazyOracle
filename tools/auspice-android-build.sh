@@ -19,7 +19,14 @@ cd native/android
 if [[ "${1:-debug}" == "release" ]]; then
     ./gradlew :app:bundleRelease
     BUNDLE=app/build/outputs/bundle/release/app-release.aab
-    unzip -l "$BUNDLE" | grep -q 'META-INF/.*\.RSA' || { echo "the bundle is not signed" >&2; exit 1; }
+    # Gradle signs the bundle a moment after it reports success, so give the
+    # file a few seconds to settle before deciding it came out unsigned.
+    for _ in 1 2 3 4 5 6; do
+        if unzip -l "$BUNDLE" | grep -q 'META-INF/.*\.RSA'; then signed=yes; break; fi
+        signed=no
+        sleep 2
+    done
+    [[ "$signed" == yes ]] || { echo "the bundle is not signed" >&2; exit 1; }
     echo "signed bundle: $REPO/native/android/$BUNDLE"
 else
     ./gradlew :app:assembleDebug

@@ -15,12 +15,12 @@
 
 <h2>What we collect</h2>
 <p>Auspice has no account, no sign-in and no analytics. LazyingArt LLC does not store your questions, your birth details, your photographs or your readings.</p>
-<p><strong>Written readings.</strong> Every chart, hexagram, draw and almanac page is computed on the device. When you ask for a reading in words, the app sends your question and the computed facts of that reading — for example the cards drawn, or the four pillars — to our own reading service at <code>oracle-fast.lazying.art</code>, which holds the provider key so the app does not have to. The service forwards them to the language-model provider and keeps no copy of the content. Nothing else is sent, and nothing at all is sent while you are only using the practice screens.</p>
+<p><strong>Written readings.</strong> Every chart, hexagram, draw and almanac page is computed on the device. When you ask for a reading in words, the app sends your question, relevant conversation history or its summary, and the computed facts of that reading — for example the cards drawn, the four pillars, or measured hand/face features — to our own reading service at <code>oracle-fast.lazying.art</code>, which holds the provider key so the app does not have to. The service forwards them to the language-model provider and keeps no copy of the content. Birth details included in the conversation or reading context are sent with that request. Raw camera images are not uploaded. Browsing computed practice results without requesting written narration does not send a reading request.</p>
 
 <h2>What stays on your device</h2>
 <ul>
-<li><strong>Birth details</strong> — date, time, sex at birth and birthplace — entered for BaZi, astrology and feng shui. They are stored in the app's own storage and can be changed or cleared at any time from Settings.</li>
-<li><strong>Your conversations.</strong> They are written to a file inside the app and never uploaded. Deleting a conversation deletes it; deleting the app deletes them all.</li>
+<li><strong>Birth details</strong> — date, time, sex at birth and birthplace — entered for BaZi, astrology and feng shui. They are stored in the app's own storage and can be changed or cleared at any time from Settings. Details included in reading or chat context are also sent to the reading service.</li>
+<li><strong>Your conversations.</strong> They are saved to a file inside the app. Relevant turns or a summary are sent to the reading service when you continue a conversation. Deleting a conversation deletes it; deleting the app deletes them all.</li>
 <li><strong>The camera never records.</strong> Palmistry and face reading measure the live camera image in memory to find the twenty-one points of a hand or the mesh of a face. No photograph is taken, saved or uploaded, no face is recognised, and nothing is matched against any database. Only the resulting measurements — proportions and ratios — exist, and only while that screen is open.</li>
 </ul>
 

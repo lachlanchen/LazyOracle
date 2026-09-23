@@ -75,3 +75,50 @@ and 6 did.
 
 Everything after that — bundle ids, certificates, provisioning profiles,
 prices, builds, TestFlight groups — is API work and needs nobody.
+
+## Why there is no downloaded model in Auspice
+
+Tried and withdrawn on 2026-09-23, with the evidence kept because the next
+person to have this idea deserves the numbers rather than the conclusion.
+
+The plan was a local reader for phones Apple's system model will not run on —
+an iPhone SE and anything of its age. llama.cpp was linked and embedded, two
+GGUF models were offered (Gemma 3 1B at 769 MB, Qwen3 1.7B at 1081 MB), and the
+work was split in two so that no part of it asked a small model to do something
+it is bad at: name one computation from a list, then read the computed facts
+back in words.
+
+**The routing half worked perfectly.** A deterministic router keyed on the
+words of the question — "palm"/"手相", "hexagram"/"卦", "desk"/"风水",
+"today"/"今日" — reached 9 of 9 in under a second each, with no model call at
+all. That part is worth keeping and is still in
+`tools/auspice-small-model-test.mjs`.
+
+**The narration half failed in the one way that disqualifies it.** Asked
+今天适合搬家吗？ with the real almanac in front of it —
+
+    engine's 宜: 祭祀 沐浴 修饰垣墙 平治道涂 馀事勿取
+    engine's 忌: 嫁娶 入宅 安床 出行
+
+the model wrote 今日宜嫁娶、入宅、安床、出行，忌祭祀、沐浴… — 宜 and 忌
+inverted while looking straight at them — and then advised 读者可考虑搬家 on a
+day the tables forbid moving house. Asked to open the Book of Answers it added
+日主己土、六合丑未 to a page containing neither.
+
+An app whose whole claim is that the engine decides cannot ship a reader that
+reverses the engine. So the option was removed, llama.cpp unlinked, and
+Automatic now goes to the relay, which is the only reader whose output has been
+measured against the engines and found faithful.
+
+Two lessons worth carrying:
+
+- Instructions are not mechanisms. "Never invent" in a prompt did nothing for a
+  1.7B model with no facts in hand; refusing to call the model at all when no
+  tool has run is what actually prevents it.
+- A reasoning model spends a short token budget entirely on thinking. The first
+  run scored 0 of 8 for that reason alone, which looked like a design failure
+  and was a configuration one. Both were real; only the second was fixable.
+
+If this is revisited, the bar is a 4B-class model or better, and the test
+harness above is how to decide rather than by reading the output once and
+liking it.

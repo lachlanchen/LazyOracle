@@ -169,6 +169,22 @@ enum AgentTools {
 
     static let maxSteps = 6
 
+    /// Every tool, as a name and a sentence. The cloud reader turns these into
+    /// JSON schemas; the on-device reader takes them as they are.
+    static let descriptions: [(name: String, description: String)] = [
+        ("draw_tarot", "Draw a tarot spread from a full shuffle and return the cards with their positions and keywords. Arguments: spread (one, three or celtic) and question."),
+        ("cast_iching", "Cast a hexagram and return the lines, the primary and resulting hexagrams, and where the classical rule says to read. Arguments: method (coins or yarrow) and question."),
+        ("four_pillars", "Compute the reader's BaZi chart from their saved birth details. No arguments."),
+        ("natal_chart", "Compute the reader's natal chart and today's transits against it. No arguments."),
+        ("eight_mansions", "Compute the reader's eight mansions: their gua, group and the quality of each direction. No arguments."),
+        ("open_book", "Open a page of the Book of Answers or the Book of Questions. Arguments: book (answers or questions) and question."),
+        ("birth_details", "Report the birth details saved on this device. No arguments."),
+        ("almanac_day", "The almanac for a date: 宜, 忌, the day officer, the mansion, the spirits and the lucky hours, with a verdict for one undertaking if given. Arguments: date (ISO, defaults to today) and activity."),
+        ("today", "Today's date, the lunar date, and the day's stem and branch. No arguments."),
+        ("read_palm", "Read a hand: returns the measurements if one has been measured, otherwise opens the camera on the palmistry screen. No arguments."),
+        ("read_face", "Read a face: returns the measurements if one has been measured, otherwise opens the camera on the face-reading screen. No arguments."),
+    ]
+
     static func schemas() -> [[String: Any]] {
         func tool(_ name: String, _ description: String, _ properties: [String: Any] = [:]) -> [String: Any] {
             [

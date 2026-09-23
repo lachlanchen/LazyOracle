@@ -46,6 +46,25 @@ final class ChatStore {
     var error: String?
     var tier = "tianji-fast"
 
+    /// Which reader answers. The on-device one is free, private and needs no
+    /// download, so it is preferred wherever the phone can run it.
+    enum Reader: String, CaseIterable {
+        case automatic, onDevice, cloud
+    }
+
+    var reader: Reader = .automatic {
+        didSet { UserDefaults.standard.set(reader.rawValue, forKey: "auspice.reader") }
+    }
+
+    /// The one actually used for the next answer.
+    var effectiveReader: Reader {
+        switch reader {
+        case .automatic: LocalModel.isReady ? .onDevice : .cloud
+        case .onDevice: .onDevice
+        case .cloud: .cloud
+        }
+    }
+
     private let file: URL = {
         let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("Auspice", isDirectory: true)
@@ -58,6 +77,10 @@ final class ChatStore {
     private let budgetCharacters = 24_000
 
     private init() {
+        if let stored = UserDefaults.standard.string(forKey: "auspice.reader"),
+           let known = Reader(rawValue: stored) {
+            reader = known
+        }
         load()
         if sessions.isEmpty {
             sessions = [ChatSession()]
@@ -86,6 +109,14 @@ final class ChatStore {
         if sessions.isEmpty { sessions = [ChatSession()] }
         if currentId == id { currentId = sessions[0].id }
         save()
+    }
+
+    /// Shows a tool line in the log. Called by the on-device reader, which
+    /// runs its own loop and tells us only that a tool fired.
+    func noteTool(_ outcome: AgentTools.Outcome) {
+        var session = current
+        session.turns.append(Turn(kind: .tool, text: outcome.label, ok: outcome.ok))
+        current = session
     }
 
     private func removeTurn(_ id: UUID) {
@@ -138,7 +169,15 @@ final class ChatStore {
         streaming = true
         error = nil
         defer { streaming = false }
+        if effectiveReader == .onDevice {
+            await runOnDevice()
+        } else {
+            await runInCloud()
+        }
+    }
 
+    @MainActor
+    private func runInCloud() async {
         var attempted = Set<String>()
         var emptyReplies = 0
         for step in 0..<AgentTools.maxSteps {
@@ -239,6 +278,44 @@ final class ChatStore {
                 return
             }
         }
+    }
+
+    /// The on-device reader runs its own tool loop, so all this has to do is
+    /// hand it the conversation and append what it writes.
+    @MainActor
+    private func runOnDevice() async {
+        #if canImport(FoundationModels)
+        if #available(iOS 26.0, *) {
+            let transcript = await messagesForModel()
+            let holder = Turn(kind: .oracle, text: "")
+            var opened = false
+            do {
+                _ = try await LocalModel.answer(transcript: transcript) { [weak self] piece in
+                    guard let self else { return }
+                    var session = self.current
+                    if !opened {
+                        opened = true
+                        session.turns.append(holder)
+                    }
+                    if let index = session.turns.lastIndex(where: { $0.id == holder.id }) {
+                        session.turns[index].text += piece
+                    }
+                    self.current = session
+                }
+                save()
+                return
+            } catch {
+                // A refusal or a context overflow on the device is not a dead
+                // end: the relay can still answer, and the reader is told which
+                // one did.
+                var session = current
+                session.turns.removeAll { $0.id == holder.id }
+                session.turns.append(Turn(kind: .note, text: t("local.fellBack"), ok: false))
+                current = session
+            }
+        }
+        #endif
+        await runInCloud()
     }
 
     /// The history, fitted to the budget, with anything older folded into a
@@ -551,6 +628,7 @@ private struct SessionList: View {
 struct SettingsScreen: View {
     @State private var store = ProfileStore.shared
     @State private var localisation = Localisation.shared
+    @State private var chat = ChatStore.shared
     @State private var editing = false
 
     var body: some View {
@@ -568,6 +646,18 @@ struct SettingsScreen: View {
                         }
                     }
                 }
+            }
+
+            Panel(title: t("local.reader")) {
+                FlowRow(spacing: 8) {
+                    Chip(label: t("local.automatic"), active: chat.reader == .automatic) { chat.reader = .automatic }
+                    Chip(label: t("local.onDevice"), active: chat.reader == .onDevice) { chat.reader = .onDevice }
+                    Chip(label: t("local.cloud"), active: chat.reader == .cloud) { chat.reader = .cloud }
+                }
+                Text(LocalModel.readiness.explanation)
+                    .font(Typeface.serif(16))
+                    .foregroundStyle(LocalModel.isReady ? Palette.inkSoft : Palette.inkMute)
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
             Panel(title: t("settings.readings")) {

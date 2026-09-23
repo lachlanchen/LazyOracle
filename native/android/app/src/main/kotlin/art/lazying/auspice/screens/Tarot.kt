@@ -57,22 +57,22 @@ fun TarotScreen(navController: NavController) {
 
     ScreenScaffold(
         navController,
-        eyebrow = "塔罗 · Tarot",
-        title = "Shuffle and draw",
-        tagline = "A full shuffle, seventy-eight cards, no card twice."
+        eyebrow = t("practice.tarot"),
+        title = t("tarot.title"),
+        tagline = t("tarot.tagline")
     ) {
         Panel {
             FlowRowOf {
-                Chip("One card", "单张", spreadId == "one") { spreadId = "one"; draw = null }
-                Chip("Past · Present · Future", "三张", spreadId == "three") { spreadId = "three"; draw = null }
-                Chip("Celtic cross", "凯尔特十字", spreadId == "celtic") { spreadId = "celtic"; draw = null }
+                Chip(t("tarot.draw"), "1", spreadId == "one") { spreadId = "one"; draw = null }
+                Chip(t("tarot.draw"), "3", spreadId == "three") { spreadId = "three"; draw = null }
+                Chip(t("tarot.draw"), "10", spreadId == "celtic") { spreadId = "celtic"; draw = null }
             }
-            FieldLabel("Your question, if you have one")
+            FieldLabel(t("tarot.question"))
             AuspiceField(question) { question = it }
-            PrimaryButton(if (draw == null) "Shuffle and draw" else "Draw again") { dealCount++ }
+            PrimaryButton(if (draw == null) t("tarot.draw") else t("tarot.drawAgain")) { dealCount++ }
         }
 
-        error?.let { Panel(title = "Not drawn") { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
+        error?.let { Panel(title = t("common.notComputed")) { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
 
         draw?.let { result ->
             Panel {
@@ -81,7 +81,7 @@ fun TarotScreen(navController: NavController) {
                 }
                 if (revealed.size < result.cards.size) {
                     Text(
-                        "Tap a card to turn it.",
+                        t("tarot.tapToTurn"),
                         style = Type.sans(13), color = Palette.inkMute,
                         modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center
                     )
@@ -221,7 +221,7 @@ private fun CardReading(card: DrawnCard) {
             Spacer(Modifier.weight(1f))
             if (card.reversed) {
                 Text(
-                    "REVERSED",
+                    t("tarot.reversed"),
                     style = Type.sans(10, FontWeight.Bold).copy(letterSpacing = 1.6.sp),
                     color = Palette.rose
                 )

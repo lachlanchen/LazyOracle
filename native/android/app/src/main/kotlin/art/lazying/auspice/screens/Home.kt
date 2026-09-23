@@ -82,7 +82,7 @@ fun HomeScreen(
                                 )
                         )
                         Text(
-                            "  AUSPICE",
+                            t("app.name").uppercase(),
                             style = Type.display(17).copy(letterSpacing = 1.4.sp),
                             color = Palette.ink
                         )
@@ -98,9 +98,9 @@ fun HomeScreen(
                                 .padding(11.dp)
                         )
                     }
-                    Text("宜时", style = Type.display(44), color = Palette.ink, modifier = Modifier.padding(top = 8.dp))
+                    Text(t("app.name"), style = Type.display(44), color = Palette.ink, modifier = Modifier.padding(top = 8.dp))
                     Text(
-                        "A sign read from what is actually there.",
+                        t("app.tagline"),
                         style = Type.serif(19).copy(fontStyle = FontStyle.Italic),
                         color = Palette.inkSoft
                     )
@@ -113,7 +113,7 @@ fun HomeScreen(
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                                 Text(
-                                    "TODAY",
+                                    t("home.today"),
                                     style = Type.sans(11, FontWeight.Bold).copy(letterSpacing = 2.sp),
                                     color = Palette.gold
                                 )
@@ -139,7 +139,7 @@ fun HomeScreen(
 
             item(span = { GridItemSpan(2) }) {
                 Text(
-                    "Every chart, hexagram and draw is computed on this device. Nothing about your birth leaves it unless you ask for a reading in words.",
+                    t("home.privacy"),
                     style = Type.sans(12),
                     color = Palette.inkMute,
                     modifier = Modifier.padding(top = 6.dp, start = 8.dp, end = 8.dp)
@@ -164,7 +164,7 @@ fun HomeScreen(
             Box(Modifier.weight(1f)) {
                 if (draft.isEmpty()) {
                     Text(
-                        "Ask about today, a chart, a card…",
+                        t("home.ask"),
                         style = Type.sans(16),
                         color = Palette.inkMute
                     )
@@ -236,16 +236,10 @@ private fun Tile(practice: Practice, onClick: () -> Unit) {
                     .background(Palette.gold.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(practice.chinese.take(1), style = Type.display(18), color = Palette.gold)
+                Text(practice.title.take(1).uppercase(), style = Type.display(18), color = Palette.gold)
             }
             Text(practice.title, style = Type.display(19), color = Palette.ink, modifier = Modifier.padding(top = 2.dp))
             Text(practice.blurb, style = Type.serif(15), color = Palette.inkSoft)
         }
-        Text(
-            practice.chinese,
-            style = Type.serif(14),
-            color = Palette.inkMute,
-            modifier = Modifier.align(Alignment.TopEnd)
-        )
     }
 }

@@ -180,7 +180,7 @@ final class ChatStore {
                         var session = current
                         session.turns.append(Turn(
                             kind: .note,
-                            text: "The reading service went quiet. Ask again and it will pick up where it left off.",
+                            text: t("chat.quiet"),
                             ok: false
                         ))
                         current = session
@@ -343,8 +343,8 @@ struct ChatScreen: View {
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
-                    Button { store.newSession() } label: { Label("New conversation", systemImage: "square.and.pencil") }
-                    Button { showingSessions = true } label: { Label("All conversations", systemImage: "clock.arrow.circlepath") }
+                    Button { store.newSession() } label: { Label(t("chat.newConversation"), systemImage: "square.and.pencil") }
+                    Button { showingSessions = true } label: { Label(t("chat.allConversations"), systemImage: "clock.arrow.circlepath") }
                     Divider()
                     Picker("Model", selection: $store.tier) {
                         Text("Tianji Fast 天机快速版").tag("tianji-fast")
@@ -368,7 +368,7 @@ struct ChatScreen: View {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 12) {
                     if store.current.turns.count > visibleTurns {
-                        Text("\(store.current.turns.count - visibleTurns) earlier messages, kept and summarised")
+                        Text("\(store.current.turns.count - visibleTurns) \(t("chat.earlier"))")
                             .font(Typeface.sans(12))
                             .foregroundStyle(Palette.inkMute)
                             .frame(maxWidth: .infinity)
@@ -383,7 +383,7 @@ struct ChatScreen: View {
                     if store.streaming {
                         HStack(spacing: 6) {
                             ProgressView().tint(Palette.gold).scaleEffect(0.8)
-                            Text("reading…").font(Typeface.sans(13)).foregroundStyle(Palette.inkMute)
+                            Text(t("chat.reading")).font(Typeface.sans(13)).foregroundStyle(Palette.inkMute)
                         }
                         .padding(.leading, 4)
                         .id("tail")
@@ -404,7 +404,7 @@ struct ChatScreen: View {
 
     private var opener: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Ask about today, or about a chart.")
+            Text(t("chat.opener"))
                 .font(Typeface.serif(20))
                 .foregroundStyle(Palette.inkSoft)
             FlowRow(spacing: 8) {
@@ -469,7 +469,7 @@ struct ChatScreen: View {
     /// quarter and Send filling the rest.
     private var composer: some View {
         VStack(spacing: 8) {
-            TextField("Ask…", text: $draft, axis: .vertical)
+            TextField(t("chat.ask"), text: $draft, axis: .vertical)
                 .font(Typeface.serif(18))
                 .foregroundStyle(Palette.ink)
                 .focused($composerFocused)
@@ -481,7 +481,7 @@ struct ChatScreen: View {
                     RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Palette.line, lineWidth: 1)
                 )
             HStack(spacing: 10) {
-                Button("Clear") { store.clearCurrent() }
+                Button(t("common.clear")) { store.clearCurrent() }
                     .buttonStyle(GhostButtonStyle())
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .layoutPriority(0)
@@ -490,7 +490,7 @@ struct ChatScreen: View {
                     draft = ""
                     store.send(text)
                 } label: {
-                    Label("Send", systemImage: "arrow.up")
+                    Label(t("common.send"), systemImage: "arrow.up")
                 }
                 .buttonStyle(PrimaryButtonStyle())
                 .disabled(store.streaming || draft.trimmingCharacters(in: .whitespaces).isEmpty)
@@ -524,7 +524,7 @@ private struct SessionList: View {
                                 .font(Typeface.serif(17))
                                 .foregroundStyle(session.id == store.currentId ? Palette.gold : Palette.ink)
                                 .lineLimit(1)
-                            Text("\(session.turns.count) messages · \(session.updated.formatted(date: .abbreviated, time: .shortened))")
+                            Text("\(session.turns.count) \(t("chat.messages")) · \(session.updated.formatted(date: .abbreviated, time: .shortened))")
                                 .font(Typeface.sans(12))
                                 .foregroundStyle(Palette.inkMute)
                         }
@@ -537,11 +537,11 @@ private struct SessionList: View {
             }
             .scrollContentBackground(.hidden)
             .background(Palette.night)
-            .navigationTitle("Conversations")
+            .navigationTitle(t("chat.allConversations"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("New") { store.newSession(); dismiss() }.foregroundStyle(Palette.gold)
+                    Button(t("chat.newConversation")) { store.newSession(); dismiss() }.foregroundStyle(Palette.gold)
                 }
             }
         }
@@ -550,20 +550,34 @@ private struct SessionList: View {
 
 struct SettingsScreen: View {
     @State private var store = ProfileStore.shared
+    @State private var localisation = Localisation.shared
     @State private var editing = false
 
     var body: some View {
-        ScreenScaffold(eyebrow: "Auspice 宜时", title: "Settings") {
+        ScreenScaffold(eyebrow: t("app.name"), title: t("common.settings")) {
             BirthSummary(profile: store.profile) { editing = true }
 
-            Panel(title: "Readings") {
-                Text("Charts, hexagrams, draws and the almanac are computed on this device and never leave it. When you ask for a reading in words, the question and the computed facts go to our own reading service, which holds the provider keys so this app does not have to.")
+            Panel(title: t("settings.language")) {
+                FlowRow(spacing: 8) {
+                    Chip(label: t("settings.languageSystem"), active: localisation.chosen == nil) {
+                        localisation.chosen = nil
+                    }
+                    ForEach(Catalogue.languages, id: \.code) { language in
+                        Chip(label: language.name, active: localisation.chosen == language.code) {
+                            localisation.chosen = language.code
+                        }
+                    }
+                }
+            }
+
+            Panel(title: t("settings.readings")) {
+                Text(t("settings.readingsNote"))
                     .font(Typeface.serif(16))
                     .foregroundStyle(Palette.inkSoft)
                     .fixedSize(horizontal: false, vertical: true)
             }
 
-            Panel(title: "Rules") {
+            Panel(title: t("settings.rules")) {
                 Text("\(Engines.shared.available().count) engines, contract version \(Engines.expectedVersion)")
                     .font(Typeface.serif(16))
                     .foregroundStyle(Palette.inkSoft)
@@ -571,17 +585,17 @@ struct SettingsScreen: View {
                     .font(Typeface.sans(12))
                     .foregroundStyle(Palette.inkMute)
                     .fixedSize(horizontal: false, vertical: true)
-                Text("The same rules the web app runs, built from one source so the two can never disagree.")
+                Text(t("settings.rulesNote"))
                     .font(Typeface.sans(13))
                     .foregroundStyle(Palette.inkMute)
                     .fixedSize(horizontal: false, vertical: true)
             }
 
-            Panel(title: "About") {
-                Text("Auspice 宜时 · LazyingArt LLC")
+            Panel(title: t("settings.about")) {
+                Text("\(t("app.name")) · LazyingArt LLC")
                     .font(Typeface.serif(17))
                     .foregroundStyle(Palette.ink)
-                Text("Version \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "") (\(Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? ""))")
+                Text("\(t("settings.version")) \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "") (\(Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? ""))")
                     .font(Typeface.sans(13))
                     .foregroundStyle(Palette.inkMute)
             }

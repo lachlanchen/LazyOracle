@@ -17,47 +17,9 @@ enum Practice: String, CaseIterable, Hashable, Identifiable {
 
     var id: String { rawValue }
 
-    var name: String {
-        switch self {
-        case .almanac: "Almanac"
-        case .tarot: "Tarot"
-        case .bazi: "BaZi"
-        case .iching: "I Ching"
-        case .astrology: "Astrology"
-        case .fengshui: "Feng Shui"
-        case .palm: "Palmistry"
-        case .face: "Face Reading"
-        case .answers: "Book of Answers"
-        }
-    }
+    var name: String { t("practice.\(rawValue)") }
 
-    var chinese: String {
-        switch self {
-        case .almanac: "黄历"
-        case .tarot: "塔罗"
-        case .bazi: "八字"
-        case .iching: "易经"
-        case .astrology: "星盘"
-        case .fengshui: "风水"
-        case .palm: "手相"
-        case .face: "面相"
-        case .answers: "答案之书"
-        }
-    }
-
-    var blurb: String {
-        switch self {
-        case .almanac: "What today suits, and what it does not"
-        case .tarot: "One card, three, or the Celtic cross"
-        case .bazi: "Four pillars, from the hour you were born"
-        case .iching: "Coins or yarrow, and the lines that change"
-        case .astrology: "The sky at your birth, and where it stands now"
-        case .fengshui: "Your eight mansions, and the sector you face"
-        case .palm: "The hand, measured rather than guessed"
-        case .face: "Three courts, five eyes, twelve palaces"
-        case .answers: "Ask once. The page falls where it falls"
-        }
-    }
+    var blurb: String { t("blurb.\(rawValue)") }
 
     var symbol: String {
         switch self {
@@ -155,5 +117,6 @@ struct ScreenScaffold<Content: View>: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
+        .environment(\.layoutDirection, Localisation.shared.layoutDirection)
     }
 }

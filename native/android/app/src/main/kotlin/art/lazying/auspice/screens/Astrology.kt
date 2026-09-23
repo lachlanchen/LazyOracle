@@ -53,13 +53,13 @@ fun AstrologyScreen(navController: NavController) {
 
     ScreenScaffold(
         navController,
-        eyebrow = "星盘 · Astrology",
-        title = "The sky at your birth",
-        tagline = "Computed from the ephemeris, not from a lookup table."
+        eyebrow = t("practice.astrology"),
+        title = t("astro.title"),
+        tagline = t("astro.tagline")
     ) {
         BirthSummary(profile) { editing = true }
 
-        error?.let { Panel(title = "Not computed") { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
+        error?.let { Panel(title = t("common.notComputed")) { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
 
         chart?.let { c ->
             Panel {
@@ -68,12 +68,12 @@ fun AstrologyScreen(navController: NavController) {
                     Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    AngleLabel("Ascendant", c.ascendant)
-                    AngleLabel("Midheaven", c.midheaven)
+                    AngleLabel(t("astro.ascendant"), c.ascendant)
+                    AngleLabel(t("astro.midheaven"), c.midheaven)
                 }
             }
 
-            Panel(title = "Placements") {
+            Panel(title = t("astro.placements")) {
                 c.placements.forEachIndexed { index, placement ->
                     Row(
                         Modifier.fillMaxWidth().padding(vertical = 5.dp),
@@ -92,14 +92,14 @@ fun AstrologyScreen(navController: NavController) {
                         Text(degreeText(placement.longitude), style = Type.serif(16), color = Palette.inkSoft)
                         if (placement.retrograde) Text("℞", style = Type.display(15), color = Palette.rose)
                         Spacer(Modifier.weight(1f))
-                        Text("House ${placement.house}", style = Type.sans(12), color = Palette.inkMute)
+                        Text("${t("astro.house")} ${placement.house}", style = Type.sans(12), color = Palette.inkMute)
                     }
                     if (index < c.placements.lastIndex) HorizontalDivider(color = Palette.line)
                 }
             }
 
             if (c.aspects.isNotEmpty()) {
-                Panel(title = "Aspects") {
+                Panel(title = t("astro.aspects")) {
                     c.aspects.forEach { aspect ->
                         Row(
                             Modifier.fillMaxWidth().padding(vertical = 4.dp),
@@ -122,7 +122,7 @@ fun AstrologyScreen(navController: NavController) {
             }
 
             report?.takeIf { it.transits.isNotEmpty() }?.let { r ->
-                Panel(title = "Today against your chart") {
+                Panel(title = t("astro.transits")) {
                     r.transits.take(12).forEach { transit ->
                         Row(
                             Modifier.fillMaxWidth().padding(vertical = 3.dp),
@@ -142,7 +142,7 @@ fun AstrologyScreen(navController: NavController) {
                 }
             }
 
-            Panel(title = "Method") {
+            Panel(title = t("common.method")) {
                 Text(
                     "Positions come from the astronomy engine for the exact instant of birth in UTC, with " +
                         "whole-sign houses counted from the ascendant. The moon stands at " +

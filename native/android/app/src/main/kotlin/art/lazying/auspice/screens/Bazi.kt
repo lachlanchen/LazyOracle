@@ -56,25 +56,25 @@ fun BaziScreen(navController: NavController) {
 
     ScreenScaffold(
         navController,
-        eyebrow = "八字 · Four Pillars",
-        title = "Your four pillars",
-        tagline = "Stem and branch for the year, month, day and hour of your birth."
+        eyebrow = t("practice.bazi"),
+        title = t("bazi.title"),
+        tagline = t("bazi.tagline")
     ) {
         BirthSummary(profile) { editing = true }
 
-        error?.let { Panel(title = "Not computed") { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
+        error?.let { Panel(title = t("common.notComputed")) { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
 
         chart?.let { c ->
             Panel {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    PillarColumn("Hour", c.pillars.hour, false, Modifier.weight(1f))
-                    PillarColumn("Day", c.pillars.day, true, Modifier.weight(1f))
-                    PillarColumn("Month", c.pillars.month, false, Modifier.weight(1f))
-                    PillarColumn("Year", c.pillars.year, false, Modifier.weight(1f))
+                    PillarColumn(t("bazi.hour"), c.pillars.hour, false, Modifier.weight(1f))
+                    PillarColumn(t("bazi.day"), c.pillars.day, true, Modifier.weight(1f))
+                    PillarColumn(t("bazi.month"), c.pillars.month, false, Modifier.weight(1f))
+                    PillarColumn(t("bazi.year"), c.pillars.year, false, Modifier.weight(1f))
                 }
             }
 
-            Panel(title = "Day master") {
+            Panel(title = t("bazi.dayMaster")) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(c.dayMaster.stem, style = Type.display(40), color = elementColour(c.dayMaster.element))
                     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -87,7 +87,7 @@ fun BaziScreen(navController: NavController) {
                 }
                 if (c.favourable.isNotEmpty()) {
                     Text(
-                        "Favourable: " + c.favourable.joinToString(" · ") { "$it ${ELEMENT_NAMES[it] ?: ""}" },
+                        t("bazi.favourable") + ": " + c.favourable.joinToString(" · ") { "$it ${ELEMENT_NAMES[it] ?: ""}" },
                         style = Type.serif(16), color = Palette.inkSoft
                     )
                 }
@@ -97,7 +97,7 @@ fun BaziScreen(navController: NavController) {
                 )
             }
 
-            Panel(title = "The five elements") {
+            Panel(title = t("bazi.elements")) {
                 ELEMENT_ORDER.forEach { element ->
                     val value = c.elements[element] ?: 0.0
                     val fraction by animateFloatAsState(
@@ -131,7 +131,7 @@ fun BaziScreen(navController: NavController) {
                 }
             }
 
-            Panel(title = "Luck cycles") {
+            Panel(title = t("bazi.luck")) {
                 Text(
                     "The first cycle begins at ${c.luckStart.years} years and ${c.luckStart.months} months, " +
                         "counted from birth to the governing solar term.",
@@ -161,7 +161,7 @@ fun BaziScreen(navController: NavController) {
                 }
             }
 
-            Panel(title = "Method") {
+            Panel(title = t("common.method")) {
                 Text(
                     "子平法: the pillars are taken from the solar terms, not the lunar month, and the hour " +
                         "pillar from true solar time. Your birth time was corrected by " +
@@ -211,7 +211,7 @@ private fun PillarColumn(label: String, pillar: Pillar, isDay: Boolean, modifier
 }
 
 private fun strengthLine(strength: String) = when (strength) {
-    "strong" -> "Strong at the root, and well supported."
-    "weak" -> "Weak at the root, and in need of support."
-    else -> "Balanced between support and drain."
+    "strong" -> t("bazi.strong")
+    "weak" -> t("bazi.weak")
+    else -> t("bazi.balanced")
 }

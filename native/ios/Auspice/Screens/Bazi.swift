@@ -12,14 +12,14 @@ struct BaziScreen: View {
 
     var body: some View {
         ScreenScaffold(
-            eyebrow: "八字 · Four Pillars",
-            title: "Your four pillars",
-            tagline: "Stem and branch for the year, month, day and hour of your birth."
+            eyebrow: t("practice.bazi"),
+            title: t("bazi.title"),
+            tagline: t("bazi.tagline")
         ) {
             BirthSummary(profile: store.profile) { editing = true }
 
             if let error {
-                Panel(title: "Not computed") {
+                Panel(title: t("common.notComputed")) {
                     Text(error).font(Typeface.serif(16)).foregroundStyle(Palette.inkSoft)
                 }
             }
@@ -41,15 +41,15 @@ struct BaziScreen: View {
     private func pillarsPanel(_ chart: BaziChart) -> some View {
         Panel {
             HStack(spacing: 8) {
-                pillarColumn("Hour", "时", chart.pillars.hour, isDay: false)
-                pillarColumn("Day", "日", chart.pillars.day, isDay: true)
-                pillarColumn("Month", "月", chart.pillars.month, isDay: false)
-                pillarColumn("Year", "年", chart.pillars.year, isDay: false)
+                pillarColumn(t("bazi.hour"), chart.pillars.hour, isDay: false)
+                pillarColumn(t("bazi.day"), chart.pillars.day, isDay: true)
+                pillarColumn(t("bazi.month"), chart.pillars.month, isDay: false)
+                pillarColumn(t("bazi.year"), chart.pillars.year, isDay: false)
             }
         }
     }
 
-    private func pillarColumn(_ label: String, _ mark: String, _ pillar: Pillar, isDay: Bool) -> some View {
+    private func pillarColumn(_ label: String, _ pillar: Pillar, isDay: Bool) -> some View {
         VStack(spacing: 6) {
             Text(label.uppercased())
                 .font(Typeface.sans(10, weight: .bold))
@@ -97,7 +97,7 @@ struct BaziScreen: View {
     }
 
     private func dayMasterPanel(_ chart: BaziChart) -> some View {
-        Panel(title: "Day master") {
+        Panel(title: t("bazi.dayMaster")) {
             HStack(alignment: .firstTextBaseline, spacing: 10) {
                 Text(chart.dayMaster.stem)
                     .font(Typeface.display(40))
@@ -113,7 +113,7 @@ struct BaziScreen: View {
                 Spacer(minLength: 0)
             }
             if !chart.favourable.isEmpty {
-                Text("Favourable: " + chart.favourable.map { "\($0) \(elementNames[$0] ?? "")" }.joined(separator: " · "))
+                Text(t("bazi.favourable") + ": " + chart.favourable.map { "\($0) \(elementNames[$0] ?? "")" }.joined(separator: " · "))
                     .font(Typeface.serif(16))
                     .foregroundStyle(Palette.inkSoft)
                     .fixedSize(horizontal: false, vertical: true)
@@ -126,7 +126,7 @@ struct BaziScreen: View {
     }
 
     private func elementsPanel(_ chart: BaziChart) -> some View {
-        Panel(title: "The five elements") {
+        Panel(title: t("bazi.elements")) {
             VStack(spacing: 10) {
                 ForEach(elementOrder, id: \.self) { element in
                     HStack(spacing: 10) {
@@ -161,7 +161,7 @@ struct BaziScreen: View {
     }
 
     private func luckPanel(_ chart: BaziChart) -> some View {
-        Panel(title: "Luck cycles") {
+        Panel(title: t("bazi.luck")) {
             Text("The first cycle begins at \(chart.luckStart.years) years and \(chart.luckStart.months) months, counted from birth to the governing solar term.")
                 .font(Typeface.serif(16))
                 .foregroundStyle(Palette.inkSoft)
@@ -198,7 +198,7 @@ struct BaziScreen: View {
     }
 
     private func methodPanel(_ chart: BaziChart) -> some View {
-        Panel(title: "Method") {
+        Panel(title: t("common.method")) {
             Text("子平法: the pillars are taken from the solar terms, not the lunar month, and the hour pillar from true solar time. Your birth time was corrected by \(Int(chart.solarCorrectionMinutes.rounded())) minutes for longitude and the equation of time.")
                 .font(Typeface.serif(16))
                 .foregroundStyle(Palette.inkSoft)
@@ -221,9 +221,9 @@ struct BaziScreen: View {
 
     private func strengthLine(_ chart: BaziChart) -> String {
         switch chart.strength {
-        case "strong": "Strong at the root, and well supported."
-        case "weak": "Weak at the root, and in need of support."
-        default: "Balanced between support and drain."
+        case "strong": t("bazi.strong")
+        case "weak": t("bazi.weak")
+        default: t("bazi.balanced")
         }
     }
 

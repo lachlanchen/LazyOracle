@@ -62,7 +62,7 @@ fun ScreenScaffold(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Palette.inkSoft)
-            Text("  Back", style = Type.sans(14, FontWeight.SemiBold), color = Palette.inkSoft)
+            Text("  " + t("common.back"), style = Type.sans(14, FontWeight.SemiBold), color = Palette.inkSoft)
         }
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Eyebrow(eyebrow)

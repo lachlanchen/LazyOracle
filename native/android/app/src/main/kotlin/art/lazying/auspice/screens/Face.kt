@@ -63,9 +63,9 @@ fun FaceScreen(navController: NavController) {
 
     ScreenScaffold(
         navController,
-        eyebrow = "面相 · Face reading",
-        title = "Three courts, five eyes",
-        tagline = "The proportions the old handbooks measure, measured."
+        eyebrow = t("practice.face"),
+        title = t("face.title"),
+        tagline = t("face.tagline")
     ) {
         Panel {
             Box(
@@ -85,7 +85,7 @@ fun FaceScreen(navController: NavController) {
                     LandmarkOverlay(session.overlay, joined = false, modifier = Modifier.fillMaxSize())
                     if (!session.detecting) {
                         Text(
-                            "Face the camera, level, in even light",
+                            t("face.hint"),
                             style = Type.serif(17), color = Palette.ink,
                             modifier = Modifier
                                 .clip(CircleShape)
@@ -96,27 +96,26 @@ fun FaceScreen(navController: NavController) {
                     CameraFlipButton(session, owner, Modifier.align(Alignment.TopEnd))
                 } else {
                     Text(
-                        "Auspice needs the camera to read a face.",
+                        t("camera.needed"),
                         style = Type.serif(17), color = Palette.inkSoft, textAlign = TextAlign.Center
                     )
                 }
             }
             session.message?.let { Text(it, style = Type.sans(13), color = Palette.inkMute) }
             PrimaryButton(
-                if (features == null) "Read this face" else "Read it again",
+                if (features == null) t("face.read") else t("palm.readAgain"),
                 enabled = session.detecting
             ) { reads++ }
             Text(
-                "The picture is never saved and never leaves this device; only the measurements are kept, " +
-                    "and only while you are on this screen.",
+                t("face.privacy"),
                 style = Type.sans(12), color = Palette.inkMute
             )
         }
 
-        error?.let { Panel(title = "Not read") { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
+        error?.let { Panel(title = t("common.notComputed")) { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
 
         features?.let { f ->
-            Panel(title = "Five-element type") {
+            Panel(title = t("face.element")) {
                 Text(ELEMENT_FACES[f.element] ?: f.element, style = Type.display(28), color = Palette.gold)
                 Text(
                     "Read from the height of the face against its width, and from how the jaw and forehead " +
@@ -125,7 +124,7 @@ fun FaceScreen(navController: NavController) {
                 )
             }
 
-            Panel(title = "The three courts") {
+            Panel(title = t("face.courts")) {
                 f.courts.forEach { court ->
                     Row(
                         Modifier.fillMaxWidth().padding(vertical = 4.dp),
@@ -159,7 +158,7 @@ fun FaceScreen(navController: NavController) {
                 )
             }
 
-            Panel(title = "Proportion") {
+            Panel(title = t("face.proportion")) {
                 Measure("Eyes across the face (ideal 5.00)", String.format("%.2f", f.eyesAcross))
                 Measure("Gap between the eyes (ideal 1.00)", String.format("%.2f", f.eyeGap))
                 Measure("Height to width", String.format("%.2f", f.heightRatio))
@@ -168,7 +167,7 @@ fun FaceScreen(navController: NavController) {
                 Measure("Symmetry (ideal 1.000)", String.format("%.3f", f.symmetry))
             }
 
-            Panel(title = "The twelve palaces") {
+            Panel(title = t("face.palaces")) {
                 f.palaces.forEach { palace ->
                     Row(
                         Modifier.fillMaxWidth().padding(vertical = 3.dp),
@@ -193,7 +192,7 @@ fun FaceScreen(navController: NavController) {
                 }
             }
 
-            Panel(title = "Method") {
+            Panel(title = t("common.method")) {
                 Text(
                     "三停五眼: the face is divided at the hairline, the brows, the base of the nose and the " +
                         "chin, and its width is counted in eye-widths. Eight of the twelve palaces are measured " +

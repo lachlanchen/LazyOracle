@@ -15,7 +15,7 @@ struct HomeScreen: View {
                     header
                     todayStrip
                     grid
-                    Text("Every chart, hexagram and draw is computed on this device. Nothing about your birth leaves it unless you ask for a reading in words.")
+                    Text(t("home.privacy"))
                         .font(Typeface.sans(12))
                         .foregroundStyle(Palette.inkMute)
                         .multilineTextAlignment(.center)
@@ -53,7 +53,7 @@ struct HomeScreen: View {
                     )
                     .frame(width: 22, height: 22)
                     .shadow(color: Palette.gold.opacity(0.45), radius: 9)
-                Text("AUSPICE")
+                Text(t("app.name").uppercased())
                     .font(Typeface.display(17))
                     .tracking(1.4)
                     .foregroundStyle(Palette.ink)
@@ -66,11 +66,11 @@ struct HomeScreen: View {
                 }
             }
             .padding(.top, 6)
-            Text("宜时")
+            Text(t("app.name"))
                 .font(Typeface.display(44))
                 .foregroundStyle(Palette.ink)
                 .padding(.top, 8)
-            Text("A sign read from what is actually there.")
+            Text(t("app.tagline"))
                 .font(Typeface.serif(19))
                 .italic()
                 .foregroundStyle(Palette.inkSoft)
@@ -84,7 +84,7 @@ struct HomeScreen: View {
                 Panel {
                     HStack(alignment: .top, spacing: 12) {
                         VStack(alignment: .leading, spacing: 3) {
-                            Text("TODAY")
+                            Text(t("home.today"))
                                 .font(Typeface.sans(11, weight: .bold))
                                 .tracking(2)
                                 .foregroundStyle(Palette.gold)
@@ -158,12 +158,6 @@ struct HomeScreen: View {
             RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .strokeBorder(practice == .tarot ? Palette.goldLine : Palette.line, lineWidth: 1)
         )
-        .overlay(alignment: .topTrailing) {
-            Text(practice.chinese)
-                .font(Typeface.serif(14))
-                .foregroundStyle(Palette.inkMute)
-                .padding(12)
-        }
     }
 
     private func tileBackground(_ practice: Practice) -> some ShapeStyle {
@@ -186,7 +180,7 @@ struct HomeScreen: View {
         HStack(spacing: 10) {
             Image(systemName: "sparkles")
                 .foregroundStyle(Palette.gold)
-            TextField("Ask about today, a chart, a card…", text: $draft)
+            TextField(t("home.ask"), text: $draft)
                 .font(Typeface.sans(16))
                 .foregroundStyle(Palette.ink)
                 .submitLabel(.send)

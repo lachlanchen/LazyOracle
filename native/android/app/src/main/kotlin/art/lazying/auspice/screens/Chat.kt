@@ -100,7 +100,7 @@ fun ChatScreen(navController: NavController, opening: String) {
             if (turns.size > VISIBLE_TURNS) {
                 item {
                     Text(
-                        "${turns.size - VISIBLE_TURNS} earlier messages, kept and summarised",
+                        "${turns.size - VISIBLE_TURNS} ${t("chat.earlier")}",
                         style = Type.sans(12), color = Palette.inkMute,
                         modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
                         textAlign = TextAlign.Center
@@ -110,7 +110,7 @@ fun ChatScreen(navController: NavController, opening: String) {
             if (turns.isEmpty()) {
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.padding(top = 8.dp)) {
-                        Text("Ask about today, or about a chart.", style = Type.serif(20), color = Palette.inkSoft)
+                        Text(t("chat.opener"), style = Type.serif(20), color = Palette.inkSoft)
                         FlowRowOf {
                             listOf(
                                 "Is today good for signing a contract?",
@@ -129,7 +129,7 @@ fun ChatScreen(navController: NavController, opening: String) {
                 item {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         CircularProgressIndicator(Modifier.size(14.dp), color = Palette.gold, strokeWidth = 2.dp)
-                        Text("reading…", style = Type.sans(13), color = Palette.inkMute)
+                        Text(t("chat.reading"), style = Type.sans(13), color = Palette.inkMute)
                     }
                 }
             }
@@ -152,7 +152,7 @@ fun ChatScreen(navController: NavController, opening: String) {
                     .padding(horizontal = 14.dp, vertical = 10.dp)
             ) {
                 if (draft.isEmpty()) {
-                    Text("Ask…", style = Type.serif(18), color = Palette.inkMute)
+                    Text(t("chat.ask"), style = Type.serif(18), color = Palette.inkMute)
                 }
                 BasicTextField(
                     value = draft,
@@ -174,11 +174,11 @@ fun ChatScreen(navController: NavController, opening: String) {
                             .padding(horizontal = 16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Clear", style = Type.sans(14, FontWeight.Bold), color = Palette.gold)
+                        Text(t("common.clear"), style = Type.sans(14, FontWeight.Bold), color = Palette.gold)
                     }
                 }
                 Box(Modifier.weight(3f)) {
-                    PrimaryButton("Send", enabled = !Conversations.streaming && draft.isNotBlank()) {
+                    PrimaryButton(t("common.send"), enabled = !Conversations.streaming && draft.isNotBlank()) {
                         val text = draft
                         draft = ""
                         scope.launch { Conversations.send(text) }
@@ -231,7 +231,7 @@ private fun SessionList(onDismiss: () -> Unit) {
                 .padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Text("Conversations", style = Type.display(22), color = Palette.ink)
+            Text(t("chat.allConversations"), style = Type.display(22), color = Palette.ink)
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(Conversations.sessions.toList(), key = { it.id }) { session ->
                     Row(
@@ -250,7 +250,7 @@ private fun SessionList(onDismiss: () -> Unit) {
                                 color = if (session.id == Conversations.currentId) Palette.gold else Palette.ink,
                                 maxLines = 1
                             )
-                            Text("${session.turns.size} messages", style = Type.sans(12), color = Palette.inkMute)
+                            Text("${session.turns.size} ${t("chat.messages")}", style = Type.sans(12), color = Palette.inkMute)
                         }
                         Text(
                             "Delete",
@@ -261,7 +261,7 @@ private fun SessionList(onDismiss: () -> Unit) {
                     }
                 }
             }
-            PrimaryButton("New conversation") { Conversations.newConversation(); onDismiss() }
+            PrimaryButton(t("chat.newConversation")) { Conversations.newConversation(); onDismiss() }
         }
     }
 }
@@ -272,14 +272,23 @@ fun SettingsScreen(navController: NavController) {
     val profile = Profiles.profile
     if (editing) BirthFormDialog(profile, { editing = false }) { Profiles.save(it) }
 
-    ScreenScaffold(navController, "Auspice 宜时", "Settings") {
+    ScreenScaffold(navController, t("app.name"), t("common.settings")) {
         BirthSummary(profile) { editing = true }
 
-        Panel(title = "Readings") {
+        Panel(title = t("settings.language")) {
+            FlowRowOf {
+                Chip(t("settings.languageSystem"), null, Localisation.chosen == null) {
+                    Localisation.choose(null)
+                }
+                Catalogue.languages.forEach { (code, name) ->
+                    Chip(name, null, Localisation.chosen == code) { Localisation.choose(code) }
+                }
+            }
+        }
+
+        Panel(title = t("settings.readings")) {
             Text(
-                "Charts, hexagrams, draws and the almanac are computed on this device and never leave it. " +
-                    "When you ask for a reading in words, the question and the computed facts go to our own " +
-                    "reading service, which holds the provider keys so this app does not have to.",
+                t("settings.readingsNote"),
                 style = Type.serif(16), color = Palette.inkSoft
             )
             FlowRowOf {
@@ -292,22 +301,21 @@ fun SettingsScreen(navController: NavController) {
             }
         }
 
-        Panel(title = "Rules") {
+        Panel(title = t("settings.rules")) {
             Text(
                 if (Engines.ready) "Loaded, contract version ${Engines.EXPECTED_VERSION}"
                 else Engines.startupError ?: "Loading…",
                 style = Type.serif(16), color = if (Engines.ready) Palette.inkSoft else Palette.rose
             )
             Text(
-                "The same rules the web app and the iOS app run, built from one source so the three can " +
-                    "never disagree.",
+                t("settings.rulesNote"),
                 style = Type.sans(13), color = Palette.inkMute
             )
         }
 
-        Panel(title = "About") {
-            Text("Auspice 宜时 · LazyingArt LLC", style = Type.serif(17), color = Palette.ink)
-            Text("Version ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})", style = Type.sans(13), color = Palette.inkMute)
+        Panel(title = t("settings.about")) {
+            Text("${t("app.name")} · LazyingArt LLC", style = Type.serif(17), color = Palette.ink)
+            Text("${t("settings.version")} ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})", style = Type.sans(13), color = Palette.inkMute)
         }
     }
 }

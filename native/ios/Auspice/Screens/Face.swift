@@ -14,16 +14,16 @@ struct FaceScreen: View {
 
     var body: some View {
         ScreenScaffold(
-            eyebrow: "面相 · Face reading",
-            title: "Three courts, five eyes",
-            tagline: "The proportions the old handbooks measure, measured."
+            eyebrow: t("practice.face"),
+            title: t("face.title"),
+            tagline: t("face.tagline")
         ) {
             Panel {
                 ZStack {
                     CameraView(session: camera.session)
                     LandmarkOverlay(points: camera.overlay, joined: false)
                     if !camera.detecting {
-                        Text("Face the camera, level, in even light")
+                        Text(t("face.hint"))
                             .font(Typeface.serif(17))
                             .foregroundStyle(Palette.ink)
                             .padding(.horizontal, 14)
@@ -42,25 +42,25 @@ struct FaceScreen: View {
                     Text(message).font(Typeface.sans(13)).foregroundStyle(Palette.inkMute)
                 }
                 Button(action: read) {
-                    Label(captured ? "Read it again" : "Read this face", systemImage: "face.smiling")
+                    Label(captured ? t("palm.readAgain") : t("face.read"), systemImage: "face.smiling")
                 }
                 .buttonStyle(PrimaryButtonStyle())
                 .disabled(!camera.detecting)
                 .opacity(camera.detecting ? 1 : 0.5)
-                Text("The picture is never saved and never leaves this device; only the measurements are kept, and only while you are on this screen.")
+                Text(t("face.privacy"))
                     .font(Typeface.sans(12))
                     .foregroundStyle(Palette.inkMute)
                     .fixedSize(horizontal: false, vertical: true)
             }
 
             if let error {
-                Panel(title: "Not read") {
+                Panel(title: t("common.notComputed")) {
                     Text(error).font(Typeface.serif(16)).foregroundStyle(Palette.inkSoft)
                 }
             }
 
             if let features {
-                Panel(title: "Five-element type") {
+                Panel(title: t("face.element")) {
                     Text(elementNames[features.element] ?? features.element)
                         .font(Typeface.display(28))
                         .foregroundStyle(Palette.gold)
@@ -70,7 +70,7 @@ struct FaceScreen: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
-                Panel(title: "The three courts") {
+                Panel(title: t("face.courts")) {
                     ForEach(features.courts) { court in
                         HStack(spacing: 10) {
                             Text(courtNames[court.court] ?? court.court)
@@ -99,7 +99,7 @@ struct FaceScreen: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
-                Panel(title: "Proportion") {
+                Panel(title: t("face.proportion")) {
                     measure("Eyes across the face", String(format: "%.2f", features.eyesAcross), ideal: "5.00")
                     measure("Gap between the eyes", String(format: "%.2f", features.eyeGap), ideal: "1.00")
                     measure("Height to width", String(format: "%.2f", features.heightRatio), ideal: nil)
@@ -108,7 +108,7 @@ struct FaceScreen: View {
                     measure("Symmetry", String(format: "%.3f", features.symmetry), ideal: "1.000")
                 }
 
-                Panel(title: "The twelve palaces") {
+                Panel(title: t("face.palaces")) {
                     ForEach(features.palaces) { palace in
                         HStack(spacing: 10) {
                             Text(palace.palace)
@@ -133,7 +133,7 @@ struct FaceScreen: View {
                     }
                 }
 
-                Panel(title: "Method") {
+                Panel(title: t("common.method")) {
                     Text("三停五眼: the face is divided at the hairline, the brows, the base of the nose and the chin, and its width is counted in eye-widths. Eight of the twelve palaces are measured here; the rest ask for things a landmark mesh cannot see, and the app does not pretend otherwise.")
                         .font(Typeface.serif(16))
                         .foregroundStyle(Palette.inkSoft)

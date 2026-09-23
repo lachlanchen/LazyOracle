@@ -9,27 +9,27 @@ struct IChingScreen: View {
 
     var body: some View {
         ScreenScaffold(
-            eyebrow: "易经 · I Ching",
-            title: "Cast the lines",
-            tagline: "Six throws, from the bottom up, as the Zhou ritual has it."
+            eyebrow: t("practice.iching"),
+            title: t("iching.title"),
+            tagline: t("iching.tagline")
         ) {
             Panel {
                 FlowRow(spacing: 8) {
-                    Chip(label: "Three coins", detail: "三枚铜钱", active: method == "coins") { method = "coins" }
-                    Chip(label: "Yarrow stalks", detail: "蓍草", active: method == "yarrow") { method = "yarrow" }
+                    Chip(label: t("iching.coins"), active: method == "coins") { method = "coins" }
+                    Chip(label: t("iching.yarrow"), active: method == "yarrow") { method = "yarrow" }
                 }
-                FieldLabel("Your question")
+                FieldLabel(t("tarot.question"))
                 TextField("", text: $question, axis: .vertical)
                     .textFieldStyle(AuspiceFieldStyle())
                     .lineLimit(1...3)
                 Button(action: throwLines) {
-                    Label(cast == nil ? "Cast the lines" : "Cast again", systemImage: "circle.hexagongrid")
+                    Label(t("iching.title"), systemImage: "circle.hexagongrid")
                 }
                 .buttonStyle(PrimaryButtonStyle())
             }
 
             if let error {
-                Panel(title: "Not cast") {
+                Panel(title: t("common.notComputed")) {
                     Text(error).font(Typeface.serif(16)).foregroundStyle(Palette.inkSoft)
                 }
             }
@@ -62,7 +62,7 @@ struct IChingScreen: View {
                 }
 
                 if shown >= 6 {
-                    Panel(title: "The judgement") {
+                    Panel(title: t("iching.judgement")) {
                         Text(cast.primary.judgement)
                             .font(Typeface.serif(20))
                             .foregroundStyle(Palette.ink)
@@ -77,7 +77,7 @@ struct IChingScreen: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
 
-                    Panel(title: "Where to read") {
+                    Panel(title: t("iching.whereToRead")) {
                         Text(focusLine(cast))
                             .font(Typeface.serif(17))
                             .foregroundStyle(Palette.inkSoft)
@@ -89,7 +89,7 @@ struct IChingScreen: View {
                     }
 
                     if let resulting = cast.resulting {
-                        Panel(title: "It becomes") {
+                        Panel(title: t("iching.becomes")) {
                             HStack(spacing: 20) {
                                 HexagramView(lines: resulting.lines.map { CastLine(value: $0, yang: $0 == 1, changing: false, coins: nil) }, shown: 6)
                                 VStack(alignment: .leading, spacing: 4) {
@@ -109,7 +109,7 @@ struct IChingScreen: View {
                         }
                     }
 
-                    Panel(title: "Behind the hexagram") {
+                    Panel(title: t("iching.behind")) {
                         relative("互卦 Nuclear", cast.nuclear)
                         relative("错卦 Opposite", cast.opposite)
                         relative("综卦 Inverse", cast.inverse)

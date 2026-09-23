@@ -52,9 +52,9 @@ fun AlmanacScreen(navController: NavController) {
 
     ScreenScaffold(
         navController,
-        eyebrow = "黄历 · Almanac",
-        title = "What today suits",
-        tagline = "The old tables, read for a single day."
+        eyebrow = t("practice.almanac"),
+        title = t("almanac.title"),
+        tagline = t("almanac.tagline")
     ) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Icon(
@@ -77,7 +77,7 @@ fun AlmanacScreen(navController: NavController) {
         }
 
         error?.let {
-            Panel(title = "Not computed") { Text(it, style = Type.serif(16), color = Palette.inkSoft) }
+            Panel(title = t("common.notComputed")) { Text(it, style = Type.serif(16), color = Palette.inkSoft) }
         }
 
         day?.let { d ->
@@ -102,10 +102,10 @@ fun AlmanacScreen(navController: NavController) {
                 )
             }
 
-            Panel(title = "Can I do it today") {
+            Panel(title = t("almanac.canIDoIt")) {
                 FlowRowOf {
                     activities.forEach { item ->
-                        Chip(item.name.en, item.name.zh, activity == item.id) {
+                        Chip(if (Localisation.code.startsWith("zh")) item.name.zh else item.name.en, null, activity == item.id) {
                             activity = if (activity == item.id) null else item.id
                         }
                     }
@@ -121,12 +121,12 @@ fun AlmanacScreen(navController: NavController) {
 
             Panel {
                 Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                    TermColumn("宜", "Suits", d.yi, Palette.gold, Modifier.weight(1f))
-                    TermColumn("忌", "Avoid", d.ji, Palette.rose, Modifier.weight(1f))
+                    TermColumn("宜", t("common.suits"), d.yi, Palette.gold, Modifier.weight(1f))
+                    TermColumn("忌", t("common.avoid"), d.ji, Palette.rose, Modifier.weight(1f))
                 }
             }
 
-            Panel(title = "Hours") {
+            Panel(title = t("almanac.hours")) {
                 d.hours.forEachIndexed { index, hour ->
                     Row(Modifier.fillMaxWidth().padding(vertical = 7.dp), verticalAlignment = Alignment.CenterVertically) {
                         Text(
@@ -141,7 +141,7 @@ fun AlmanacScreen(navController: NavController) {
                 }
             }
 
-            Panel(title = "The tables") {
+            Panel(title = t("almanac.tables")) {
                 TableRow("干支", "${d.lunar.yearGanZhi}年 ${d.lunar.monthGanZhi}月 ${d.lunar.dayGanZhi}日 · 属${d.lunar.zodiac}")
                 TableRow("建除", "${d.dayOfficer}日")
                 TableRow("二十八宿", "${d.mansion.name}${d.mansion.animal} · ${d.mansion.direction}方${d.mansion.beast}")
@@ -188,9 +188,9 @@ private fun TableRow(label: String, value: String) {
 }
 
 private fun standingWord(standing: String) = when (standing) {
-    "auspicious" -> "A yellow-road day"
-    "inauspicious" -> "A black-road day"
-    else -> "A mixed day"
+    "auspicious" -> t("almanac.yellowDay")
+    "inauspicious" -> t("almanac.blackDay")
+    else -> t("almanac.mixedDay")
 }
 
 private fun standingColour(standing: String) = when (standing) {
@@ -200,9 +200,9 @@ private fun standingColour(standing: String) = when (standing) {
 }
 
 private fun verdictWord(verdict: String) = when (verdict) {
-    "suitable" -> "Yes — the day suits it"
-    "avoid" -> "No — the day is against it"
-    else -> "The almanac is silent"
+    "suitable" -> t("almanac.yes")
+    "avoid" -> t("almanac.no")
+    else -> t("almanac.silent")
 }
 
 private fun verdictColour(verdict: String) = when (verdict) {

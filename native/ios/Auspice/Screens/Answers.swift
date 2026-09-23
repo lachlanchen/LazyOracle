@@ -9,28 +9,28 @@ struct AnswersScreen: View {
 
     var body: some View {
         ScreenScaffold(
-            eyebrow: "答案之书 · The books",
-            title: "Open the book",
-            tagline: "Hold the question. Let the page fall where it falls."
+            eyebrow: t("practice.answers"),
+            title: t("answers.title"),
+            tagline: t("answers.tagline")
         ) {
             Panel {
                 FlowRow(spacing: 8) {
-                    Chip(label: "Book of Answers", detail: "答案之书", active: book == "answers") { book = "answers" }
+                    Chip(label: t("practice.answers"), active: book == "answers") { book = "answers" }
                     Chip(label: "Book of Questions", detail: "问题之书", active: book == "questions") { book = "questions" }
                 }
-                FieldLabel("What you are asking")
+                FieldLabel(t("answers.whatAsking"))
                 TextField("", text: $question, axis: .vertical)
                     .textFieldStyle(AuspiceFieldStyle())
                     .lineLimit(1...4)
                 Button(action: turn) {
-                    Label(opening == nil ? "Open the book" : "Open it again", systemImage: "book")
+                    Label(t("answers.title"), systemImage: "book")
                 }
                 .buttonStyle(PrimaryButtonStyle())
                 .padding(.top, 6)
             }
 
             if let error {
-                Panel(title: "Not opened") {
+                Panel(title: t("common.notComputed")) {
                     Text(error).font(Typeface.serif(16)).foregroundStyle(Palette.inkSoft)
                 }
             }
@@ -45,7 +45,7 @@ struct AnswersScreen: View {
 
     private func page(_ opening: BookOpening) -> some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("PAGE \(opening.page.number)")
+            Text("\(t("answers.page")) \(opening.page.number)")
                 .font(Typeface.sans(11, weight: .bold))
                 .tracking(2.4)
                 .foregroundStyle(Color(hex: 0x8A6A22))

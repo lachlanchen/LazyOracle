@@ -14,16 +14,16 @@ struct PalmScreen: View {
 
     var body: some View {
         ScreenScaffold(
-            eyebrow: "手相 · Palmistry",
-            title: "The hand, measured",
-            tagline: "Twenty-one points, read for proportion rather than guessed at."
+            eyebrow: t("practice.palm"),
+            title: t("palm.title"),
+            tagline: t("palm.tagline")
         ) {
             Panel {
                 ZStack {
                     CameraView(session: camera.session)
                     LandmarkOverlay(points: camera.overlay, joined: true)
                     if !camera.detecting {
-                        Text("Hold your open palm to the camera")
+                        Text(t("palm.hint"))
                             .font(Typeface.serif(17))
                             .foregroundStyle(Palette.ink)
                             .padding(.horizontal, 14)
@@ -42,15 +42,15 @@ struct PalmScreen: View {
                     Text(message).font(Typeface.sans(13)).foregroundStyle(Palette.inkMute)
                 }
                 Button(action: read) {
-                    Label(captured ? "Read it again" : "Read this hand", systemImage: "hand.raised")
+                    Label(captured ? t("palm.readAgain") : t("palm.read"), systemImage: "hand.raised")
                 }
                 .buttonStyle(PrimaryButtonStyle())
                 .disabled(!camera.detecting)
                 .opacity(camera.detecting ? 1 : 0.5)
             }
 
-            Panel(title: "The lines") {
-                Text("The landmarker sees the shape of the hand, not the creases in it. These four are yours to answer, and the reading says which came from measurement and which from you.")
+            Panel(title: t("palm.lines")) {
+                Text(t("palm.linesNote"))
                     .font(Typeface.serif(16))
                     .foregroundStyle(Palette.inkSoft)
                     .fixedSize(horizontal: false, vertical: true)
@@ -61,13 +61,13 @@ struct PalmScreen: View {
             }
 
             if let error {
-                Panel(title: "Not read") {
+                Panel(title: t("common.notComputed")) {
                     Text(error).font(Typeface.serif(16)).foregroundStyle(Palette.inkSoft)
                 }
             }
 
             if let features {
-                Panel(title: "The hand") {
+                Panel(title: t("palm.hand")) {
                     measure("Shape", shapeWord(features.shape))
                     measure("Palm width to length", String(format: "%.2f", features.palmRatio))
                     measure("Fingers to palm", String(format: "%.2f", features.fingerRatio))
@@ -76,7 +76,7 @@ struct PalmScreen: View {
                     measure("Openness", String(format: "%.2f", features.openness))
                 }
 
-                Panel(title: "The fingers") {
+                Panel(title: t("palm.fingers")) {
                     ForEach(features.fingers) { finger in
                         HStack(spacing: 10) {
                             Text(fingerNames[finger.finger] ?? finger.finger)
@@ -94,7 +94,7 @@ struct PalmScreen: View {
                     }
                 }
 
-                Panel(title: "The eight mounts") {
+                Panel(title: t("palm.mounts")) {
                     ForEach(features.palaces) { palace in
                         HStack(spacing: 10) {
                             Text(palace.palace)
@@ -125,7 +125,7 @@ struct PalmScreen: View {
                     }
                 }
 
-                Panel(title: "Method") {
+                Panel(title: t("common.method")) {
                     Text("Proportions follow classical palmistry: the palm is square when its width reaches 0.86 of its length, the fingers long at 0.78 of the palm, and each finger is measured against the middle one. The mounts come from how far each stands out of the palm plane, which the landmarker reports as depth.")
                         .font(Typeface.serif(16))
                         .foregroundStyle(Palette.inkSoft)

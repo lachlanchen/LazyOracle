@@ -103,13 +103,13 @@ fun FengShuiScreen(navController: NavController) {
 
     ScreenScaffold(
         navController,
-        eyebrow = "风水 · Eight Mansions",
-        title = "Your eight sectors",
-        tagline = "八宅: the gua of your birth year decides which way is good for you."
+        eyebrow = t("practice.fengshui"),
+        title = t("fengshui.title"),
+        tagline = t("fengshui.tagline")
     ) {
         BirthSummary(profile) { editing = true }
 
-        error?.let { Panel(title = "Not computed") { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
+        error?.let { Panel(title = t("common.notComputed")) { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
 
         mansions?.let { m ->
             Panel {
@@ -122,7 +122,7 @@ fun FengShuiScreen(navController: NavController) {
                         verticalArrangement = Arrangement.spacedBy(3.dp)
                     ) {
                         Text(
-                            "Facing ${sector.direction} · ${heading!!.roundToInt()}°",
+                            "${t("fengshui.facing")} ${sector.direction} · ${heading!!.roundToInt()}°",
                             style = Type.display(18), color = Palette.ink
                         )
                         Text(
@@ -137,14 +137,14 @@ fun FengShuiScreen(navController: NavController) {
                     }
                 } else {
                     Text(
-                        "No compass reading yet. The sectors below are still yours.",
+                        t("fengshui.noCompass"),
                         style = Type.sans(13), color = Palette.inkMute,
                         modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center
                     )
                 }
             }
 
-            Panel(title = "Your gua") {
+            Panel(title = t("fengshui.yourGua")) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(m.gua, style = Type.display(40), color = Palette.gold)
                     Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
@@ -159,12 +159,12 @@ fun FengShuiScreen(navController: NavController) {
                     }
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Badge("Best", m.best, Palette.gold)
-                    Badge("Worst", m.worst, Palette.rose)
+                    Badge(t("fengshui.best"), m.best, Palette.gold)
+                    Badge(t("fengshui.worst"), m.worst, Palette.rose)
                 }
             }
 
-            Panel(title = "The eight sectors") {
+            Panel(title = t("fengshui.sectors")) {
                 m.sectors.forEachIndexed { index, sector ->
                     Row(
                         Modifier.fillMaxWidth().padding(vertical = 6.dp),

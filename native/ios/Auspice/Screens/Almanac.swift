@@ -121,13 +121,13 @@ struct AlmanacScreen: View {
 
     var body: some View {
         ScreenScaffold(
-            eyebrow: "黄历 · Almanac",
-            title: "What today suits",
-            tagline: "The old tables, read for a single day."
+            eyebrow: t("practice.almanac"),
+            title: t("almanac.title"),
+            tagline: t("almanac.tagline")
         ) {
             dayPicker
             if let error = store.error {
-                Panel(title: "Not computed") {
+                Panel(title: t("common.notComputed")) {
                     Text(error).font(Typeface.serif(16)).foregroundStyle(Palette.inkSoft)
                 }
             }
@@ -191,7 +191,7 @@ struct AlmanacScreen: View {
     }
 
     private func activityPanel(_ day: AlmanacDay) -> some View {
-        Panel(title: "Can I do it today") {
+        Panel(title: t("almanac.canIDoIt")) {
             FlowRow(spacing: 8) {
                 ForEach(store.activities) { item in
                     Button {
@@ -199,8 +199,7 @@ struct AlmanacScreen: View {
                         store.load()
                     } label: {
                         HStack(spacing: 6) {
-                            Text(item.name.en)
-                            Text(item.name.zh).foregroundStyle(Palette.inkMute)
+                            Text(Localisation.shared.code.hasPrefix("zh") ? item.name.zh : item.name.en)
                         }
                         .font(Typeface.sans(14, weight: .semibold))
                         .padding(.horizontal, 14)
@@ -243,9 +242,9 @@ struct AlmanacScreen: View {
     private func listsPanel(_ day: AlmanacDay) -> some View {
         Panel {
             HStack(alignment: .top, spacing: 14) {
-                termColumn("宜", "Suits", day.yi, Palette.gold)
+                termColumn("宜", t("common.suits"), day.yi, Palette.gold)
                 Divider().overlay(Palette.line)
-                termColumn("忌", "Avoid", day.ji, Palette.rose)
+                termColumn("忌", t("common.avoid"), day.ji, Palette.rose)
             }
         }
     }
@@ -271,7 +270,7 @@ struct AlmanacScreen: View {
     }
 
     private func hoursPanel(_ day: AlmanacDay) -> some View {
-        Panel(title: "Hours") {
+        Panel(title: t("almanac.hours")) {
             VStack(spacing: 0) {
                 ForEach(day.hours) { hour in
                     HStack(spacing: 10) {
@@ -301,7 +300,7 @@ struct AlmanacScreen: View {
     }
 
     private func tablesPanel(_ day: AlmanacDay) -> some View {
-        Panel(title: "The tables") {
+        Panel(title: t("almanac.tables")) {
             row("干支", "\(day.lunar.yearGanZhi)年 \(day.lunar.monthGanZhi)月 \(day.lunar.dayGanZhi)日 · 属\(day.lunar.zodiac)")
             row("建除", "\(day.dayOfficer)日")
             row("二十八宿", "\(day.mansion.name)\(day.mansion.animal) · \(day.mansion.direction)方\(day.mansion.beast)")
@@ -336,9 +335,9 @@ struct AlmanacScreen: View {
 
     private func standingWord(_ standing: String) -> String {
         switch standing {
-        case "auspicious": "A yellow-road day"
-        case "inauspicious": "A black-road day"
-        default: "A mixed day"
+        case "auspicious": t("almanac.yellowDay")
+        case "inauspicious": t("almanac.blackDay")
+        default: t("almanac.mixedDay")
         }
     }
 
@@ -357,9 +356,9 @@ struct AlmanacScreen: View {
 
     private func verdictWord(_ verdict: String) -> String {
         switch verdict {
-        case "suitable": "Yes — the day suits it"
-        case "avoid": "No — the day is against it"
-        default: "The almanac is silent"
+        case "suitable": t("almanac.yes")
+        case "avoid": t("almanac.no")
+        default: t("almanac.silent")
         }
     }
 

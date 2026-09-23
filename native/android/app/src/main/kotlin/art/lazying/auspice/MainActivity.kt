@@ -64,6 +64,7 @@ fun AuspiceApp() {
     var loaded by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
+        Localisation.load(context)
         Engines.start(context)
         Profiles.load(context)
         Conversations.load(context)

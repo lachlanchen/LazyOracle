@@ -291,7 +291,7 @@ struct CameraFlipButton: View {
         if session.canFlip {
             Button { session.flip() } label: {
                 Label(
-                    session.position == .front ? "Front" : "Back",
+                    session.position == .front ? t("camera.front") : t("camera.back"),
                     systemImage: "arrow.triangle.2.circlepath.camera"
                 )
                 .font(Typeface.sans(13, weight: .semibold))

@@ -49,21 +49,21 @@ fun IChingScreen(navController: NavController) {
 
     ScreenScaffold(
         navController,
-        eyebrow = "易经 · I Ching",
-        title = "Cast the lines",
-        tagline = "Six throws, from the bottom up, as the Zhou ritual has it."
+        eyebrow = t("practice.iching"),
+        title = t("iching.title"),
+        tagline = t("iching.tagline")
     ) {
         Panel {
             FlowRowOf {
-                Chip("Three coins", "三枚铜钱", method == "coins") { method = "coins" }
-                Chip("Yarrow stalks", "蓍草", method == "yarrow") { method = "yarrow" }
+                Chip(t("iching.coins"), null, method == "coins") { method = "coins" }
+                Chip(t("iching.yarrow"), null, method == "yarrow") { method = "yarrow" }
             }
-            FieldLabel("Your question")
+            FieldLabel(t("tarot.question"))
             AuspiceField(question) { question = it }
-            PrimaryButton(if (cast == null) "Cast the lines" else "Cast again") { casts++ }
+            PrimaryButton(t("iching.title")) { casts++ }
         }
 
-        error?.let { Panel(title = "Not cast") { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
+        error?.let { Panel(title = t("common.notComputed")) { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
 
         cast?.let { result ->
             Panel {
@@ -87,12 +87,12 @@ fun IChingScreen(navController: NavController) {
             }
 
             if (shown >= 6) {
-                Panel(title = "The judgement") {
+                Panel(title = t("iching.judgement")) {
                     Text(result.primary.judgement, style = Type.serif(20), color = Palette.ink)
                     Text(result.primary.sense.en, style = Type.serif(17), color = Palette.inkSoft)
                     Text(result.primary.sense.zh, style = Type.serif(16), color = Palette.inkMute)
                 }
-                Panel(title = "Where to read") {
+                Panel(title = t("iching.whereToRead")) {
                     Text(focusLine(result), style = Type.serif(17), color = Palette.inkSoft)
                     Text(
                         "朱熹《易学启蒙》 decides this by the number of moving lines, not by preference.",
@@ -100,7 +100,7 @@ fun IChingScreen(navController: NavController) {
                     )
                 }
                 result.resulting?.let { resulting ->
-                    Panel(title = "It becomes") {
+                    Panel(title = t("iching.becomes")) {
                         Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
                             HexagramView(
                                 resulting.lines.map { CastLine(value = it, yang = it == 1, changing = false) },
@@ -114,7 +114,7 @@ fun IChingScreen(navController: NavController) {
                         }
                     }
                 }
-                Panel(title = "Behind the hexagram") {
+                Panel(title = t("iching.behind")) {
                     Relative("互卦 Nuclear", result.nuclear)
                     Relative("错卦 Opposite", result.opposite)
                     Relative("综卦 Inverse", result.inverse)

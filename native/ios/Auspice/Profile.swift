@@ -73,13 +73,13 @@ struct BirthSummary: View {
             Panel {
                 HStack(spacing: 12) {
                     VStack(alignment: .leading, spacing: 3) {
-                        Text(profile.isComplete ? summary : "Add your birth details")
+                        Text(profile.isComplete ? summary : t("birth.add"))
                             .font(Typeface.display(17))
                             .foregroundStyle(Palette.ink)
                             .multilineTextAlignment(.leading)
                         Text(profile.isComplete
-                             ? (profile.timeKnown ? "\(profile.place) · time known" : "\(profile.place) · time unknown")
-                             : "The hour matters: without it a pillar is missing.")
+                             ? (profile.timeKnown ? profile.place : "\(profile.place) · \(t("birth.timeUnknown"))")
+                             : t("birth.hourMatters"))
                             .font(Typeface.serif(15))
                             .foregroundStyle(Palette.inkMute)
                             .multilineTextAlignment(.leading)
@@ -113,7 +113,7 @@ struct BirthForm: View {
                 Sky()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 14) {
-                        Panel(title: "Born") {
+                        Panel(title: t("birth.details")) {
                             DatePicker(
                                 "Date and time",
                                 selection: Binding(
@@ -125,42 +125,42 @@ struct BirthForm: View {
                             .datePickerStyle(.compact)
                             .foregroundStyle(Palette.inkSoft)
                             .font(Typeface.sans(16))
-                            Toggle("I know the hour", isOn: $draft.timeKnown)
+                            Toggle(t("birth.timeKnown"), isOn: $draft.timeKnown)
                                 .font(Typeface.sans(16))
                                 .foregroundStyle(Palette.inkSoft)
                                 .tint(Palette.gold)
                         }
 
-                        Panel(title: "Where") {
-                            FieldLabel("Place")
+                        Panel(title: t("birth.place")) {
+                            FieldLabel(t("birth.place"))
                             TextField("", text: $draft.place)
                                 .textFieldStyle(AuspiceFieldStyle())
                             HStack(spacing: 10) {
-                                numberField("Latitude", value: $draft.latitude)
-                                numberField("Longitude", value: $draft.longitude)
+                                numberField(t("birth.latitude"), value: $draft.latitude)
+                                numberField(t("birth.longitude"), value: $draft.longitude)
                             }
-                            numberField("Hours from UTC", value: $draft.utcOffsetHours)
-                            Text("Longitude and the offset give true solar time, which is what the hour pillar is taken from.")
+                            numberField(t("birth.utcOffset"), value: $draft.utcOffsetHours)
+                            Text(t("birth.solarNote"))
                                 .font(Typeface.sans(13))
                                 .foregroundStyle(Palette.inkMute)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
 
-                        Panel(title: "Who") {
-                            FieldLabel("Name, if you want it on the chart")
+                        Panel(title: t("birth.name")) {
+                            FieldLabel(t("birth.name"))
                             TextField("", text: $draft.name)
                                 .textFieldStyle(AuspiceFieldStyle())
                             FlowRow(spacing: 8) {
-                                Chip(label: "Female", detail: "女", active: draft.gender == "female") { draft.gender = "female" }
-                                Chip(label: "Male", detail: "男", active: draft.gender == "male") { draft.gender = "male" }
+                                Chip(label: t("birth.female"), active: draft.gender == "female") { draft.gender = "female" }
+                                Chip(label: t("birth.male"), active: draft.gender == "male") { draft.gender = "male" }
                             }
-                            Text("The eight mansions and the direction of the luck cycles are counted differently for each; the practices ask for it, so the app does too.")
+                            Text(t("birth.genderNote"))
                                 .font(Typeface.sans(13))
                                 .foregroundStyle(Palette.inkMute)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
 
-                        Button("Save") {
+                        Button(t("common.save")) {
                             profile = draft
                             done()
                             dismiss()
@@ -173,11 +173,11 @@ struct BirthForm: View {
                 }
                 .scrollDismissesKeyboard(.interactively)
             }
-            .navigationTitle("Birth details")
+            .navigationTitle(t("birth.details"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }.foregroundStyle(Palette.inkSoft)
+                    Button(t("common.cancel")) { dismiss() }.foregroundStyle(Palette.inkSoft)
                 }
             }
         }

@@ -32,14 +32,14 @@ fun BirthSummary(profile: BirthProfile, onEdit: () -> Unit) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                 Text(
-                    if (profile.isComplete) summary(profile) else "Add your birth details",
+                    if (profile.isComplete) summary(profile) else t("birth.add"),
                     style = Type.display(17), color = Palette.ink
                 )
                 Text(
                     if (profile.isComplete) {
-                        "${profile.place} · ${if (profile.timeKnown) "time known" else "time unknown"}"
+                        if (profile.timeKnown) profile.place else "${profile.place} · ${t("birth.timeUnknown")}"
                     } else {
-                        "The hour matters: without it a pillar is missing."
+                        t("birth.hourMatters")
                     },
                     style = Type.serif(15), color = Palette.inkMute
                 )
@@ -70,19 +70,19 @@ fun BirthFormDialog(profile: BirthProfile, onDismiss: () -> Unit, onSave: (Birth
                 .padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text("Birth details", style = Type.display(22), color = Palette.ink)
+            Text(t("birth.details"), style = Type.display(22), color = Palette.ink)
 
-            NumberRow("Year", draft.year) { draft = draft.copy(year = it) }
+            NumberRow(t("bazi.year"), draft.year) { draft = draft.copy(year = it) }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Box(Modifier.weight(1f)) { NumberRow("Month", draft.month) { draft = draft.copy(month = it) } }
-                Box(Modifier.weight(1f)) { NumberRow("Day", draft.day) { draft = draft.copy(day = it) } }
+                Box(Modifier.weight(1f)) { NumberRow(t("bazi.month"), draft.month) { draft = draft.copy(month = it) } }
+                Box(Modifier.weight(1f)) { NumberRow(t("bazi.day"), draft.day) { draft = draft.copy(day = it) } }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Box(Modifier.weight(1f)) { NumberRow("Hour", draft.hour) { draft = draft.copy(hour = it) } }
-                Box(Modifier.weight(1f)) { NumberRow("Minute", draft.minute) { draft = draft.copy(minute = it) } }
+                Box(Modifier.weight(1f)) { NumberRow(t("bazi.hour"), draft.hour) { draft = draft.copy(hour = it) } }
+                Box(Modifier.weight(1f)) { NumberRow(t("birth.utcOffset"), draft.minute) { draft = draft.copy(minute = it) } }
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("I know the hour", style = Type.sans(16), color = Palette.inkSoft, modifier = Modifier.weight(1f))
+                Text(t("birth.timeKnown"), style = Type.sans(16), color = Palette.inkSoft, modifier = Modifier.weight(1f))
                 Switch(
                     checked = draft.timeKnown,
                     onCheckedChange = { draft = draft.copy(timeKnown = it) },
@@ -90,26 +90,26 @@ fun BirthFormDialog(profile: BirthProfile, onDismiss: () -> Unit, onSave: (Birth
                 )
             }
 
-            FieldLabel("Place")
+            FieldLabel(t("birth.place"))
             TextRow(draft.place) { draft = draft.copy(place = it) }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Box(Modifier.weight(1f)) { DecimalRow("Latitude", draft.latitude) { draft = draft.copy(latitude = it) } }
-                Box(Modifier.weight(1f)) { DecimalRow("Longitude", draft.longitude) { draft = draft.copy(longitude = it) } }
+                Box(Modifier.weight(1f)) { DecimalRow(t("birth.latitude"), draft.latitude) { draft = draft.copy(latitude = it) } }
+                Box(Modifier.weight(1f)) { DecimalRow(t("birth.longitude"), draft.longitude) { draft = draft.copy(longitude = it) } }
             }
-            DecimalRow("Hours from UTC", draft.utcOffsetHours) { draft = draft.copy(utcOffsetHours = it) }
+            DecimalRow(t("birth.utcOffset"), draft.utcOffsetHours) { draft = draft.copy(utcOffsetHours = it) }
             Text(
-                "Longitude and the offset give true solar time, which is what the hour pillar is taken from.",
+                t("birth.solarNote"),
                 style = Type.sans(13), color = Palette.inkMute
             )
 
-            FieldLabel("Name, if you want it on the chart")
+            FieldLabel(t("birth.name"))
             TextRow(draft.name) { draft = draft.copy(name = it) }
             FlowRowOf {
-                Chip("Female", "女", draft.gender == "female") { draft = draft.copy(gender = "female") }
-                Chip("Male", "男", draft.gender == "male") { draft = draft.copy(gender = "male") }
+                Chip(t("birth.female"), null, draft.gender == "female") { draft = draft.copy(gender = "female") }
+                Chip(t("birth.male"), null, draft.gender == "male") { draft = draft.copy(gender = "male") }
             }
 
-            PrimaryButton("Save") { onSave(draft); onDismiss() }
+            PrimaryButton(t("common.save")) { onSave(draft); onDismiss() }
         }
     }
 }

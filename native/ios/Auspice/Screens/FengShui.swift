@@ -52,14 +52,14 @@ struct FengShuiScreen: View {
 
     var body: some View {
         ScreenScaffold(
-            eyebrow: "风水 · Eight Mansions",
-            title: "Your eight sectors",
-            tagline: "八宅: the gua of your birth year decides which way is good for you."
+            eyebrow: t("practice.fengshui"),
+            title: t("fengshui.title"),
+            tagline: t("fengshui.tagline")
         ) {
             BirthSummary(profile: store.profile) { editing = true }
 
             if let error {
-                Panel(title: "Not computed") {
+                Panel(title: t("common.notComputed")) {
                     Text(error).font(Typeface.serif(16)).foregroundStyle(Palette.inkSoft)
                 }
             }
@@ -72,7 +72,7 @@ struct FengShuiScreen: View {
                     compassLine
                 }
 
-                Panel(title: "Your gua") {
+                Panel(title: t("fengshui.yourGua")) {
                     HStack(alignment: .firstTextBaseline, spacing: 12) {
                         Text(mansions.gua)
                             .font(Typeface.display(40))
@@ -88,12 +88,12 @@ struct FengShuiScreen: View {
                         }
                     }
                     HStack(spacing: 10) {
-                        badge("Best", mansions.best, Palette.gold)
-                        badge("Worst", mansions.worst, Palette.rose)
+                        badge(t("fengshui.best"), mansions.best, Palette.gold)
+                        badge(t("fengshui.worst"), mansions.worst, Palette.rose)
                     }
                 }
 
-                Panel(title: "The eight sectors") {
+                Panel(title: t("fengshui.sectors")) {
                     ForEach(mansions.sectors) { sector in
                         sectorRow(sector)
                         if sector.id != mansions.sectors.last?.id {
@@ -132,7 +132,7 @@ struct FengShuiScreen: View {
                 .frame(maxWidth: .infinity)
         } else if let heading = compass.heading, let facing, let quality = mansions?.sectors.first(where: { $0.direction == facing })?.quality {
             VStack(spacing: 4) {
-                Text(String(format: "Facing %@ · %.0f°", facing, heading))
+                Text("\(t("fengshui.facing")) \(facing) · \(Int(heading))°")
                     .font(Typeface.display(18))
                     .foregroundStyle(Palette.ink)
                 Text("\(quality.name.zh) \(quality.name.en)")

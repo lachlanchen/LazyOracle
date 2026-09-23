@@ -69,9 +69,9 @@ fun PalmScreen(navController: NavController) {
 
     ScreenScaffold(
         navController,
-        eyebrow = "手相 · Palmistry",
-        title = "The hand, measured",
-        tagline = "Twenty-one points, read for proportion rather than guessed at."
+        eyebrow = t("practice.palm"),
+        title = t("palm.title"),
+        tagline = t("palm.tagline")
     ) {
         Panel {
             Box(
@@ -91,7 +91,7 @@ fun PalmScreen(navController: NavController) {
                     LandmarkOverlay(session.overlay, joined = true, modifier = Modifier.fillMaxSize())
                     if (!session.detecting) {
                         Text(
-                            "Hold your open palm to the camera",
+                            t("palm.hint"),
                             style = Type.serif(17), color = Palette.ink,
                             modifier = Modifier
                                 .clip(CircleShape)
@@ -102,22 +102,21 @@ fun PalmScreen(navController: NavController) {
                     CameraFlipButton(session, owner, Modifier.align(Alignment.TopEnd))
                 } else {
                     Text(
-                        "Auspice needs the camera to read a hand.",
+                        t("camera.needed"),
                         style = Type.serif(17), color = Palette.inkSoft, textAlign = TextAlign.Center
                     )
                 }
             }
             session.message?.let { Text(it, style = Type.sans(13), color = Palette.inkMute) }
             PrimaryButton(
-                if (features == null) "Read this hand" else "Read it again",
+                if (features == null) t("palm.read") else t("palm.readAgain"),
                 enabled = session.detecting
             ) { reads++ }
         }
 
-        Panel(title = "The lines") {
+        Panel(title = t("palm.lines")) {
             Text(
-                "The landmarker sees the shape of the hand, not the creases in it. These four are yours to " +
-                    "answer, and the reading says which came from measurement and which from you.",
+                t("palm.linesNote"),
                 style = Type.serif(16), color = Palette.inkSoft
             )
             LineChoice("Heart line ends", listOf("index" to "Under the index", "middle" to "Under the middle", "between" to "Between them"), lines.heart) {
@@ -134,10 +133,10 @@ fun PalmScreen(navController: NavController) {
             }
         }
 
-        error?.let { Panel(title = "Not read") { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
+        error?.let { Panel(title = t("common.notComputed")) { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
 
         features?.let { f ->
-            Panel(title = "The hand") {
+            Panel(title = t("palm.hand")) {
                 Measure("Shape", f.shape.replace("-", " ").replaceFirstChar { it.uppercase() })
                 Measure("Palm width to length", String.format("%.2f", f.palmRatio))
                 Measure("Fingers to palm", String.format("%.2f", f.fingerRatio))
@@ -145,7 +144,7 @@ fun PalmScreen(navController: NavController) {
                 Measure("Thumb angle", String.format("%.0f°", f.thumbAngle))
                 Measure("Openness", String.format("%.2f", f.openness))
             }
-            Panel(title = "The fingers") {
+            Panel(title = t("palm.fingers")) {
                 f.fingers.forEach { finger ->
                     Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                         Text(FINGER_NAMES[finger.finger] ?: finger.finger, style = Type.serif(16), color = Palette.ink)
@@ -156,7 +155,7 @@ fun PalmScreen(navController: NavController) {
                     }
                 }
             }
-            Panel(title = "The eight mounts") {
+            Panel(title = t("palm.mounts")) {
                 f.palaces.forEach { palace ->
                     Row(
                         Modifier.fillMaxWidth().padding(vertical = 3.dp),
@@ -187,7 +186,7 @@ fun PalmScreen(navController: NavController) {
                     )
                 }
             }
-            Panel(title = "Method") {
+            Panel(title = t("common.method")) {
                 Text(
                     "Proportions follow classical palmistry: the palm is square when its width reaches 0.86 of " +
                         "its length, the fingers long at 0.78 of the palm, and each finger is measured against " +

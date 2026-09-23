@@ -44,21 +44,21 @@ fun AnswersScreen(navController: NavController) {
 
     ScreenScaffold(
         navController,
-        eyebrow = "答案之书 · The books",
-        title = "Open the book",
-        tagline = "Hold the question. Let the page fall where it falls."
+        eyebrow = t("practice.answers"),
+        title = t("answers.title"),
+        tagline = t("answers.tagline")
     ) {
         Panel {
             FlowRowOf {
-                Chip("Book of Answers", "答案之书", book == "answers") { book = "answers" }
-                Chip("Book of Questions", "问题之书", book == "questions") { book = "questions" }
+                Chip(t("practice.answers"), null, book == "answers") { book = "answers" }
+                Chip(t("answers.whatAsking"), null, book == "questions") { book = "questions" }
             }
-            FieldLabel("What you are asking")
+            FieldLabel(t("answers.whatAsking"))
             AuspiceField(question) { question = it }
-            PrimaryButton(if (opening == null) "Open the book" else "Open it again") { opens++ }
+            PrimaryButton(t("answers.title")) { opens++ }
         }
 
-        error?.let { Panel(title = "Not opened") { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
+        error?.let { Panel(title = t("common.notComputed")) { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
 
         opening?.let { page ->
             Column(
@@ -71,7 +71,7 @@ fun AnswersScreen(navController: NavController) {
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 Text(
-                    "PAGE ${page.page.number}",
+                    "${t("answers.page")} ${page.page.number}",
                     style = Type.sans(11, FontWeight.Bold).copy(letterSpacing = 2.4.sp),
                     color = Color(0xFF8A6A22)
                 )

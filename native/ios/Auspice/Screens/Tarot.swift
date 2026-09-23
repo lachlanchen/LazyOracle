@@ -17,9 +17,9 @@ struct TarotScreen: View {
 
     var body: some View {
         ScreenScaffold(
-            eyebrow: "塔罗 · Tarot",
-            title: "Shuffle and draw",
-            tagline: "A full shuffle, seventy-eight cards, no card twice."
+            eyebrow: t("practice.tarot"),
+            title: t("tarot.title"),
+            tagline: t("tarot.tagline")
         ) {
             Panel {
                 FlowRow(spacing: 8) {
@@ -35,19 +35,19 @@ struct TarotScreen: View {
                         }
                     }
                 }
-                FieldLabel("Your question, if you have one")
+                FieldLabel(t("tarot.question"))
                 TextField("", text: $question, axis: .vertical)
                     .textFieldStyle(AuspiceFieldStyle())
                     .lineLimit(1...3)
                 Button(action: deal) {
-                    Label(draw == nil ? "Shuffle and draw" : "Draw again", systemImage: "sparkles")
+                    Label(draw == nil ? t("tarot.draw") : t("tarot.drawAgain"), systemImage: "sparkles")
                 }
                 .buttonStyle(PrimaryButtonStyle())
                 .disabled(dealing)
             }
 
             if let error {
-                Panel(title: "Not drawn") {
+                Panel(title: t("common.notComputed")) {
                     Text(error).font(Typeface.serif(16)).foregroundStyle(Palette.inkSoft)
                 }
             }
@@ -65,7 +65,7 @@ struct TarotScreen: View {
                     })
                     .frame(height: stageHeight(draw.spread.id))
                     if revealed.count < draw.cards.count {
-                        Text("Tap a card to turn it.")
+                        Text(t("tarot.tapToTurn"))
                             .font(Typeface.sans(13))
                             .foregroundStyle(Palette.inkMute)
                             .frame(maxWidth: .infinity)
@@ -265,7 +265,7 @@ private struct CardReading: View {
                     .foregroundStyle(Palette.inkMute)
                 Spacer()
                 if card.reversed {
-                    Text("REVERSED")
+                    Text(t("tarot.reversed"))
                         .font(Typeface.sans(10, weight: .bold))
                         .tracking(1.6)
                         .foregroundStyle(Palette.rose)

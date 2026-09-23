@@ -240,7 +240,7 @@ fun CameraFlipButton(
     val context = androidx.compose.ui.platform.LocalContext.current
     if (session.canFlip) {
         androidx.compose.material3.Text(
-            if (session.front) "Front" else "Back",
+            if (session.front) t("camera.front") else t("camera.back"),
             style = Type.sans(13, androidx.compose.ui.text.font.FontWeight.SemiBold),
             color = Palette.ink,
             modifier = modifier

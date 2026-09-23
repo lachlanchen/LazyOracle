@@ -10,14 +10,14 @@ struct AstrologyScreen: View {
 
     var body: some View {
         ScreenScaffold(
-            eyebrow: "星盘 · Astrology",
-            title: "The sky at your birth",
-            tagline: "Computed from the ephemeris, not from a lookup table."
+            eyebrow: t("practice.astrology"),
+            title: t("astro.title"),
+            tagline: t("astro.tagline")
         ) {
             BirthSummary(profile: store.profile) { editing = true }
 
             if let error {
-                Panel(title: "Not computed") {
+                Panel(title: t("common.notComputed")) {
                     Text(error).font(Typeface.serif(16)).foregroundStyle(Palette.inkSoft)
                 }
             }
@@ -31,13 +31,13 @@ struct AstrologyScreen: View {
                             withAnimation(.easeOut(duration: 1.1)) { wheelIn = true }
                         }
                     HStack(spacing: 16) {
-                        angle("Ascendant", chart.ascendant)
-                        angle("Midheaven", chart.midheaven)
+                        angle(t("astro.ascendant"), chart.ascendant)
+                        angle(t("astro.midheaven"), chart.midheaven)
                     }
                     .frame(maxWidth: .infinity)
                 }
 
-                Panel(title: "Placements") {
+                Panel(title: t("astro.placements")) {
                     ForEach(chart.placements) { placement in
                         placementRow(placement)
                         if placement.id != chart.placements.last?.id {
@@ -47,7 +47,7 @@ struct AstrologyScreen: View {
                 }
 
                 if !chart.aspects.isEmpty {
-                    Panel(title: "Aspects") {
+                    Panel(title: t("astro.aspects")) {
                         ForEach(chart.aspects) { aspect in
                             HStack(spacing: 10) {
                                 Text(Zodiac.bodySymbols[aspect.a] ?? aspect.a)
@@ -73,7 +73,7 @@ struct AstrologyScreen: View {
                 }
 
                 if let report, !report.transits.isEmpty {
-                    Panel(title: "Today against your chart") {
+                    Panel(title: t("astro.transits")) {
                         ForEach(report.transits.prefix(12)) { transit in
                             HStack(spacing: 10) {
                                 Text("\(Zodiac.bodySymbols[transit.transiting] ?? "") \(aspectGlyph(transit.type)) \(Zodiac.bodySymbols[transit.natal] ?? "")")
@@ -92,7 +92,7 @@ struct AstrologyScreen: View {
                     }
                 }
 
-                Panel(title: "Method") {
+                Panel(title: t("common.method")) {
                     Text("Positions come from the astronomy engine for the exact instant of birth in UTC, with whole-sign houses counted from the ascendant. The moon stands at \(Int((chart.moonPhase * 100).rounded()))% of its cycle.")
                         .font(Typeface.serif(16))
                         .foregroundStyle(Palette.inkSoft)
@@ -135,7 +135,7 @@ struct AstrologyScreen: View {
                 Text("℞").font(Typeface.display(15)).foregroundStyle(Palette.rose)
             }
             Spacer(minLength: 0)
-            Text("House \(placement.house)")
+            Text("\(t("astro.house")) \(placement.house)")
                 .font(Typeface.sans(12))
                 .foregroundStyle(Palette.inkMute)
         }

@@ -9,11 +9,14 @@
 /* Begin PBXBuildFile section */
 		A1000101 /* MediaPipeTasksVision.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = A1000111 /* MediaPipeTasksVision.xcframework */; };
 		A1000102 /* MediaPipeTasksCommon.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = A1000112 /* MediaPipeTasksCommon.xcframework */; };
+		A1000103 /* llama.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = A1000113 /* llama.xcframework */; };
+		A1000104 /* llama.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A1000113 /* llama.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		A1000111 /* MediaPipeTasksVision.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = MediaPipeTasksVision.xcframework; path = Frameworks/vision/frameworks/MediaPipeTasksVision.xcframework; sourceTree = "<group>"; };
 		A1000112 /* MediaPipeTasksCommon.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = MediaPipeTasksCommon.xcframework; path = Frameworks/common/frameworks/MediaPipeTasksCommon.xcframework; sourceTree = "<group>"; };
+		A1000113 /* llama.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = llama.xcframework; path = Frameworks/llama/build-apple/llama.xcframework; sourceTree = "<group>"; };
 		A1000001 /* Auspice.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Auspice.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -32,6 +35,7 @@
 			files = (
 				A1000101 /* MediaPipeTasksVision.xcframework in Frameworks */,
 				A1000102 /* MediaPipeTasksCommon.xcframework in Frameworks */,
+				A1000103 /* llama.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -52,6 +56,7 @@
 			children = (
 				A1000111 /* MediaPipeTasksVision.xcframework */,
 				A1000112 /* MediaPipeTasksCommon.xcframework */,
+				A1000113 /* llama.xcframework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -74,6 +79,7 @@
 				A1000011 /* Sources */,
 				A1000010 /* Frameworks */,
 				A1000012 /* Resources */,
+				A1000013 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -121,6 +127,20 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		A1000013 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				A1000104 /* llama.xcframework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXResourcesBuildPhase section */
 		A1000012 /* Resources */ = {
@@ -198,6 +218,7 @@
 					"$(inherited)",
 					"$(SRCROOT)/Frameworks/vision/frameworks",
 					"$(SRCROOT)/Frameworks/common/frameworks",
+					"$(SRCROOT)/Frameworks/llama/build-apple",
 				);
 				"OTHER_LDFLAGS[sdk=iphoneos*]" = "$(inherited) -ObjC -lc++ -force_load \"$(SRCROOT)/Frameworks/common/frameworks/graph_libraries/libMediaPipeTasksCommon_device_graph.a\" -framework AudioToolbox -framework Accelerate -framework CoreMedia -framework CoreGraphics -framework CoreImage -framework QuartzCore -framework AVFoundation -framework CoreVideo";
 				"OTHER_LDFLAGS[sdk=iphonesimulator*]" = "$(inherited) -ObjC -lc++ -force_load \"$(SRCROOT)/Frameworks/common/frameworks/graph_libraries/libMediaPipeTasksCommon_simulator_graph.a\" -framework AudioToolbox -framework Accelerate -framework CoreMedia -framework CoreGraphics -framework CoreImage -framework QuartzCore -framework AVFoundation -framework CoreVideo";
@@ -231,6 +252,7 @@
 					"$(inherited)",
 					"$(SRCROOT)/Frameworks/vision/frameworks",
 					"$(SRCROOT)/Frameworks/common/frameworks",
+					"$(SRCROOT)/Frameworks/llama/build-apple",
 				);
 				"OTHER_LDFLAGS[sdk=iphoneos*]" = "$(inherited) -ObjC -lc++ -force_load \"$(SRCROOT)/Frameworks/common/frameworks/graph_libraries/libMediaPipeTasksCommon_device_graph.a\" -framework AudioToolbox -framework Accelerate -framework CoreMedia -framework CoreGraphics -framework CoreImage -framework QuartzCore -framework AVFoundation -framework CoreVideo";
 				"OTHER_LDFLAGS[sdk=iphonesimulator*]" = "$(inherited) -ObjC -lc++ -force_load \"$(SRCROOT)/Frameworks/common/frameworks/graph_libraries/libMediaPipeTasksCommon_simulator_graph.a\" -framework AudioToolbox -framework Accelerate -framework CoreMedia -framework CoreGraphics -framework CoreImage -framework QuartzCore -framework AVFoundation -framework CoreVideo";

@@ -49,7 +49,7 @@ final class ChatStore {
     /// Which reader answers. The on-device one is free, private and needs no
     /// download, so it is preferred wherever the phone can run it.
     enum Reader: String, CaseIterable {
-        case automatic, onDevice, cloud
+        case automatic, onDevice, downloaded, cloud
     }
 
     var reader: Reader = .automatic {
@@ -59,9 +59,16 @@ final class ChatStore {
     /// The one actually used for the next answer.
     var effectiveReader: Reader {
         switch reader {
-        case .automatic: LocalModel.isReady ? .onDevice : .cloud
-        case .onDevice: .onDevice
-        case .cloud: .cloud
+        case .automatic:
+            // Prefer whatever runs on the phone: Apple's model needs no
+            // download, a downloaded one needs no network, and the relay is
+            // the fallback when neither is there.
+            if LocalModel.isReady { return .onDevice }
+            if DownloadedReader.shared.isReady { return .downloaded }
+            return .cloud
+        case .onDevice: return LocalModel.isReady ? .onDevice : .cloud
+        case .downloaded: return DownloadedReader.shared.isReady ? .downloaded : .cloud
+        case .cloud: return .cloud
         }
     }
 
@@ -105,6 +112,9 @@ final class ChatStore {
     }
 
     func delete(_ id: UUID) {
+        #if canImport(FoundationModels)
+        if #available(iOS 26.0, *) { LocalModel.forget(id) }
+        #endif
         sessions.removeAll { $0.id == id }
         if sessions.isEmpty { sessions = [ChatSession()] }
         if currentId == id { currentId = sessions[0].id }
@@ -126,6 +136,9 @@ final class ChatStore {
     }
 
     func clearCurrent() {
+        #if canImport(FoundationModels)
+        if #available(iOS 26.0, *) { LocalModel.forget(current.id) }
+        #endif
         var session = current
         session.turns = []
         session.summary = nil
@@ -169,10 +182,57 @@ final class ChatStore {
         streaming = true
         error = nil
         defer { streaming = false }
-        if effectiveReader == .onDevice {
-            await runOnDevice()
-        } else {
-            await runInCloud()
+        switch effectiveReader {
+        case .onDevice: await runOnDevice()
+        case .downloaded: await runDownloaded()
+        default: await runInCloud()
+        }
+    }
+
+    /// The downloaded model: one pass to choose a computation, one to read it.
+    @MainActor
+    private func runDownloaded() async {
+        let asked = current.turns.last(where: { $0.kind == .reader })?.text ?? ""
+        let holder = Turn(kind: .oracle, text: "")
+        var opened = false
+        do {
+            let outcome = try await DownloadedReader.shared.answer(
+                question: asked,
+                onStage: { [weak self] stage in
+                    guard let self else { return }
+                    var session = self.current
+                    session.turns.append(Turn(kind: .tool, text: stage, ok: true))
+                    self.current = session
+                },
+                onDelta: { [weak self] piece in
+                    guard let self else { return }
+                    var session = self.current
+                    if !opened {
+                        opened = true
+                        session.turns.append(holder)
+                    }
+                    if let index = session.turns.lastIndex(where: { $0.id == holder.id }) {
+                        session.turns[index].text += piece
+                    }
+                    self.current = session
+                }
+            )
+            if let outcome {
+                var session = current
+                // Show what was computed above the reading, as the other
+                // readers do, so the reader can see it came from an engine.
+                if let index = session.turns.lastIndex(where: { $0.kind == .tool }) {
+                    session.turns[index] = Turn(kind: .tool, text: outcome.label, ok: outcome.ok)
+                }
+                current = session
+            }
+            save()
+        } catch {
+            var session = current
+            session.turns.removeAll { $0.id == holder.id }
+            session.turns.append(Turn(kind: .note, text: error.localizedDescription, ok: false))
+            current = session
+            save()
         }
     }
 
@@ -286,11 +346,11 @@ final class ChatStore {
     private func runOnDevice() async {
         #if canImport(FoundationModels)
         if #available(iOS 26.0, *) {
-            let transcript = await messagesForModel()
+            let asked = current.turns.last(where: { $0.kind == .reader })?.text ?? ""
             let holder = Turn(kind: .oracle, text: "")
             var opened = false
             do {
-                _ = try await LocalModel.answer(transcript: transcript) { [weak self] piece in
+                _ = try await LocalModel.answer(conversation: current.id, question: asked) { [weak self] piece in
                     guard let self else { return }
                     var session = self.current
                     if !opened {
@@ -434,6 +494,9 @@ struct ChatScreen: View {
         }
         .sheet(isPresented: $showingSessions) { SessionList(store: store) }
         .onAppear {
+            #if canImport(FoundationModels)
+            if #available(iOS 26.0, *) { LocalModel.prewarm(store.current.id) }
+            #endif
             if !opening.trimmingCharacters(in: .whitespaces).isEmpty, store.current.turns.isEmpty {
                 store.send(opening)
             }
@@ -629,6 +692,7 @@ struct SettingsScreen: View {
     @State private var store = ProfileStore.shared
     @State private var localisation = Localisation.shared
     @State private var chat = ChatStore.shared
+    @State private var downloader = DownloadedReader.shared
     @State private var editing = false
 
     var body: some View {
@@ -652,12 +716,53 @@ struct SettingsScreen: View {
                 FlowRow(spacing: 8) {
                     Chip(label: t("local.automatic"), active: chat.reader == .automatic) { chat.reader = .automatic }
                     Chip(label: t("local.onDevice"), active: chat.reader == .onDevice) { chat.reader = .onDevice }
+                    Chip(label: t("downloaded.reader"), active: chat.reader == .downloaded) { chat.reader = .downloaded }
                     Chip(label: t("local.cloud"), active: chat.reader == .cloud) { chat.reader = .cloud }
                 }
                 Text(LocalModel.readiness.explanation)
                     .font(Typeface.serif(16))
                     .foregroundStyle(LocalModel.isReady ? Palette.inkSoft : Palette.inkMute)
                     .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Panel(title: t("downloaded.title")) {
+                Text(t("downloaded.note"))
+                    .font(Typeface.serif(16))
+                    .foregroundStyle(Palette.inkSoft)
+                    .fixedSize(horizontal: false, vertical: true)
+                ForEach(DownloadedModel.choices) { choice in
+                    HStack(spacing: 10) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(choice.name)
+                                .font(Typeface.serif(17))
+                                .foregroundStyle(Palette.ink)
+                            Text(DownloadedModel.isDownloaded(choice)
+                                 ? t("downloaded.ready")
+                                 : "\(choice.sizeMB) MB")
+                                .font(Typeface.sans(13))
+                                .foregroundStyle(Palette.inkMute)
+                        }
+                        Spacer(minLength: 0)
+                        if downloader.downloading?.id == choice.id {
+                            Text("\(Int((downloader.progress ?? 0) * 100))%")
+                                .font(Typeface.sans(14, weight: .semibold))
+                                .foregroundStyle(Palette.gold)
+                        } else if DownloadedModel.isDownloaded(choice) {
+                            Button(t("downloaded.remove")) { DownloadedModel.remove(choice) }
+                                .buttonStyle(GhostButtonStyle())
+                        } else {
+                            Button(t("downloaded.download")) { downloader.download(choice) }
+                                .buttonStyle(GhostButtonStyle())
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+                if let failure = downloader.error {
+                    Text(failure)
+                        .font(Typeface.sans(13))
+                        .foregroundStyle(Palette.rose)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
 
             Panel(title: t("settings.readings")) {

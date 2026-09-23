@@ -55,6 +55,25 @@ enum LocalModel {
     }
 
     static var isReady: Bool { readiness == .ready }
+
+    /// Instructions for the reader on the phone.
+    ///
+    /// A three-billion-parameter model follows short, concrete rules far
+    /// better than long prose, so this is the cloud prompt boiled down: the
+    /// same discipline, a quarter of the words. The method notes are dropped
+    /// because the tool results already carry the method's own vocabulary, and
+    /// spending the instruction budget on them costs more than it returns.
+    static let instructions = """
+    You are the reader in Auspice. Never invent a card, hexagram, pillar, chart     or almanac entry — call the tool, then read what it returns. If the tool     disagrees with you, the tool is right.
+
+    Rules for your answer:
+    1. Call a tool before answering any question about a day, a chart, a draw or     a cast. For a hand or a face, call read_palm or read_face.
+    2. Reply in the language the reader wrote in, and stay in it.
+    3. Keep the tradition's terms in Chinese characters: 宜, 忌, 日主, 卦.
+    4. Two or three short paragraphs. No headings, no bullet lists, no bold labels.
+    5. Open with the answer. Give the one fact it rests on, naming where it came     from. End with one thing the reader can do.
+    6. If a tool could not compute something, say so. Never claim certainty about     health, death or the law.
+    """
 }
 
 #if canImport(FoundationModels)
@@ -89,25 +108,43 @@ extension LocalModel {
         AgentTools.descriptions.map { EngineTool(name: $0.name, description: $0.description) }
     }
 
-    /// Answers a conversation on the device, streaming as it writes.
+    /// One session per conversation, kept alive.
     ///
-    /// The transcript is replayed as a single prompt rather than as turns,
-    /// because a session started fresh each time cannot be handed the history
-    /// any other way, and because the compaction the app already does means
-    /// the transcript is always short enough to be worth repeating.
+    /// Building a session is the slow part — the model has to be brought up and
+    /// the instructions taken in. Holding one per conversation means the second
+    /// question is answered immediately, and it also gives the model its own
+    /// memory of the exchange, so the history does not have to be replayed as a
+    /// wall of text on every turn.
+    private static var sessions: [UUID: LanguageModelSession] = [:]
+
+    static func session(for conversation: UUID) -> LanguageModelSession {
+        if let existing = sessions[conversation] { return existing }
+        let made = LanguageModelSession(tools: tools(), instructions: instructions)
+        sessions[conversation] = made
+        return made
+    }
+
+    static func forget(_ conversation: UUID) {
+        sessions[conversation] = nil
+    }
+
+    /// Wakes the model up before the reader has finished typing, so the first
+    /// word of the answer arrives without the model being loaded first.
+    static func prewarm(_ conversation: UUID) {
+        guard isReady else { return }
+        session(for: conversation).prewarm()
+    }
+
+    /// Answers on the device, streaming as it writes.
     static func answer(
-        transcript: [Relay.Message],
+        conversation: UUID,
+        question: String,
         onDelta: @escaping (String) -> Void
     ) async throws -> String {
-        let instructions = transcript.first(where: { $0.role == "system" })?.content ?? ChatStore.systemPrompt
-        let spoken = transcript.filter { $0.role == "user" || $0.role == "assistant" }
-        let prompt = spoken.map { turn in
-            (turn.role == "user" ? "Reader: " : "You: ") + (turn.content ?? "")
-        }.joined(separator: "\n\n")
-
-        let session = LanguageModelSession(tools: tools(), instructions: instructions)
+        let session = session(for: conversation)
+        let options = GenerationOptions(temperature: 0.7)
         var written = ""
-        for try await partial in session.streamResponse(to: prompt) {
+        for try await partial in session.streamResponse(to: question, options: options) {
             // Apple streams cumulative snapshots; send only what is new.
             let text = partial.content
             if text.count > written.count {

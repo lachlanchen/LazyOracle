@@ -50,7 +50,7 @@
       "bytes": 23913891,
       "sha256": "9a4f527ac791c32986b0dc21f31ff2216abaa75cf523ab7ff82d747d6fbcbb30",
       "delivery": "764e1235-3be3-4779-a4ea-7982e639bc00",
-      "testflight": "IN_BETA_TESTING: internal; public beta attached, WAITING_FOR_REVIEW"
+      "testflight": "IN_BETA_TESTING: internal and public beta"
     }
   ],
   "androidArtifacts": {
@@ -85,7 +85,5 @@
       "build": null
     }
   },
-  "openIssues": [
-    "Owner reported an Auspice crash after these releases. Affected build/device/action not yet confirmed; no crash submissions returned by Apple API at 17:10 HKT. Investigation is open."
-  ]
+  "followUp": "Auspice build 7 compass crash fixed in 273ca9f and published as TestFlight build 8. See auspice-crashfix-2026-09-23.json; the build-7 artifact here records the earlier takeover release."
 }

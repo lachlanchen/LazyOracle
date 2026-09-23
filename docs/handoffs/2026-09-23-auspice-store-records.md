@@ -148,3 +148,17 @@ reading earlier messages pauses automatic following. The reported Traditional
 Chinese question completed through the actual iOS chat loop and live relay.
 Four regression scenarios passed on each native platform. No Auspice formal
 submission was made; its App Store version remains PREPARE_FOR_SUBMISSION.
+
+
+## 2026-09-23 — iPhone SE 3 compass crash, TestFlight build 8
+
+The owner's build 7 crash report maps to a compass heading callback. The
+engine correctly returned a direction String, but iOS JSON serialization
+rejected scalar values with an Objective-C exception. The bridge now allows
+JSON fragments. The real native bridge reproduces the old crash and passes
+1,441 heading updates after the fix, on Darwin and the iOS simulator runtime.
+
+Build **8** (0.1.0), delivery `d60aa43d-6e7a-463f-a3af-22da82bb96b0`, is
+`VALID` and `IN_BETA_TESTING` in Auspice internal as of 19:02 HKT. This is an
+iOS bridge fix; Android internal 5 is unchanged. No formal submission.
+See [the diagnosis and regression evidence](2026-09-23-auspice-crash.md).

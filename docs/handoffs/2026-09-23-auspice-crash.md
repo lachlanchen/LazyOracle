@@ -42,5 +42,17 @@ simulator. The patched bridge passes:
 The simulator executable is an `IOSSIMULATOR` binary (minimum iOS 17), run in
 the existing iOS 26.3 simulator. No additional simulator or GUI stack was
 launched. This reproduces the serialization failure, without simulating a
-physical magnetometer. TestFlight build 8 is the replacement build; its final
+physical magnetometer. The live production chat loop was also rerun successfully after the change.
+TestFlight build 8 is the replacement build; its final
 availability and artifact hash are recorded in `store/release.yaml`.
+
+
+## Released replacement
+
+At 19:02 HKT, Apple reports build **8** as `VALID` and `IN_BETA_TESTING`.
+Its membership in the existing Auspice internal group was separately verified.
+TestFlight notes ask testers to open Feng Shui, rotate the phone, return to
+chat and send a question. Exact IPA identity/hash and delivery UUID are in
+`store/artifacts/auspice-crashfix-2026-09-23.json`. No Auspice formal release
+was submitted. The owner can now update build 7 to build 8 for physical-device
+confirmation; the original build 7 archive/dSYM is retained for diagnostics.

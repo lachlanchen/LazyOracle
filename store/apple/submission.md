@@ -39,3 +39,15 @@
   Auspice's formal version still has no build attached and was not submitted.
 - The owner subsequently reported an Auspice crash. That investigation is
   open; do not treat passing build/chat tests as proof that the crash is fixed.
+
+
+## 2026-09-23 — crash diagnosis resolved, Auspice TestFlight build 8
+
+The reported iPhone SE 3 crash was symbolicated to the Feng Shui compass's
+scalar JSON result, reproduced with the production Swift bridge, and fixed.
+Auspice build **8** is `VALID` and available in its internal TestFlight group;
+see `store/artifacts/auspice-crashfix-2026-09-23.json`. No Auspice App Store
+submission was made. The owner should update from build 7 to verify on device.
+
+LazyOracle build 14's public beta has also reached `IN_BETA_TESTING`, verified
+by API at 18:50 HKT; its earlier beta-review wait is complete.

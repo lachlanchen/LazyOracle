@@ -212,15 +212,18 @@ and keyboard testing remains part of the broader device/parity review.
 
 The latest build/release receipt is `store/release.yaml`; intermediate builds
 13/6 predate this follow-up. Android codes 12/5 now carry the fixes and are published to internal testing.
-TestFlight 14/7 are available internally; LazyOracle public build 14 awaits beta review. The user explicitly authorized the existing CDP browser on
+TestFlight 14/7 became available internally; LazyOracle public build 14 is now approved.
+Auspice iOS build 8 subsequently replaced 7 for the compass crash below. The user explicitly authorized the existing CDP browser on
 port 9485 for the two Play internal-test updates. No Auspice formal submission.
 
 
-## Open follow-up — owner-reported Auspice crash
+## Follow-up — iPhone SE 3 crash diagnosed
 
-After the test releases, the owner reported that Auspice crashed and that
-reports were sent. The affected device/build/action is not yet confirmed.
-Apple's crash-feedback API returned no submissions at the first checks;
-private report retrieval is under `.runtime/takeover/crashes/`. Continue the
-investigation before publishing another Auspice update. No crash diagnosis or
-fix is claimed by the preceding successful chat-loop tests.
+The owner confirmed build 7 on an iPhone SE (3rd generation). The TestFlight
+report later became available and its matching dSYM identifies a Feng Shui
+compass callback: the iOS engine bridge tried to serialize a scalar direction
+without allowing JSON fragments. Swift `try?` could not catch the resulting
+Objective-C exception. The fix and before/after native-runtime evidence are in
+[the crash handoff](2026-09-23-auspice-crash.md). Build 8 carries the fix and is `VALID` / `IN_BETA_TESTING` in the Auspice
+internal group, verified at 19:02 HKT. Raw crash reports
+remain private. Physical-device confirmation after updating is still useful.

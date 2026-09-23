@@ -1,0 +1,44 @@
+{
+  "date": "2026-09-23",
+  "app": "Auspice",
+  "sourceCommit": "273ca9ff9a0fc88f8fa3155f87391eefe61dbdd0",
+  "reportedBuild": "7",
+  "reportedDevice": "iPhone SE (3rd generation)",
+  "reportedOS": "26.3.1",
+  "diagnosis": "FengShui heading callback receives a scalar String from fengshui.sector; Foundation serialization without fragmentsAllowed raises an Objective-C exception. Archive dSYM UUID matches the report.",
+  "fix": "Allow JSON fragments when serializing a successful engine result. Deterministic rules unchanged.",
+  "artifact": {
+    "build": "8",
+    "version": "0.1.0",
+    "bundleId": "art.lazying.auspice",
+    "bytes": 27287542,
+    "sha256": "d00d61cff940fa1f8f757b6f498ad62d3522a5ce71a0c45429ba8a9484ecf2bb",
+    "delivery": "d60aa43d-6e7a-463f-a3af-22da82bb96b0"
+  },
+  "validation": {
+    "darwinBefore": "crashes at first compass result; objc_exception_throw from NSJSONSerialization confirmed",
+    "iosSimulatorBefore": "crashes at first compass result",
+    "darwinAfter": "passed",
+    "iosSimulatorAfter": "passed on existing iOS 26.3 runtime",
+    "checks": [
+      "eight compass sectors",
+      "1441 consecutive heading updates",
+      "array and object results",
+      "exact almanac facts",
+      "unknown engine remains a Swift error"
+    ],
+    "liveChat": "actual Swift ChatStore + SSE relay + JSCore engine passed",
+    "archive": "succeeded",
+    "export": "succeeded",
+    "physicalDevice": "owner confirmation after updating pending"
+  },
+  "testflight": {
+    "processingState": "VALID",
+    "build": "8",
+    "id": "d60aa43d-6e7a-463f-a3af-22da82bb96b0",
+    "group": "24b67fe2-ec14-40f3-a40c-04a2bb68a032",
+    "internalBuildState": "IN_BETA_TESTING",
+    "verifiedAt": "2026-09-23T19:02:10+08:00"
+  },
+  "production": "not submitted"
+}

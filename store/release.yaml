@@ -35,7 +35,7 @@ ios:
   build: 14
   ipa_sha256: 9a4f527ac791c32986b0dc21f31ff2216abaa75cf523ab7ff82d747d6fbcbb30
   delivery: 764e1235-3be3-4779-a4ea-7982e639bc00
-  testflight: IN_BETA_TESTING internally; public beta attached and WAITING_FOR_REVIEW
+  testflight: IN_BETA_TESTING internally and in public beta; verified by API
   public_beta: https://testflight.apple.com/join/JZJM3PFb
   app_store: 1.0.0 with build 12 WAITING_FOR_REVIEW; verified by API and untouched
 auspice:
@@ -45,9 +45,11 @@ auspice:
   price_usd: 0.99
   app_store_id: '6815034620'
   play_app_id: '4973267996880132777'
-  ios_build: 7
-  ios_delivery: 21ccf2ca-caad-4d83-b11d-f2558536ade3
-  ios_sha256: 2c7a539ebc1584d7b8fa02209b6b94abf8ef4286bb494369e5f380efe4060858
+  ios_build: 8
+  ios_delivery: d60aa43d-6e7a-463f-a3af-22da82bb96b0
+  ios_sha256: d00d61cff940fa1f8f757b6f498ad62d3522a5ce71a0c45429ba8a9484ecf2bb
+  ios_source_commit: 273ca9ff9a0fc88f8fa3155f87391eefe61dbdd0
+  ios_evidence: store/artifacts/auspice-crashfix-2026-09-23.json
   testflight: IN_BETA_TESTING in Auspice internal; verified by API
   android_versionCode: 5
   android_artifact: native/android/app/build/outputs/bundle/release/app-release.aab
@@ -58,4 +60,4 @@ auspice:
   app_store: version 1.0 PREPARE_FOR_SUBMISSION, no build attached; formal release not authorized
 
 open_issues:
-  - Auspice crash reported by owner after these updates; build/device/action and Apple crash report pending; investigate before another Auspice release.
+  - The reported Auspice build 7 compass crash is fixed in TestFlight build 8; owner verification on the physical iPhone SE 3 remains pending.

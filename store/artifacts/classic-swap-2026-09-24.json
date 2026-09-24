@@ -1,0 +1,57 @@
+{
+  "date": "2026-09-24",
+  "app": "Auspice",
+  "identity": "art.lazying.auspice",
+  "implementation": "React/Capacitor, shared with the maintained PWA",
+  "ios_source_commit": "94ea1c34a206e9ca7109ea47ab62d978dbc3232f",
+  "android_source_commit": "d746040",
+  "backend_commit": "57d1117",
+  "android": {
+    "version": "0.1.0",
+    "build": 7,
+    "aab_sha256": "7d1a5b57d05fe957aa1718f81875b5984326dcf0ca397c88d3d649e24d6064fb",
+    "bytes": 24362512,
+    "internal": "Available to internal testers",
+    "min_api": 24,
+    "newly_supported_devices": 1382
+  },
+  "ios": {
+    "version": "0.1.0",
+    "build": 12,
+    "ipa_sha256": "dd8724432e1625d49e4e8ac805f9ad07eff9b39f1178450f1ba96ffe7c293658",
+    "bytes": 23499642,
+    "minimum_os": "15.0",
+    "processing": "VALID",
+    "web_asset_sha256": "d654908127a542cd0b1fa4a802d08e5267c576c14432ddd54710edcd7399c402",
+    "delivery": "03918640-c6e6-4f1a-a6cf-16b7ee91604d",
+    "build_id": "03918640-c6e6-4f1a-a6cf-16b7ee91604d",
+    "internal": "IN_BETA_TESTING",
+    "external": "READY_FOR_BETA_SUBMISSION",
+    "internal_group_verified": true
+  },
+  "validation": {
+    "web_tests": 120,
+    "lint_typecheck_build": "passed",
+    "ios_native_to_classic_upgrade": "native9 launched and backgrounded before classic12; four resumes retained same PID",
+    "android_native_to_classic_upgrade": "passed; retained native debug5, current-format saved facts",
+    "imported": "profile, language, chat and exact engine facts; original native storage preserved",
+    "ui": "classic Auspice branding and restored tarot; iOS status bar corrected",
+    "android_emulator": "software renderer host crashes; host GPU run passed, runtime stopped",
+    "ios_preserved_archive": "profile, language, chat, exact facts imported; original archive byte-for-byte retained",
+    "ios_classic_scene_upgrade": "UIKit App.SceneDelegate fixture -> classic12; three same-PID resumes",
+    "ios_clean_install": "passed",
+    "ios_keyboard_ui_test": "passed; input above keyboard, draft survives background/resume",
+    "physical_iPhone_SE3": "build12 confirmation and native camera retest pending"
+  },
+  "rollback": {
+    "tag": "rollback/auspice-native-2026-09-24",
+    "native_ios": 9,
+    "native_android": 6
+  },
+  "production": "not submitted; prior authorization is for testing",
+  "superseded_ios11": {
+    "build_id": "d7180a76-ff3f-43b4-bc07-04a669b98f47",
+    "ipa_sha256": "f6ba88eedb12791072a3909cc838cb890a54cf43d3e1f5967e25de2565534e8d",
+    "issue": "Opening crash while restoring original SwiftUI scene into UIKit lifecycle; reproduced and fixed in12"
+  }
+}

@@ -32,6 +32,15 @@ These supersede the earlier product split below.
   Preserve the existing formal production reviews. See the
   [migration plan](plans/native-main-2026-09-24.md).
 
+## Native-main checkpoint — 2026-09-24
+
+LazyOracle native iOS16 is in internal and public TestFlight; Android14 is
+available to internal testers. PWA fixes are live on both hosts. The classic
+Auspice swap is available to internal testers as iOS12/Android7, preserving its native data and
+both app IDs. See [the current handoff](handoffs/2026-09-24-native-main.md).
+Shared relay language selection stays conversational. Earlier release details
+below are historical checkpoints, not the current product split.
+
 ## Earlier owner decisions — 2026-09-23
 
 These supersede older local-model and native-migration plans below. The full

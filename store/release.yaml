@@ -1,43 +1,47 @@
-# Current checkpoint; historical submissions remain in apple/ and google-play/.
 verified_date: 2026-09-24
 app: LazyOracle
 version: 1.0.0
 price_usd: 0.99
-source_commit: 7dde5abe5bd9bc5e87881a50b026a2e9f6a4cbca
-evidence: store/artifacts/stability-2026-09-24.json
+source_commit: 95dec20989fbfcf4e5837bd9ae43e0ded6cee5a9
+evidence: store/artifacts/native-main-2026-09-24.json
 web:
   domain: oracle.lazying.art
   host: sshem-admin (Aliyun)
   release_root: /opt/lazyoracle-web/releases
-  live_release: 66db2bb1700b99fba9baba05f0a6619d8b0aad4e5519bfb5fe550172213b2fb6
+  live_release: native-language-57d1117
   mirror: https://oracle-fast.lazying.art
-  mirror_release: /srv/lazyoracle/releases/7dde5abe5bd9bc5e
-  live_asset: assets/index-lsWaNgfz.js
-  verification: both sites HTTP 200; deployed JavaScript SHA matches both signed LazyOracle packages
+  mirror_release: /srv/lazyoracle/releases/95dec20989fbfcf4
+  live_asset: assets/index-V5e0jQwO.js
+  verification: Both sites HTTP 200 and matching JavaScript SHA256; shared relay language
+    checks passed
 android:
   package: art.lazying.lazyoracle
-  versionCode: 13
+  versionCode: 14
   versionName: 1.0.0
-  artifact: android/app/build/outputs/bundle/release/app-release.aab
-  bundle_sha256: 5e8cbabbeb3255c373c6f59a521edefe0c13b25844c7d7aa646075add2ad1296
+  artifact: native/android/app/build/outputs/bundle/lazyoracleRelease/app-lazyoracle-release.aab
+  bundle_sha256: b5249989ccd7b9c44b1e740633db671f40447c945e010018fe72db98970c30fc
   play_app_id: '4975413590951100628'
-  internal_testing: build 13 available to internal testers; verified in Play Console
+  internal_testing: build 14 available to internal testers; verified in Play Console
   internal_testing_link: https://play.google.com/apps/internaltest/4701677916092886102
-  previous_internal: build 12 observed in Play Console before this update
-  production: build 11 in Changes in review; freshly verified in Play Console and untouched
+  previous_internal: classic build 13 retained for rollback
+  production: build 11 in Changes in review; freshly verified in Play Console and
+    untouched
   keystore: ~/.config/lazyoracle/android/upload-keystore.jks
   key_alias: lazyoracle-upload
+  implementation: native Compose
 ios:
   bundle_id: art.lazying.lazyoracle
   app_id: '6814663937'
   profile: LazyOracle App Store 1
   marketing_version: 1.0.0
-  build: 15
-  ipa_sha256: 5644a68a159c95f286c0108b32929712c39f1a85059f00495a79bd3cb7144c4a
-  delivery: b818ab85-d023-48e0-9813-242082fde373
-  testflight: build 15 IN_BETA_TESTING internally; public beta retains 14; verified by API
+  build: 16
+  ipa_sha256: 4c06de7699d6b049cfeb99d2e3f9c2db2d173f3a70c80d0938754b2d1d0f3199
+  delivery: 9b07de87-6583-46d5-957a-2952e1692079
+  testflight: build 16 IN_BETA_TESTING in internal and public beta groups; verified
+    by API
   public_beta: https://testflight.apple.com/join/JZJM3PFb
   app_store: 1.0.0 with build 12 WAITING_FOR_REVIEW; verified by API and untouched
+  implementation: native SwiftUI
 auspice:
   package: art.lazying.auspice
   site: https://auspice.lazying.art
@@ -45,19 +49,30 @@ auspice:
   price_usd: 0.99
   app_store_id: '6815034620'
   play_app_id: '4973267996880132777'
-  ios_build: 9
-  ios_delivery: f79616bf-c39f-4771-8eb4-81b42a3fda13
-  ios_sha256: 361a769ec491880bf1d91f6916550d237ab03a3659d39131e6a5ce8545acb0b7
-  ios_source_commit: 7dde5abe5bd9bc5e87881a50b026a2e9f6a4cbca
-  ios_evidence: store/artifacts/stability-2026-09-24.json
-  testflight: IN_BETA_TESTING in Auspice internal; verified by API
-  android_versionCode: 6
-  android_artifact: native/android/app/build/outputs/bundle/release/app-release.aab
-  android_sha256: 778f0140e7bb9efd718bab9a4e61b9e5841b98d10d51b0629b5189ff85890e6b
-  internal_testing: build 6 available to internal testers; verified in Play Console
+  ios_build: 12
+  ios_delivery: 03918640-c6e6-4f1a-a6cf-16b7ee91604d
+  ios_sha256: dd8724432e1625d49e4e8ac805f9ad07eff9b39f1178450f1ba96ffe7c293658
+  ios_source_commit: 94ea1c34a206e9ca7109ea47ab62d978dbc3232f
+  ios_evidence: store/artifacts/classic-swap-2026-09-24.json
+  testflight: classic build12 IN_BETA_TESTING in Auspice internal; VALID and group
+    membership verified by API
+  android_versionCode: 7
+  android_artifact: android/app/build/outputs/bundle/auspiceRelease/app-auspice-release.aab
+  android_sha256: 7d1a5b57d05fe957aa1718f81875b5984326dcf0ca397c88d3d649e24d6064fb
+  internal_testing: classic build 7 available to internal testers; verified in Play
+    Console
   internal_testing_link: https://play.google.com/apps/internaltest/4701649823136226500
-  previous_internal: build 5 observed in Play Console before this update
-  app_store: version 1.0 PREPARE_FOR_SUBMISSION, no build attached; formal release not authorized
-
+  previous_internal: native build 6 retained for rollback
+  app_store: version 1.0 PREPARE_FOR_SUBMISSION, no build attached; formal release
+    not authorized
+  implementation: classic React/Capacitor from the PWA source
 open_issues:
-  - The reported Auspice build 8 face crash and palm freeze have a lifecycle fix in TestFlight 9; repeated real-framework simulator tests pass. Physical iPhone SE 3 camera retesting remains pending.
+- Auspice iOS12 scene-restoration fix passed simulator upgrade/resume and keyboard
+  checks; physical iPhone SE 3 confirmation pending.
+- Physical iPhone SE 3 live camera/orientation/background/memory retest remains pending;
+  simulator camera lifecycle checks passed.
+- Native LazyOracle requires iOS17 and AndroidAPI26; Play reports 1382 previously
+  supported devices excluded.
+- Classic Auspice/PWA interface supports English and Simplified Chinese; native LazyOracle
+  supports eleven interface languages.
+backend_commit: 57d1117

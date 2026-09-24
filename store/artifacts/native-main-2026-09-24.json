@@ -1,0 +1,57 @@
+{
+  "date": "2026-09-24",
+  "source_commit": "95dec20989fbfcf4e5837bd9ae43e0ded6cee5a9",
+  "backend_commit": "57d1117",
+  "identity": "art.lazying.lazyoracle",
+  "ios": {
+    "version": "1.0.0",
+    "build": 16,
+    "build_id": "9b07de87-6583-46d5-957a-2952e1692079",
+    "ipa_sha256": "4c06de7699d6b049cfeb99d2e3f9c2db2d173f3a70c80d0938754b2d1d0f3199",
+    "bytes": 28259463,
+    "internal": "IN_BETA_TESTING",
+    "external": "IN_BETA_TESTING"
+  },
+  "android": {
+    "version": "1.0.0",
+    "build": 14,
+    "aab_sha256": "b5249989ccd7b9c44b1e740633db671f40447c945e010018fe72db98970c30fc",
+    "bytes": 43534962,
+    "internal": "Available to internal testers"
+  },
+  "rollback": {
+    "tag": "rollback/lazyoracle-classic-2026-09-24",
+    "classic_ios": 15,
+    "classic_android": 13,
+    "auspice_native_ios": 9,
+    "auspice_native_android": 6
+  },
+  "validation": {
+    "web_tests": 118,
+    "android_chat_tests": 6,
+    "swift_chat_cases": 6,
+    "ios_ui_tests": 5,
+    "pwa_layouts": 27,
+    "real_mediapipe_pwa": "face and hand passed",
+    "upgrade_import": "classic to native passed on both platforms",
+    "physical_iPhone_SE3": "pending"
+  },
+  "compatibility": {
+    "native_ios_min": "17.0",
+    "native_android_min_api": 26,
+    "play_previously_supported_devices_excluded": 1382
+  },
+  "formal_review": {
+    "apple_build": 12,
+    "apple_state": "WAITING_FOR_REVIEW",
+    "play_build": 11,
+    "play_state": "Changes in review"
+  },
+  "web": {
+    "source_commit": "95dec20989fbfcf4e5837bd9ae43e0ded6cee5a9",
+    "asset": "assets/index-V5e0jQwO.js",
+    "sha256": "9ffc8c4b27d9da870978de6a38b3ecf8ee9e000a6c4b9b76b1ee3e9e71b336fc",
+    "aliyun_release": "native-language-57d1117",
+    "huanayun_release": "/srv/lazyoracle/releases/95dec20989fbfcf4"
+  }
+}

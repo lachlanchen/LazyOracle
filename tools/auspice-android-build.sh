@@ -11,6 +11,7 @@ set -euo pipefail
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO"
 
+python3 tools/auspice-sync-prompt.py
 python3 tools/auspice-build-strings.py
 node tools/build-engine-bundle.mjs
 install -m 644 native/shared/lazyoracle-engines.js native/android/app/src/main/assets/

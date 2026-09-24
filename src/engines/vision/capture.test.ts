@@ -54,10 +54,11 @@ describe('native stable vision capture',()=>{
       expect(capturePalm(frames(clearHand,{noise:.7,phase}),lines).shape).toBe(palm.shape)
     }
   })
-  it('reports a boundary instead of choosing incompatible definite categories',()=>{
+  it('resolves face boundaries consistently while keeping uncertain palm observations',()=>{
     for(const height of [.578,.58,.582]) {
       const f=captureFace(frames(face({height})))
-      expect(f.element).toBe('mixed');expect(f.measurement.typeCandidates).toEqual(['metal','wood'])
+      expect(f.element).toBe(captureFace(frames(face({height:.58}))).element)
+      expect(f.measurement.typeCandidates).toEqual([f.classification.primary])
     }
     const p=hand().map(p=>({...p,x:.5+(p.x-.5)*(.86/.9)}))
     const result=capturePalm(frames(p),lines)

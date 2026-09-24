@@ -15,6 +15,7 @@ describe('the engine bridge', () => {
       'book.open',
       'face.capture',
       'face.features',
+      'face.resolve',
       'fengshui.mansions',
       'fengshui.sector',
       'iching.cast',

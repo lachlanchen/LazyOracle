@@ -3,6 +3,7 @@
  * Limits describe repeatability of landmark estimates, not clinical accuracy.
  */
 import { faceFeatures, type Point } from '../face/face'
+import { resolveFace } from '../face/shape'
 import { palmFeatures, type LineTraits } from '../palm/palm'
 
 export interface LandmarkFrame {
@@ -103,28 +104,19 @@ function measurement(candidates: string[], hand: boolean): Measurement {
       : 'The upper face starts at the tracked forehead outline, not a detected hairline. Expression, perspective and lighting can change estimates.',
   ] }
 }
-function faceType(height: number, jaw: number, forehead: number): string {
-  return height >= 1.45 ? 'wood' : forehead-jaw >= 0.18 ? 'fire' : jaw >= 0.9 && height <= 1.3 ? 'earth' : height <= 1.2 ? 'water' : 'metal'
-}
 function near(value: number, boundaries: number[], margin: number) { return boundaries.some(b => Math.abs(value-b) <= margin+1e-9) }
 
 export function captureFace(frames: LandmarkFrame[]) {
   const f = faceFeatures(stableLandmarks(frames,false))
-  const candidates = []
-  // A fixed ambiguity band prevents categorical flip-flops around arbitrary
-  // traditional cutoffs. It is not a calibrated probability/confidence score.
-  for (const h of [-0.04,0.04]) for (const j of [-0.025,0.025]) for (const t of [-0.025,0.025]) {
-    candidates.push(faceType(f.heightRatio+h,f.jawRatio+j,f.foreheadRatio+t))
-  }
-  const m = measurement(candidates,false)
+  const resolved = resolveFace({...f,measurement:measurement([],false)})
   const ideals = [1,0.333,0.42,0.62,0.78,1.15,1,0.86]
   const tolerances = [0.15,0.08,0.18,0.15,0.12,0.15,0.06,0.08]
   const palaces = f.palaces.map((p,i) => ({...p, state: near(p.value,[ideals[i]*(1-tolerances[i]),ideals[i]*(1+tolerances[i])],ideals[i]*0.035) ? 'uncertain' : p.state}))
   const strongPalaces = palaces.map((p,i)=>({...p,excess:p.value/ideals[i]-1})).filter(p=>p.state==='generous')
     .sort((a,b)=>b.excess-a.excess || (a.palace < b.palace ? -1 : 1)).slice(0,2).map(p=>p.palace)
-  return {...f, element:m.typeCandidates.length===1 ? m.typeCandidates[0] : 'mixed',
+  return {...resolved,
     courts:f.courts.map(c=>({...c,share:q(c.share),state:near(c.share,[0.3,0.36],0.01)?'uncertain':c.state})),
-    palaces,strongPalaces,measurement:m}
+    palaces,strongPalaces}
 }
 
 export function capturePalm(frames: LandmarkFrame[], lines: LineTraits) {

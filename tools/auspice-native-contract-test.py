@@ -13,6 +13,22 @@ source+=r'''
 @main struct ContractTest {
     static func main() throws {
         let engine = Engines.shared
+        let savedFace: [String: Any] = [
+            "element":"mixed", "heightRatio":1.20, "jawRatio":0.80, "foreheadRatio":0.98,
+            "eyesAcross":5.0, "eyeGap":1.0, "symmetry":0.99, "courts":[], "palaces":[], "strongPalaces":[],
+            "measurement":["version":2, "samples":8, "typeCandidates":["fire","metal","water"], "limitations":["old"]]
+        ]
+        let oldData = try JSONSerialization.data(withJSONObject: savedFace)
+        let old = try JSONDecoder().decode(FaceFeatures.self, from: oldData)
+        precondition(old.classification == nil)
+        let resolved = try engine.evaluate("face.resolve", ["features":savedFace], as: FaceFeatures.self)
+        precondition(resolved.element == "water" && resolved.classification?.primary == "water")
+        precondition(resolved.heightRatio == old.heightRatio && resolved.foreheadRatio == old.foreheadRatio)
+        precondition(resolved.measurement?.typeCandidates == ["water"])
+        let reloaded = try JSONDecoder().decode(FaceFeatures.self, from: JSONEncoder().encode(resolved))
+        precondition(reloaded.classification?.theme == resolved.classification?.theme)
+        precondition(reloaded.classification?.basis.foreheadRatio == 1.0)
+        print("PASS saved mixed face migration, canonical primary and native persistence round trip")
         var seen = Set<String>()
         for spread in ["one", "three", "celtic"] {
             for seed in 0..<100 {

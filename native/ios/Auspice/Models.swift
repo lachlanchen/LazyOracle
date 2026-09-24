@@ -382,6 +382,22 @@ struct FacePalaceReading: Codable, Identifiable {
     var id: String { palace }
 }
 
+struct FaceShapeRatios: Codable {
+    let heightRatio: Double
+    let jawRatio: Double
+    let foreheadRatio: Double
+}
+
+struct FaceClassification: Codable {
+    let version: Int
+    let method: String
+    let primary: String
+    let basis: FaceShapeRatios
+    let form: String
+    let theme: String
+    let reflection: String
+}
+
 struct FaceFeatures: Codable {
     let element: String
     let courts: [Court]
@@ -394,4 +410,5 @@ struct FaceFeatures: Codable {
     let palaces: [FacePalaceReading]
     let strongPalaces: [String]
     var measurement: VisionMeasurement? = nil
+    var classification: FaceClassification? = nil
 }

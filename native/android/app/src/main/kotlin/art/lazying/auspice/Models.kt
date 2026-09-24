@@ -321,6 +321,20 @@ data class Court(val court: String = "", val share: Double = 0.0, val state: Str
 data class FacePalaceReading(val palace: String = "", val value: Double = 0.0, val state: String = "")
 
 @Serializable
+data class FaceShapeRatios(val heightRatio: Double, val jawRatio: Double, val foreheadRatio: Double)
+
+@Serializable
+data class FaceClassification(
+    val version: Int,
+    val method: String,
+    val primary: String,
+    val basis: FaceShapeRatios,
+    val form: String,
+    val theme: String,
+    val reflection: String
+)
+
+@Serializable
 data class FaceFeatures(
     val element: String = "",
     val courts: List<Court> = emptyList(),
@@ -332,5 +346,6 @@ data class FaceFeatures(
     val symmetry: Double = 0.0,
     val palaces: List<FacePalaceReading> = emptyList(),
     val strongPalaces: List<String> = emptyList(),
-    val measurement: VisionMeasurement? = null
+    val measurement: VisionMeasurement? = null,
+    val classification: FaceClassification? = null
 )

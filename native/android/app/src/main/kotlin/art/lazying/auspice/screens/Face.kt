@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.encodeToJsonElement
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,6 +55,16 @@ fun FaceScreen(navController: NavController) {
     var error by remember { mutableStateOf<String?>(null) }
     var reads by remember { mutableIntStateOf(0) }
     LaunchedEffect(features) { Router.face = features }
+
+    LaunchedEffect(Unit) {
+        val saved = features
+        if (saved?.measurement?.version == 2 && saved.classification?.method != "five-form-outline-v1") {
+            runCatching {
+                Engines.start(context)
+                Engines.evaluateAs<FaceFeatures>("face.resolve", buildJsonObject { put("features", Json.encodeToJsonElement(saved)) })
+            }.onSuccess { features = it; Router.face = it }.onFailure { error = visionError(it) }
+        }
+    }
 
     LaunchedEffect(reads) {
         if (reads == 0) return@LaunchedEffect
@@ -121,16 +132,19 @@ fun FaceScreen(navController: NavController) {
         features?.let { f ->
             Panel(title = t("vision.measurement")) {
                 Text(t(if(f.measurement == null) "vision.legacy" else "vision.measured"), style=Type.sans(14), color=Palette.inkSoft)
-                f.measurement?.takeIf { it.typeCandidates.size>1 }?.let { m ->
-                    Text(m.typeCandidates.joinToString(" / ") { l(it.replaceFirstChar { c->c.uppercase() }) },style=Type.serif(17),color=Palette.gold)
-                    Text(t("vision.boundary"),style=Type.sans(13),color=Palette.inkMute)
-                }
+
             }
             Panel(title = t("face.element")) {
                 Text(if(f.element=="mixed") t("vision.mixed") else l(ELEMENT_FACES[f.element] ?: f.element), style = Type.display(28), color = Palette.gold)
-                Text(l("Read from the height of the face against its width, and from how the jaw and forehead stand against the cheekbones."),
-                    style = Type.serif(16), color = Palette.inkSoft
-                )
+                f.classification?.let { c ->
+                    Text(t("face.form.${c.primary}"), style = Type.serif(16), color = Palette.inkSoft)
+                }
+            }
+
+            f.classification?.let { c ->
+                Panel(title = t("face.reflection")) {
+                    Text(t("face.reading.${c.primary}"), style = Type.serif(18), color = Palette.ink)
+                }
             }
 
             Panel(title = t("face.courts")) {
@@ -198,7 +212,7 @@ fun FaceScreen(navController: NavController) {
             }
 
             Panel(title = t("common.method")) {
-                Text(t("vision.faceMethod"),
+                Text(t("face.shapeMethod"),
                     style = Type.serif(16), color = Palette.inkSoft
                 )
             }

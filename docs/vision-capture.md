@@ -19,9 +19,9 @@ personality, health, wealth, relationships or future events from appearance.
   relaxed mouth or an open, front-facing palm when those proportions would
   otherwise be distorted. The last frame must be suitable; old good frames
   cannot conceal a currently unsuitable pose.
-- Use explicit ambiguity bands around traditional shape cutoffs. A reading
-  near a boundary lists candidates instead of alternating definite labels.
-  These bands are engineering tolerances, not calibrated probabilities.
+- Face readings resolve one primary silhouette using the five fixed templates
+  documented below; palm readings retain ambiguity bands near their cutoffs.
+  These are engineering rules, not calibrated probabilities.
 - Correct Android image rotation/mirroring and both preview overlays' aspect
   fill geometry. Serialize Android detector creation, video inference and
   teardown off the UI thread, following the existing iOS worker design.
@@ -66,7 +66,7 @@ person never reuses a previous person's classification as a prior.
 Physical iPhone SE 3 testing under varied lighting, perspective and repeated
 background/foreground use remains necessary. Landmarks can still vary with
 expression, occlusion and camera perspective; the app must show uncertainty
-rather than manufacture certainty.
+without suggesting these numerical templates establish facts about a person.
 
 ## Sources and reproduction
 
@@ -84,3 +84,54 @@ model directory, a neutral frontal face image and an open-palm image.
 The neutral portrait fixture comes from
 [Matplotlib's sample data](https://github.com/matplotlib/matplotlib/blob/main/lib/matplotlib/mpl-data/sample_data/grace_hopper.jpg);
 models, photographs and raw detected landmarks stay in ignored runtime files.
+
+
+## Native face interpretation update — iOS18 / Android17
+
+The previous face reader exposed all boundary candidates (for example Fire /
+Metal / Water) and told Tianji not to resolve them. This produced a mixed card
+and a lengthy explanation of limitations. Native `face.capture` now calls the
+same `face.resolve` rule used to upgrade saved version-2 measurements. Measured
+ratios, courts and regions stay unchanged; one primary classification and its
+symbolic theme travel together to both native cards and Tianji. Pre-version-2
+snapshots still invite a new capture because their image geometry was different.
+No photos or identity matching are involved.
+
+The rule minimizes squared normalized distance from these templates, using
+height/width, jaw/cheekbones and upper-width/cheekbones in that order. Inputs are
+rounded to 0.05 bands for classification only; distance scales are 0.20, 0.12,
+0.10. An exact tie follows the table order. This is a reproducible app convention,
+not a claim that traditional texts specify numerical thresholds or that a label
+cannot change near a template boundary.
+
+| Form | Height / width | Jaw / cheekbones | Upper width / cheekbones |
+| --- | ---: | ---: | ---: |
+| Wood | 1.55 | 0.72 | 0.85 |
+| Fire | 1.35 | 0.95 | 0.80 |
+| Earth | 1.25 | 0.98 | 0.97 |
+| Metal | 1.35 | 0.88 | 0.90 |
+| Water | 1.15 | 0.80 | 0.89 |
+
+The outline vocabulary is inspired by [太清神鑑, 卷4, 五形](https://zh.wikisource.org/zh-hans/太清神鑑_(四庫全書本)/卷4).
+In particular its Fire description is narrower above and broader below, the
+reverse of the older app heuristic. The source describes broader bodily forms;
+these face-only templates are explicitly our approximation. General element
+imagery comes from [尚書·洪範](https://zh.wikisource.org/zh-hans/尚書/洪範).
+Neither source is used to attribute character, health, fortune or relationship
+outcomes to a photographed person.
+
+Both native apps show a localized short symbolic reflection before the detailed
+measurements. Tianji receives the canonical form/theme and develops an optional
+activity, without repeatedly reciting limitations. The interface, the reader's
+language and explicit language requests remain conversational defaults. One
+shared reading prompt now generates the Swift and Kotlin implementations.
+
+Validation: 138 shared tests, including all five forms, Fire orientation,
+saved-result migration, small perturbations and existing capture invariance.
+Replaying twelve previously captured real-model portrait bursts resolves Water
+in all twelve, retaining the exact measured height ratios of 1.11–1.12. This is
+one fixture, not population-wide validation. The production Swift model and
+JavaScriptCore bridge pass old-snapshot decoding, reclassification and encoding
+round trips. Live Chinese, English, explicit-English and practical-follow-up
+requests were reviewed against a synthetic saved mixed-type fixture. Physical
+iPhone SE 3 repeatability remains pending.

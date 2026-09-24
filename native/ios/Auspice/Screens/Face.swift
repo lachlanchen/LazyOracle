@@ -66,20 +66,25 @@ struct FaceScreen: View {
                 Panel(title: t("vision.measurement")) {
                     Text(t(features.measurement == nil ? "vision.legacy" : "vision.measured"))
                         .font(Typeface.sans(14)).foregroundStyle(Palette.inkSoft)
-                    if let measurement = features.measurement, measurement.typeCandidates.count > 1 {
-                        Text(measurement.typeCandidates.map { l($0.capitalized) }.joined(separator: " / "))
-                            .font(Typeface.serif(17)).foregroundStyle(Palette.gold)
-                        Text(t("vision.boundary")).font(Typeface.sans(13)).foregroundStyle(Palette.inkMute)
-                    }
+
                 }
                 Panel(title: t("face.element")) {
                     Text(features.element == "mixed" ? t("vision.mixed") : l(elementNames[features.element] ?? features.element))
                         .font(Typeface.display(28))
                         .foregroundStyle(Palette.gold)
-                    Text(l("Read from the height of the face against its width, and from how the jaw and forehead stand against the cheekbones."))
-                        .font(Typeface.serif(16))
-                        .foregroundStyle(Palette.inkSoft)
-                        .fixedSize(horizontal: false, vertical: true)
+                    if let classification = features.classification {
+                        Text(t("face.form.\(classification.primary)"))
+                            .font(Typeface.serif(16)).foregroundStyle(Palette.inkSoft)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+
+                if let classification = features.classification {
+                    Panel(title: t("face.reflection")) {
+                        Text(t("face.reading.\(classification.primary)"))
+                            .font(Typeface.serif(18)).foregroundStyle(Palette.ink)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                 }
 
                 Panel(title: t("face.courts")) {
@@ -146,7 +151,7 @@ struct FaceScreen: View {
                 }
 
                 Panel(title: t("common.method")) {
-                    Text(t("vision.faceMethod"))
+                    Text(t("face.shapeMethod"))
                         .font(Typeface.serif(16))
                         .foregroundStyle(Palette.inkSoft)
                         .fixedSize(horizontal: false, vertical: true)
@@ -154,7 +159,7 @@ struct FaceScreen: View {
                 ExplainReading(result: features)
             }
         }
-        .onAppear { Router.shared.face = features; camera.start() }
+        .onAppear { restoreClassification(); Router.shared.face = features; camera.start() }
         .onDisappear { camera.stop() }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { camera.start() } else { camera.stop() }
@@ -176,6 +181,16 @@ struct FaceScreen: View {
                 .frame(width: 58, alignment: .trailing)
         }
         .padding(.vertical, 3)
+    }
+
+    /// Upgrade the interpretation of a v2 capture, retaining its exact measurements.
+    private func restoreClassification() {
+        guard let saved = features, saved.measurement?.version == 2,
+              saved.classification?.method != "five-form-outline-v1" else { return }
+        do {
+            let input = try JSONSerialization.jsonObject(with: JSONEncoder().encode(saved))
+            features = try Engines.shared.evaluate("face.resolve", ["features": input], as: FaceFeatures.self)
+        } catch { self.error = visionError(error) }
     }
 
     private func read() {

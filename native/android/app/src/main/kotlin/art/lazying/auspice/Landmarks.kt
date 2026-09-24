@@ -88,6 +88,10 @@ class LandmarkSession(private val hands: Boolean) {
                     FaceLandmarker.FaceLandmarkerOptions.builder().setBaseOptions(base).setRunningMode(RunningMode.VIDEO)
                         .setNumFaces(1).setMinFaceDetectionConfidence(0.7f).setMinFacePresenceConfidence(0.7f).setMinTrackingConfidence(0.7f).build())
                 main.post { if(!closed && token==generation) bind(context,owner) }
+            } catch (_: LinkageError) {
+                // MediaPipe does not ship every emulator/device ABI. Class
+                // initialisation can fail again as NoClassDefFoundError.
+                main.post { if(!closed) { clear();message=t("camera.unavailable") } }
             } catch (_: Exception) { main.post { if(!closed) { clear();message=t("camera.retry") } } }
         }
     }

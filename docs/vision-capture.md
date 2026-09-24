@@ -42,8 +42,12 @@ person never reuses a previous person's classification as a prior.
 - 129 shared tests pass, including aspect ratio/roll/mirror invariance, 100
   perturbed bursts, category boundaries, quality rejection, stale timestamps,
   single outlier resistance and unknown manual observations.
-- Android capture-window unit tests cover minimum duration, bounded memory,
-  freshness and reset conditions; the debug app builds successfully.
+- Nine Android unit tests pass, including capture-window minimum duration,
+  bounded memory, freshness and reset conditions. Debug and signed release
+  builds succeed. An Intel emulator exposed an unavailable MediaPipe JNI
+  library; detector initialisation now catches linkage failures and keeps the
+  app usable with a camera-unavailable state. Android16 supersedes the
+  unpublished Android15 upload.
 - The production iOS worker and JavaScriptCore/Codable bridge pass 24
   create/infer/stop cycles (288 frames) with small real pixel translations,
   rotations and scale changes. Twelve face bursts retain one candidate set,

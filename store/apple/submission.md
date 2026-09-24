@@ -51,3 +51,18 @@ submission was made. The owner should update from build 7 to verify on device.
 
 LazyOracle build 14's public beta has also reached `IN_BETA_TESTING`, verified
 by API at 18:50 HKT; its earlier beta-review wait is complete.
+
+## 2026-09-24 — stability and explanations, internal TestFlight
+
+- Auspice **9 (0.1.0)** and LazyOracle **15 (1.0.0)** passed archive validation,
+  upload and processing. Both are `VALID` / `IN_BETA_TESTING`; internal group
+  membership was verified through the API.
+- Auspice addresses the build-8 face/palm lifecycle failure, mixed tarot rank
+  types, language labels, home sends and new-session layout. Both apps add
+  backend explanations/follow-ups for their existing computed readings.
+- LazyOracle public beta remains 14; formal build 12 is still
+  `WAITING_FOR_REVIEW`. Auspice's formal version remains
+  `PREPARE_FOR_SUBMISSION` with no build attached.
+- Artifact hashes and delivery IDs: `store/artifacts/stability-2026-09-24.json`.
+  Physical iPhone SE 3 camera verification is pending; simulator stress and
+  native UI tests passed.

@@ -19,6 +19,26 @@ request history and outstanding work are in
   languages with a Settings dropdown. LazyOracle currently has English and
   Simplified Chinese; this is a remaining parity gap.
 
+## Stability checkpoint — 2026-09-24
+
+- Auspice TestFlight **9** and Play internal **6** carry the camera lifecycle,
+  tarot decoding, home-to-chat, visible new-session action and eleven-language
+  reading-label fixes. Ask Tianji remains below the home practice cards.
+- LazyOracle TestFlight **15**, Play internal **13**, and both web hosts carry
+  backend explanations and follow-up questions for the current computed result.
+  Auspice has the same feature in all nine practices. Explanation requests do
+  not recast or redraw; replies primarily use the selected language.
+- I Ching explanations retain exact reading-focus positions. Individual line
+  verses are not currently supplied; the model must not invent or misquote them.
+- Validation passed: 108 web tests, five Android conversation tests, native
+  contracts covering all 78 tarot cards, 24 real MediaPipe simulator lifecycle
+  cycles, and native UI coverage across languages and practices. Physical
+  iPhone SE 3 camera/orientation/memory verification remains pending.
+- LazyOracle's formal Apple build 12 and Play build 11 remain in review, and
+  public TestFlight retains 14. Auspice has no formal release submitted.
+- Details: [stability handoff](handoffs/2026-09-24-stability.md) and
+  [signed release receipt](../store/artifacts/stability-2026-09-24.json).
+
 ## 1. What we are building
 
 A fortune-telling app that is **beautiful first, simple second, complete third**: one screen per practice, no clutter, every common practice included.

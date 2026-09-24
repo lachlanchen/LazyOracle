@@ -1,0 +1,167 @@
+{
+  "date": "2026-09-24",
+  "sourceCommit": "7dde5abe5bd9bc5e87881a50b026a2e9f6a4cbca",
+  "fixCommit": "2808c60",
+  "reportedBuild": "Auspice 8",
+  "reportedDevice": "iPhone SE (3rd generation), iOS 26.3.1",
+  "diagnosis": "Matching build-8 dSYM locates a MediaPipe TaskRunner callback failure concurrent with LandmarkSession teardown. Native camera work now uses serial video-mode inference and teardown off the main actor.",
+  "validation": {
+    "webTests": 108,
+    "androidConversationTests": 5,
+    "tarotDraws": 300,
+    "tarotCardsCovered": 78,
+    "ichingCasts": 100,
+    "cameraStress": {
+      "cycles": 24,
+      "frames": 144,
+      "framework": "real MediaPipe iOS simulator frameworks",
+      "mainActorHeartbeats": 424,
+      "result": "passed"
+    },
+    "nativeUI": [
+      "all eleven language choices",
+      "face/palm navigation",
+      "home question into existing chat",
+      "visible new conversation action",
+      "blank and Chinese tarot questions",
+      "live I Ching explanation",
+      "remaining practice screens"
+    ],
+    "productionBrowser": "375x667: live follow-up preserves original cast context and returns a visible backend answer; no horizontal overflow",
+    "relay": "Fast and Pro HTTP/stream tests pass; visible answer verified live",
+    "lint": "passed",
+    "typecheck": "passed",
+    "productionBuild": "passed",
+    "physicalDevice": "iPhone SE 3 camera, orientation and memory retest not performed; owner verification pending"
+  },
+  "web": [
+    {
+      "host": "oracle.lazying.art",
+      "status": 200,
+      "asset": "assets/index-lsWaNgfz.js",
+      "sha256": "cfe50e3b68c29395fb7b0f84caeff89c87ef9c5437e35555b605085af70d3c09",
+      "bytes": 799937
+    },
+    {
+      "host": "oracle-fast.lazying.art",
+      "status": 200,
+      "asset": "assets/index-lsWaNgfz.js",
+      "sha256": "cfe50e3b68c29395fb7b0f84caeff89c87ef9c5437e35555b605085af70d3c09",
+      "bytes": 799937
+    }
+  ],
+  "iosArtifacts": [
+    {
+      "name": "Auspice",
+      "bundle": "art.lazying.auspice",
+      "version": "0.1.0",
+      "build": 9,
+      "bytes": 27677215,
+      "sha256": "361a769ec491880bf1d91f6916550d237ab03a3659d39131e6a5ce8545acb0b7",
+      "processingState": "VALID",
+      "testflight": {
+        "build": "9",
+        "id": "f79616bf-c39f-4771-8eb4-81b42a3fda13",
+        "group": "24b67fe2-ec14-40f3-a40c-04a2bb68a032",
+        "internalBuildState": "IN_BETA_TESTING"
+      }
+    },
+    {
+      "name": "LazyOracle",
+      "bundle": "art.lazying.lazyoracle",
+      "version": "1.0.0",
+      "build": 15,
+      "bytes": 24200254,
+      "sha256": "5644a68a159c95f286c0108b32929712c39f1a85059f00495a79bd3cb7144c4a",
+      "processingState": "VALID",
+      "testflight": {
+        "build": "15",
+        "id": "b818ab85-d023-48e0-9813-242082fde373",
+        "group": "b45d710d-856f-46bd-9999-684372ca04d0",
+        "internalBuildState": "IN_BETA_TESTING"
+      }
+    }
+  ],
+  "androidArtifacts": {
+    "Auspice": {
+      "version": "0.1.0",
+      "versionCode": 6,
+      "bytes": 43295647,
+      "sha256": "778f0140e7bb9efd718bab9a4e61b9e5841b98d10d51b0629b5189ff85890e6b",
+      "path": "native/android/app/build/outputs/bundle/release/app-release.aab",
+      "signature": "jarsigner verified",
+      "playUpload": "Available to internal testers"
+    },
+    "LazyOracle": {
+      "version": "1.0.0",
+      "versionCode": 13,
+      "bytes": 24518934,
+      "sha256": "5e8cbabbeb3255c373c6f59a521edefe0c13b25844c7d7aa646075add2ad1296",
+      "path": "android/app/build/outputs/bundle/release/app-release.aab",
+      "signature": "jarsigner verified",
+      "playUpload": "Available to internal testers"
+    }
+  },
+  "bundledAssets": [
+    {
+      "app": "auspice",
+      "assets": [
+        {
+          "path": "base/assets/auspice-content.json",
+          "sha256": "6c0cb8282610d36e6cf1c805f04c94fb76143a85c49b333064680a0a6e22661b",
+          "bytes": 756520
+        },
+        {
+          "path": "base/assets/lazyoracle-engines.js",
+          "sha256": "55baa5e837e554a4fe321807e63f8b5997a39cef3a4f54596ecf8b51d1ecff7c",
+          "bytes": 420474
+        }
+      ]
+    },
+    {
+      "app": "lazyoracle",
+      "assets": [
+        {
+          "path": "base/assets/public/assets/index-lsWaNgfz.js",
+          "sha256": "cfe50e3b68c29395fb7b0f84caeff89c87ef9c5437e35555b605085af70d3c09",
+          "bytes": 799937
+        }
+      ]
+    }
+  ],
+  "formalReviews": {
+    "Auspice": {
+      "versions": [
+        {
+          "id": "83c3b8b0-1d69-4d58-affa-529128c91b4e",
+          "version": "1.0",
+          "state": "PREPARE_FOR_SUBMISSION",
+          "buildId": null
+        }
+      ],
+      "builds": []
+    },
+    "LazyOracle": {
+      "versions": [
+        {
+          "id": "1e287ce1-6004-4964-85cd-4b6ae2445be5",
+          "version": "1.0.0",
+          "state": "WAITING_FOR_REVIEW",
+          "buildId": {
+            "type": "builds",
+            "id": "89b6a2f6-3d14-47c6-b38c-bb6238a24206"
+          }
+        }
+      ],
+      "builds": [
+        {
+          "id": "89b6a2f6-3d14-47c6-b38c-bb6238a24206",
+          "build": "12"
+        }
+      ]
+    }
+  },
+  "production": "No formal release submitted or replaced. LazyOracle Apple build 12 remains WAITING_FOR_REVIEW and Play production 11 remains under Changes in review, both freshly verified. Auspice has no formal build attached.",
+  "publicBeta": "LazyOracle build 14 retained; new build 15 is internal only",
+  "verifiedAt": "2026-09-24T09:49:11.430162+08:00"
+}

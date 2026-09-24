@@ -33,3 +33,16 @@
 - LazyOracle production **11** remains under “Changes in review”, verified
   after publishing the internal update. No production change was made.
   Auspice remains internal-only; no formal release was submitted.
+
+## 2026-09-24 — stability and explanations, internal testing
+
+- Auspice **6 (0.1.0)** and LazyOracle **13 (1.0.0)** are available to internal
+  testers, verified in Play Console after publication. Both signed bundles
+  passed verification, with no loss of supported devices.
+- Auspice includes tarot rank handling, home-to-chat delivery, a visible new
+  conversation action, and eleven-language reading labels. Both apps include
+  plain-language backend explanations and follow-up questions for the current
+  computed result.
+- LazyOracle production **11** remains under “Changes in review”, verified
+  after this internal release. No Auspice production submission was made.
+- Artifact hashes and validation: `store/artifacts/stability-2026-09-24.json`.

@@ -54,8 +54,26 @@ and a home question being lost when opening an existing conversation.
   visible answers. Raw reports and detailed runtime evidence remain private.
 
 The simulator does not replace physical camera, orientation and memory testing
-on the owner's iPhone SE 3. No physical-device retest is claimed. Release
-availability and artifact hashes are recorded separately after publication.
+on the owner's iPhone SE 3. No physical-device retest is claimed.
+
+## Published test releases
+
+Source fixes are committed as `2808c60`, with the final explanation prompt and
+shared release scheme in `7dde5ab`. Auspice **0.1.0 (9)** and LazyOracle
+**1.0.0 (15)** are `VALID` and `IN_BETA_TESTING` in their internal TestFlight
+groups. Play Console confirms Auspice **6** and LazyOracle **13** are available
+to internal testers. Signed artifact hashes and validation results are in
+[the release receipt](../../store/artifacts/stability-2026-09-24.json).
+
+Both live web hosts serve `assets/index-lsWaNgfz.js`; its hash also matches both
+signed LazyOracle mobile packages. Auspice's iOS and Android packages have
+identical engine and language bundle hashes. A live production I Ching follow-up
+preserved the original cast context and returned a backend answer at phone size.
+
+LazyOracle's formal Apple build 12 and Play build 11 remain in review. Public
+TestFlight retains build 14. No Auspice formal submission was made. The next
+device check is face/palm use, camera switching, background/resume and repeated
+navigation on the owner's iPhone SE 3 with Auspice 9.
 
 For unsigned simulator UI tests, remove the project's test runner app before
 `test-without-building`: CoreSimulator reused an older test runner despite a

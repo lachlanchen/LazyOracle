@@ -1,3 +1,4 @@
+import { usePracticeState } from '../lib/practice-state'
 import { useMemo, useState } from 'react'
 import { Star } from 'lucide-react'
 import { BODY_TEXT, computeChart, formatDegree, SIGNS, transitsFor, type NatalChart } from '../engines/astrology/astrology'
@@ -85,9 +86,9 @@ export function NatalWheel({ chart }: { chart: NatalChart }) {
 export function AstrologyScreen({ copy, language }: AstrologyScreenProps) {
   const [profile, setProfile] = useState<BirthProfile | null>(() => loadProfile())
   const [editing, setEditing] = useState(profile === null)
-  const [question, setQuestion] = useState('')
-  const [asked, setAsked] = useState('')
-  const [round, setRound] = useState(0)
+  const [question, setQuestion] = usePracticeState('astrology.question', '')
+  const [asked, setAsked] = usePracticeState('astrology.asked', '')
+  const [round, setRound] = usePracticeState('astrology.round', 0)
   const en = language === 'en'
   const t = copy.astrology
   const today = useMemo(() => new Date(), [])

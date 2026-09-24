@@ -72,14 +72,16 @@ private fun rememberHeading(): State<Float?> {
 
 @Composable
 fun FengShuiScreen(navController: NavController) {
-    var mansions by remember { mutableStateOf<EightMansions?>(null) }
+    var mansions by rememberPracticeState<EightMansions?>("fengshui.mansions", null)
     var facing by remember { mutableStateOf<String?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
     var editing by remember { mutableStateOf(false) }
     val profile = Profiles.profile
     val heading by rememberHeading()
 
+    var computedProfile by rememberPracticeState<BirthProfile?>("fengshui.profile", null)
     LaunchedEffect(profile) {
+        if (mansions != null && computedProfile == profile) return@LaunchedEffect
         if (!profile.isComplete) { mansions = null; return@LaunchedEffect }
         runCatching {
             Engines.evaluateAs<EightMansions>("fengshui.mansions", buildJsonObject {
@@ -88,7 +90,8 @@ fun FengShuiScreen(navController: NavController) {
                 put("day", JsonPrimitive(profile.day))
                 put("gender", JsonPrimitive(profile.gender))
             })
-        }.onSuccess { mansions = it; error = null }.onFailure { error = l("This reading could not be computed. Please try again.") }
+        }.onSuccess { mansions = it; error = null
+                computedProfile = profile }.onFailure { error = l("This reading could not be computed. Please try again.") }
     }
 
     LaunchedEffect(heading?.roundToInt()) {
@@ -114,7 +117,6 @@ fun FengShuiScreen(navController: NavController) {
         error?.let { Panel(title = t("common.notComputed")) { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
 
         mansions?.let { m ->
-            ExplainReading(Json.encodeToString(m))
             Panel {
                 BaguaRose(m, heading)
                 val sector = facing?.let { name -> m.sectors.firstOrNull { it.direction == name } }
@@ -188,6 +190,7 @@ fun FengShuiScreen(navController: NavController) {
                     if (index < m.sectors.lastIndex) HorizontalDivider(color = Palette.line)
                 }
             }
+            ExplainReading(Json.encodeToString(m))
         }
     }
 }

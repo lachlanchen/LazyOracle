@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { usePracticeState } from '../lib/practice-state'
 import { RefreshCw, Sparkles, Wand2 } from 'lucide-react'
 import { drawSpread } from '../engines/tarot/draw'
 import { SPREAD_ORDER, SPREADS } from '../engines/tarot/spreads'
@@ -15,10 +15,10 @@ interface TarotScreenProps {
 }
 
 export function TarotScreen({ copy, language }: TarotScreenProps) {
-  const [question, setQuestion] = useState('')
-  const [spreadId, setSpreadId] = useState<Spread['id']>('three')
-  const [draw, setDraw] = useState<TarotDraw | null>(null)
-  const [revealed, setRevealed] = useState<boolean[]>([])
+  const [question, setQuestion] = usePracticeState('tarot.question', '')
+  const [spreadId, setSpreadId] = usePracticeState<Spread['id']>('tarot.spreadId', 'three')
+  const [draw, setDraw] = usePracticeState<TarotDraw | null>('tarot.draw', null)
+  const [revealed, setRevealed] = usePracticeState<boolean[]>('tarot.revealed', [])
   const textLanguage = language === 'en' ? 'en' : 'zh'
 
   const startDraw = () => {

@@ -2222,6 +2222,71 @@
       "de": "Die Kamera konnte nicht gestartet werden. Bitte versuche es erneut.",
       "ru": "Не удалось запустить камеру. Пожалуйста, попробуйте снова.",
       "ar": "تعذر تشغيل الكاميرا. يرجى المحاولة مرة أخرى."
+    },
+    "chat.stop": {
+      "en": "Stop",
+      "zh-Hans": "停止",
+      "zh-Hant": "停止",
+      "ja": "停止",
+      "ko": "중지",
+      "vi": "Dừng",
+      "es": "Detener",
+      "fr": "Arrêter",
+      "de": "Stoppen",
+      "ru": "Остановить",
+      "ar": "إيقاف"
+    },
+    "chat.retry": {
+      "en": "Retry answer",
+      "zh-Hans": "重试回答",
+      "zh-Hant": "重試回答",
+      "ja": "回答を再試行",
+      "ko": "답변 재시도",
+      "vi": "Thử trả lời lại",
+      "es": "Reintentar respuesta",
+      "fr": "Réessayer",
+      "de": "Antwort erneut versuchen",
+      "ru": "Повторить ответ",
+      "ar": "إعادة المحاولة"
+    },
+    "chat.stopped": {
+      "en": "Response stopped. You can retry.",
+      "zh-Hans": "已停止回答，可以重试。",
+      "zh-Hant": "已停止回答，可以重試。",
+      "ja": "回答を停止しました。再試行できます。",
+      "ko": "응답을 중지했습니다. 다시 시도할 수 있습니다.",
+      "vi": "Đã dừng trả lời. Bạn có thể thử lại.",
+      "es": "Respuesta detenida. Puedes reintentar.",
+      "fr": "Réponse arrêtée. Vous pouvez réessayer.",
+      "de": "Antwort gestoppt. Du kannst es erneut versuchen.",
+      "ru": "Ответ остановлен. Можно повторить.",
+      "ar": "تم إيقاف الرد. يمكنك إعادة المحاولة."
+    },
+    "chat.timeout": {
+      "en": "The response took too long. Please retry.",
+      "zh-Hans": "回答等待超时，请重试。",
+      "zh-Hant": "回答等待逾時，請重試。",
+      "ja": "回答がタイムアウトしました。再試行してください。",
+      "ko": "응답 시간이 초과되었습니다. 다시 시도해 주세요.",
+      "vi": "Phản hồi quá lâu. Vui lòng thử lại.",
+      "es": "La respuesta tardó demasiado. Reinténtalo.",
+      "fr": "La réponse a pris trop de temps. Réessayez.",
+      "de": "Die Antwort hat zu lange gedauert. Bitte erneut versuchen.",
+      "ru": "Время ожидания ответа истекло. Повторите попытку.",
+      "ar": "استغرق الرد وقتًا طويلًا. أعد المحاولة."
+    },
+    "chat.connectionFailed": {
+      "en": "The response was interrupted. Check your connection and retry.",
+      "zh-Hans": "回答中断了，请检查网络后重试。",
+      "zh-Hant": "回答中斷了，請檢查網路後重試。",
+      "ja": "回答が中断されました。接続を確認して再試行してください。",
+      "ko": "응답이 중단되었습니다. 연결을 확인하고 다시 시도해 주세요.",
+      "vi": "Phản hồi bị gián đoạn. Kiểm tra kết nối và thử lại.",
+      "es": "La respuesta se interrumpió. Comprueba la conexión y reintenta.",
+      "fr": "La réponse a été interrompue. Vérifiez la connexion et réessayez.",
+      "de": "Die Antwort wurde unterbrochen. Verbindung prüfen und erneut versuchen.",
+      "ru": "Ответ прерван. Проверьте соединение и повторите попытку.",
+      "ar": "انقطع الرد. تحقق من الاتصال وأعد المحاولة."
     }
   }
 }

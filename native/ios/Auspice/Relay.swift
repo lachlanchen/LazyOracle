@@ -6,7 +6,14 @@ import Foundation
 /// carries one. The native app talks to the Huanayun mirror, which is the
 /// faster of the two hosts from most networks here.
 enum Relay {
-    static let base = URL(string: "https://oracle-fast.lazying.art/v1")!
+    static let endpoints = ["https://oracle-fast.lazying.art/v1", "https://oracle.lazying.art/v1"]
+    private static let session: URLSession = {
+        let configuration = URLSessionConfiguration.default
+        configuration.timeoutIntervalForRequest = 20
+        configuration.timeoutIntervalForResource = 45
+        configuration.waitsForConnectivity = false
+        return URLSession(configuration: configuration)
+    }()
 
     // MARK: Wire format
 
@@ -57,9 +64,13 @@ enum Relay {
     enum Failure: LocalizedError {
         case http(Int, String)
         case offline
+        case empty
+        case interrupted
 
         var errorDescription: String? {
             switch self {
+            case .empty: "The reading service sent no answer."
+            case .interrupted: "The reading was interrupted. Please retry."
             case .offline: "The reading service could not be reached."
             case .http(let code, let body):
                 code == 503
@@ -78,15 +89,39 @@ enum Relay {
         tier: String,
         onDelta: @escaping (String) -> Void
     ) async throws -> Answer {
-        var request = URLRequest(url: base.appendingPathComponent("chat/completions"))
+        var lastError: Error = Failure.offline
+        for endpoint in endpoints {
+            var emitted = false
+            do {
+                return try await streamAt(endpoint, messages: messages, tools: tools, tier: tier) { piece in
+                    emitted = true
+                    onDelta(piece)
+                }
+            } catch {
+                if Task.isCancelled { throw CancellationError() }
+                lastError = error
+                // Retry another relay only before visible output. A partial
+                // answer must never be duplicated or silently replaced.
+                if emitted { throw error }
+                if case Failure.http(let code, _) = error, code == 400 || code == 413 || code == 429 { throw error }
+            }
+        }
+        throw lastError
+    }
+
+    @MainActor private static func streamAt(
+        _ endpoint: String, messages: [Message], tools: [[String: Any]], tier: String,
+        onDelta: @escaping (String) -> Void
+    ) async throws -> Answer {
+        var request = URLRequest(url: URL(string: endpoint + "/chat/completions")!)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.timeoutInterval = 120
+        request.timeoutInterval = 20
 
         var body: [String: Any] = [
             "model": tier,
             "stream": true,
-            "temperature": 0.7,
+            "temperature": 0.3,
             "messages": messages.map(encode)
         ]
         if !tools.isEmpty {
@@ -96,7 +131,7 @@ enum Relay {
         }
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
-        let (stream, response) = try await URLSession.shared.bytes(for: request)
+        let (stream, response) = try await session.bytes(for: request)
         guard let http = response as? HTTPURLResponse else { throw Failure.offline }
         guard http.statusCode == 200 else {
             var text = ""
@@ -106,10 +141,16 @@ enum Relay {
 
         var answer = Answer()
         var assembling: [Int: ToolCall] = [:]
+        var finished = false
         for try await line in stream.lines {
+            try Task.checkCancellation()
             guard line.hasPrefix("data:") else { continue }
             let payload = line.dropFirst(5).trimmingCharacters(in: .whitespaces)
-            if payload == "[DONE]" { break }
+            if payload == "[DONE]" { finished = true; break }
+            if let data = payload.data(using: .utf8),
+               let event = try? JSONSerialization.jsonObject(with: data) as? [String: Any], event["error"] != nil {
+                throw Failure.interrupted
+            }
             guard let data = payload.data(using: .utf8),
                   let chunk = try? JSONDecoder().decode(Delta.self, from: data),
                   let delta = chunk.choices?.first?.delta else { continue }
@@ -134,6 +175,8 @@ enum Relay {
             }
         }
         answer.toolCalls = assembling.keys.sorted().compactMap { assembling[$0] }
+        guard finished else { throw Failure.interrupted }
+        if answer.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && answer.toolCalls.isEmpty { throw Failure.empty }
         return answer
     }
 
@@ -266,6 +309,9 @@ enum AgentTools {
             let book = arguments["book"] as? String ?? "answers"
             return engine("book.open", ["book": book, "question": arguments["question"] as? String ?? ""], "Opened the Book of \(book == "questions" ? "Questions" : "Answers")")
         case "birth_details":
+            guard profile.isComplete else {
+                return Outcome(label: "No birth details", output: "{\"saved\":false,\"note\":\"No birth details have been saved. Ask the reader; do not use form defaults as personal information.\"}", ok: true)
+            }
             let data = try? JSONSerialization.data(withJSONObject: [
                 "saved": profile.isComplete,
                 "year": profile.year, "month": profile.month, "day": profile.day,

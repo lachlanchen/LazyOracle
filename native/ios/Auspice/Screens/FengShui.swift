@@ -45,9 +45,10 @@ final class Compass: NSObject, CLLocationManagerDelegate {
 struct FengShuiScreen: View {
     @State private var store = ProfileStore.shared
     @State private var compass = Compass()
-    @State private var mansions: EightMansions?
+    @SavedPractice("fengshui.mansions") private var mansions: EightMansions? = nil
     @State private var facing: String?
     @State private var error: String?
+    @SavedPractice("fengshui.profile") private var computedProfile: BirthProfile? = nil
     @State private var editing = false
 
     var body: some View {
@@ -65,7 +66,6 @@ struct FengShuiScreen: View {
             }
 
             if let mansions {
-                ExplainReading(result: mansions)
                 Panel {
                     BaguaRose(mansions: mansions, heading: compass.heading)
                         .aspectRatio(1, contentMode: .fit)
@@ -102,13 +102,14 @@ struct FengShuiScreen: View {
                         }
                     }
                 }
+                ExplainReading(result: mansions)
             }
         }
         .sheet(isPresented: $editing) {
             BirthForm(profile: $store.profile) { compute() }
         }
         .onAppear {
-            compute()
+            if mansions == nil || computedProfile != store.profile { compute() }
             compass.start()
         }
         .onDisappear { compass.stop() }
@@ -195,6 +196,7 @@ struct FengShuiScreen: View {
                 "gender": store.profile.gender
             ], as: EightMansions.self)
             error = nil
+            computedProfile = store.profile
         } catch {
             self.error = l("This reading could not be computed. Please try again.")
         }

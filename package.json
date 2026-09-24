@@ -13,8 +13,10 @@
     "test:watch": "vitest",
     "check": "npm run lint && npm run test && npm run build",
     "cap:sync": "npm run build && npx cap sync",
-    "android": "npm run cap:sync && npx cap open android",
-    "ios": "npm run cap:sync && npx cap open ios"
+    "android": "bash tools/auspice-android-build.sh",
+    "ios": "bash tools/auspice-sync.sh",
+    "android:classic": "npm run cap:sync && npx cap open android",
+    "ios:classic": "npm run cap:sync && npx cap open ios"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.1",

@@ -15,6 +15,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import java.io.File
 import java.util.UUID
+import kotlinx.coroutines.*
 
 @Serializable
 data class Turn(
@@ -47,6 +48,42 @@ object Conversations {
     private const val BUDGET_CHARACTERS = 24_000
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
     private var file: File? = null
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private var requestJob: Job? = null
+    private var deadlineJob: Job? = null
+    private var generation = 0
+    private var pendingWire: MutableList<JsonObject>? = null
+    private var pendingResults = mutableMapOf<String, AgentTools.Outcome>()
+    var canRetry by mutableStateOf(false)
+        private set
+
+    fun submit(asked: String) {
+        if (streaming || asked.isBlank()) return
+        generation++
+        val started = generation
+        canRetry = false; pendingWire = null; pendingResults.clear()
+        requestJob = scope.launch { send(asked) }
+        deadlineJob?.cancel()
+        deadlineJob = scope.launch { delay(90_000); if (generation == started && streaming) stop(t("chat.timeout")) }
+    }
+    fun stop(message: String = t("chat.stopped")) {
+        if (!streaming) return
+        generation++
+        requestJob?.cancel(); deadlineJob?.cancel()
+        streaming = false; canRetry = true
+        append(Turn(kind = "note", text = message, ok = false)); save()
+    }
+    fun retry() {
+        if (streaming || !canRetry) return
+        val asked = current.turns.lastOrNull { it.kind == "reader" }?.text ?: return
+        generation++
+        val started = generation
+        canRetry = false
+        requestJob = scope.launch { send(asked, retrying = true) }
+        deadlineJob?.cancel()
+        deadlineJob = scope.launch { delay(90_000); if (generation == started && streaming) stop(t("chat.timeout")) }
+    }
+
 
     // Never empty: a conversation exists from the first frame, before the
     // stored ones have been read, so the chat can open at once.
@@ -76,10 +113,11 @@ object Conversations {
         revision++
     }
 
-    fun select(id: String) { if (!streaming) { currentId = id; revision++ } }
+    fun select(id: String) { if (!streaming) { currentId = id; canRetry = false; pendingWire = null; pendingResults.clear(); revision++ } }
 
     fun newConversation() {
         if (streaming) return
+        canRetry = false; pendingWire = null; pendingResults.clear()
         val session = Conversation()
         sessions.add(0, session)
         currentId = session.id
@@ -96,6 +134,7 @@ object Conversations {
 
     fun clearCurrent() {
         if (streaming) return
+        canRetry = false; pendingWire = null; pendingResults.clear()
         current.apply {
             turns.clear()
             summary = null
@@ -172,31 +211,41 @@ object Conversations {
     suspend fun send(
         asked: String,
         stream: suspend (List<JsonObject>, JsonArray?, String, suspend (String) -> Unit) -> Relay.Answer = Relay::stream,
-        runTool: suspend (String, JsonObject) -> AgentTools.Outcome = AgentTools::run
+        runTool: suspend (String, JsonObject) -> AgentTools.Outcome = AgentTools::run,
+        retrying: Boolean = false
     ) {
         if (asked.isBlank() || streaming) return
-        append(Turn(kind = "reader", text = asked))
+        val started = generation
+        if (!retrying) append(Turn(kind = "reader", text = asked))
         save()
         streaming = true
-        val results = mutableMapOf<String, AgentTools.Outcome>()
+        val results = if (retrying) pendingResults.toMutableMap() else mutableMapOf<String, AgentTools.Outcome>()
         var emptyReplies = 0
         var finishWithFacts = false
         try {
             // Preserve tool calls/results throughout this exchange.
-            val messages = wire()
+            val messages = if (retrying) pendingWire?.toMutableList() ?: wire() else wire()
             for (step in 0..AgentTools.MAX_STEPS) {
+                currentCoroutineContext().ensureActive()
+                if (generation != started) return
+                pendingWire = messages.toMutableList(); pendingResults = results.toMutableMap()
                 val finalAnswer = finishWithFacts || step == AgentTools.MAX_STEPS
-                if (finalAnswer) messages.add(Relay.message("system", "Answer the reader now using the computed facts already supplied. Do not request more tools. If a fact is missing, say so. Follow the selected response language."))
+                if (finalAnswer) messages.add(Relay.message("system", "Answer the reader now using the computed facts already supplied. Do not request more tools. If a fact is missing, say so. Respect the reader’s language preference."))
                 val holder = Turn(kind = "oracle", text = "")
                 var opened = false
                 val answer = try {
                     stream(messages, if (finalAnswer) null else AgentTools.schemas(), tier) { piece ->
+                        currentCoroutineContext().ensureActive()
+                        if (generation != started) return@stream
                         if (!opened) { opened = true; append(holder) }
                         holder.text += piece
                         revision++
                     }
-                } catch (error: Throwable) {
-                    append(Turn(kind = "note", text = t("chat.quiet"), ok = false))
+                } catch (cancelled: CancellationException) { throw cancelled }
+                catch (error: Exception) {
+                    if (generation != started) return
+                    canRetry = true
+                    append(Turn(kind = "note", text = t("chat.connectionFailed"), ok = false))
                     save()
                     return
                 }
@@ -256,7 +305,7 @@ object Conversations {
                 save()
             }
         } finally {
-            streaming = false
+            if (generation == started) { streaming = false; deadlineJob?.cancel() }
         }
     }
 }

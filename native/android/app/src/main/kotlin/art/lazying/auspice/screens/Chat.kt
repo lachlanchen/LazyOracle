@@ -58,7 +58,7 @@ fun ChatScreen(navController: NavController, opening: String) {
             while (Conversations.streaming) delay(100)
             openingHandled = true
             draft = ""
-            Conversations.send(opening)
+            Conversations.submit(opening)
         }
     }
 
@@ -140,7 +140,7 @@ fun ChatScreen(navController: NavController, opening: String) {
                                 "What does my day master need?",
                                 "Cast a hexagram for me"
                             ).forEach { suggestion ->
-                                Chip(l(suggestion), null, false) { followLatest = true; scope.launch { Conversations.send(l(suggestion)) } }
+                                Chip(l(suggestion), null, false) { followLatest = true; Conversations.submit(l(suggestion)) }
                             }
                         }
                     }
@@ -194,6 +194,9 @@ fun ChatScreen(navController: NavController, opening: String) {
                     modifier = Modifier.fillMaxWidth()
                 )
             }
+            if (Conversations.canRetry && !Conversations.streaming) {
+                PrimaryButton(t("chat.retry")) { Conversations.retry() }
+            }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 // Clear on the left quarter, Send filling the rest.
                 Box(Modifier.weight(1f)) {
@@ -213,11 +216,12 @@ fun ChatScreen(navController: NavController, opening: String) {
                     }
                 }
                 Box(Modifier.weight(1f)) {
-                    PrimaryButton(t("common.send"), enabled = !Conversations.streaming && draft.isNotBlank()) {
+                    PrimaryButton(t(if (Conversations.streaming) "chat.stop" else "common.send"), enabled = Conversations.streaming || draft.isNotBlank()) {
+                        if (Conversations.streaming) { Conversations.stop(); return@PrimaryButton }
                         val text = draft
                         draft = ""
                         followLatest = true
-                        scope.launch { Conversations.send(text) }
+                        Conversations.submit(text)
                     }
                 }
             }

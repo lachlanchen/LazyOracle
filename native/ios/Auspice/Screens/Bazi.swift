@@ -2,8 +2,9 @@ import SwiftUI
 
 struct BaziScreen: View {
     @State private var store = ProfileStore.shared
-    @State private var chart: BaziChart?
+    @SavedPractice("bazi.chart") private var chart: BaziChart? = nil
     @State private var error: String?
+    @SavedPractice("bazi.profile") private var computedProfile: BirthProfile? = nil
     @State private var editing = false
     @State private var elementsShown = false
 
@@ -25,18 +26,18 @@ struct BaziScreen: View {
             }
 
             if let chart {
-                ExplainReading(result: chart)
                 pillarsPanel(chart)
                 dayMasterPanel(chart)
                 elementsPanel(chart)
                 luckPanel(chart)
                 methodPanel(chart)
+                ExplainReading(result: chart)
             }
         }
         .sheet(isPresented: $editing) {
             BirthForm(profile: $store.profile) { compute() }
         }
-        .onAppear(perform: compute)
+        .onAppear { if chart == nil || computedProfile != store.profile { compute() } }
     }
 
     private func pillarsPanel(_ chart: BaziChart) -> some View {
@@ -236,7 +237,8 @@ struct BaziScreen: View {
     }
 
     private func compute() {
-        guard store.profile.isComplete else { error = nil; chart = nil; return }
+        guard store.profile.isComplete else { error = nil
+            computedProfile = store.profile; chart = nil; return }
         do {
             chart = try Engines.shared.evaluate("bazi.chart", store.profile.engineInput, as: BaziChart.self)
             error = nil

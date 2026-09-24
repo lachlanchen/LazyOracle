@@ -3,9 +3,9 @@ import SwiftUI
 struct FaceScreen: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var camera = LandmarkSession(kind: .face)
-    @State private var features: FaceFeatures?
+    @SavedPractice("face.features") private var features: FaceFeatures? = nil
     @State private var error: String?
-    @State private var captured = false
+    @SavedPractice("face.captured") private var captured = false
 
     private let courtNames = ["upper": "Upper court", "middle": "Middle court", "lower": "Lower court"]
     private let elementNames = [
@@ -61,7 +61,6 @@ struct FaceScreen: View {
             }
 
             if let features {
-                ExplainReading(result: features)
                 Panel(title: t("face.element")) {
                     Text(l(elementNames[features.element] ?? features.element))
                         .font(Typeface.display(28))
@@ -141,9 +140,10 @@ struct FaceScreen: View {
                         .foregroundStyle(Palette.inkSoft)
                         .fixedSize(horizontal: false, vertical: true)
                 }
+                ExplainReading(result: features)
             }
         }
-        .onAppear { camera.start() }
+        .onAppear { Router.shared.face = features; camera.start() }
         .onDisappear { camera.stop() }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { camera.start() } else { camera.stop() }

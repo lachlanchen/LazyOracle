@@ -58,7 +58,8 @@ final class Localisation {
 /// Look a string up in the language in force. A missing key shows itself
 /// rather than an empty space, so a gap is obvious the first time it is seen.
 func t(_ key: String) -> String {
-    Catalogue.table[key]?[Localisation.shared.code] ?? Catalogue.table[key]?["en"] ?? key
+    if key == "app.name", Bundle.main.bundleIdentifier == "art.lazying.lazyoracle" { return "LazyOracle" }
+    return Catalogue.table[key]?[Localisation.shared.code] ?? Catalogue.table[key]?["en"] ?? key
 }
 
 /// Engine text is translated only for presentation. Identifiers and facts
@@ -110,13 +111,13 @@ func lunarDateText(_ source: String) -> String {
         return cleaned.map { digits[$0] ?? String($0) }.joined()
     }
     let parts = source.components(separatedBy: CharacterSet(charactersIn: "年月日")).filter { !$0.isEmpty }
-    guard parts.count == 3 else { return l(source) }
-    let leap = parts[1].contains("闰")
-    let date = parts.enumerated().map { number($0.element.replacingOccurrences(of: "闰", with: "")) }.joined(separator: "-")
+    guard (2...3).contains(parts.count) else { return l(source) }
+    let leap = source.contains("闰")
+    let date = parts.map { number($0.replacingOccurrences(of: "闰", with: "")) }.joined(separator: "-")
     return lf(leap ? "Lunar date: {0} (leap month)" : "Lunar date: {0}", date)
 }
 
 /// The selected language leads; an occasional traditional term is fine.
 func readingLanguageInstruction() -> String {
-    "Write mainly in the selected app language: \(Localisation.shared.code). Use clear everyday language. Traditional Chinese uses Traditional characters; Simplified Chinese uses Simplified characters. Brief conventional terms from another language are allowed when useful, but do not alternate languages, duplicate paragraphs in translation, or follow the language of raw engine data. Explain unfamiliar terms once. If the reader explicitly requests a different response language, honor that request."
+    "The interface language is \(Localisation.shared.code). Use it as the default, but naturally follow the language the reader uses or explicitly requests. Keep each answer coherent and easy to understand. Occasional useful terms from another language are fine; avoid unnecessary switching or duplicate translated paragraphs."
 }

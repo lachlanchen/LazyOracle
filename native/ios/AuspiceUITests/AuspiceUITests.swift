@@ -36,6 +36,28 @@ final class AuspiceUITests: XCTestCase {
         evidence("tarot-traditional-blank-then-question")
     }
 
+    func testPinnedComposerAndSavedPractice() {
+        launch(); open("tarot")
+        app.buttons["tarot.compute"].tap()
+        let explain = app.buttons["reading.explain"]
+        XCTAssertTrue(explain.waitForExistence(timeout: 10))
+        XCTAssertTrue(explain.isHittable)
+        let footer = explain.frame
+        app.swipeUp()
+        XCTAssertEqual(explain.frame.minY, footer.minY, accuracy: 3)
+        let input = app.textFields["reading.followup"]
+        let multiline = app.textViews["reading.followup"]
+        let question = input.exists ? input : multiline
+        question.tap(); question.typeText("A saved follow-up")
+        XCTAssertTrue(explain.isHittable)
+        evidence("native-pinned-composer-keyboard")
+        app.terminate(); launch(); open("tarot")
+        XCTAssertTrue(explain.waitForExistence(timeout: 10))
+        let restored = app.textFields["reading.followup"].exists ? app.textFields["reading.followup"] : app.textViews["reading.followup"]
+        XCTAssertEqual(restored.value as? String, "A saved follow-up")
+        evidence("native-restored-practice")
+    }
+
     func testEveryLanguageAndCameraNavigation() {
         for code in ["en","zh-Hans","zh-Hant","ja","ko","vi","es","fr","de","ru","ar"] {
             launch(code); open("tarot")

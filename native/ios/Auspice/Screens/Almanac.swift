@@ -81,10 +81,11 @@ struct AlmanacActivity: Codable, Identifiable {
 /// Loads a day, and the list of undertakings, from the shared rules.
 @Observable
 final class AlmanacStore {
+    static let shared = AlmanacStore()
     var day: AlmanacDay?
     var activities: [AlmanacActivity] = []
-    var activity: String?
-    var date = Date()
+    var activity: String? = PracticeStorage.read("almanac.activity", default: Optional<String>.none) { didSet { PracticeStorage.write(activity, key: "almanac.activity") } }
+    var date: Date = PracticeStorage.read("almanac.date", default: Date()) { didSet { PracticeStorage.write(date, key: "almanac.date") } }
     var error: String?
 
     private static let iso: DateFormatter = {
@@ -117,7 +118,7 @@ final class AlmanacStore {
 // MARK: - The screen
 
 struct AlmanacScreen: View {
-    @State private var store = AlmanacStore()
+    @State private var store = AlmanacStore.shared
 
     var body: some View {
         ScreenScaffold(

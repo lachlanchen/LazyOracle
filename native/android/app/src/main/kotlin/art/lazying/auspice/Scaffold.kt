@@ -23,7 +23,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,6 +36,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
+class ReadingDock { var content by mutableStateOf<(@Composable () -> Unit)?>(null) }
+val LocalReadingDock = staticCompositionLocalOf<ReadingDock?> { null }
+
 /** The shell every screen sits in: a back arrow, the title, one column. */
 @Composable
 fun ScreenScaffold(
@@ -44,10 +48,12 @@ fun ScreenScaffold(
     tagline: String? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    val dock = remember { ReadingDock() }
+    CompositionLocalProvider(LocalReadingDock provides dock) {
+    Column(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.systemBars).imePadding()) {
     Column(
         Modifier
-            .fillMaxSize()
-            .windowInsetsPadding(WindowInsets.systemBars)
+            .weight(1f).fillMaxWidth()
             .dismissKeyboardOnScroll()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 18.dp)
@@ -76,6 +82,11 @@ fun ScreenScaffold(
             }
         }
         content()
+    }
+    dock.content?.let { composer ->
+        Column(Modifier.fillMaxWidth().background(Palette.night).padding(horizontal = 18.dp, vertical = 10.dp)) { composer() }
+    }
+    }
     }
 }
 

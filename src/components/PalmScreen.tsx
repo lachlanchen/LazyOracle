@@ -1,3 +1,4 @@
+import { usePracticeState } from '../lib/practice-state'
 import { useRef, useState } from 'react'
 import { Camera, Hand, Image as ImageIcon } from 'lucide-react'
 import { FINGER_TEXT, palmFeatures, PALACE_TEXT, SHAPE_TEXT, type LineTraits, type PalmFeatures, type Point } from '../engines/palm/palm'
@@ -12,7 +13,7 @@ interface PalmScreenProps {
   language: ReadingLanguage
 }
 
-type Phase = 'idle' | 'analysing' | 'found' | 'nohand'
+type Phase = 'failed' | 'idle' | 'analysing' | 'found' | 'nohand'
 
 const CONNECTIONS: [number, number][] = [
   [0, 1], [1, 2], [2, 3], [3, 4], [0, 5], [5, 6], [6, 7], [7, 8], [5, 9], [9, 10], [10, 11], [11, 12],
@@ -23,10 +24,10 @@ export function PalmScreen({ copy, language }: PalmScreenProps) {
   const [phase, setPhase] = useState<Phase>('idle')
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [landmarks, setLandmarks] = useState<Point[] | null>(null)
-  const [lines, setLines] = useState<LineTraits>({ heart: 'between', head: 'curved', life: 'wide', fate: 'unsure' })
-  const [features, setFeatures] = useState<PalmFeatures | null>(null)
-  const [question, setQuestion] = useState('')
-  const [round, setRound] = useState(0)
+  const [lines, setLines] = usePracticeState<LineTraits>('palm.lines', { heart: 'between', head: 'curved', life: 'wide', fate: 'unsure' })
+  const [features, setFeatures] = usePracticeState<PalmFeatures | null>('palm.features', null)
+  const [question, setQuestion] = usePracticeState('palm.question', '')
+  const [round, setRound] = usePracticeState('palm.round', 0)
   const cameraRef = useRef<HTMLInputElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const t = copy.palm
@@ -50,7 +51,7 @@ export function PalmScreen({ copy, language }: PalmScreenProps) {
     } catch (error) {
       console.warn('hand detection failed', error)
       setLandmarks(null)
-      setPhase('nohand')
+      setPhase('failed')
     }
   }
 
@@ -97,6 +98,7 @@ export function PalmScreen({ copy, language }: PalmScreenProps) {
             {phase === 'analysing' && <p className="palm-status">{t.analysing}</p>}
           </div>
         )}
+        {phase === 'failed' && <p className="status failed">{t.processingFailed}</p>}
         {phase === 'nohand' && <p className="status failed">{t.noHand}</p>}
       </section>
 

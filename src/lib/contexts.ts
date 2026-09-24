@@ -1,3 +1,4 @@
+import { readingTerm, lunarDateText } from './reading-localisation'
 import { BODY_TEXT, formatDegree, SIGNS, type NatalChart, type Transit, type Placement } from '../engines/astrology/astrology'
 import { ELEMENT_EN, TEN_GOD_EN, type BaziChart } from '../engines/bazi/bazi'
 import { DIRECTION_TEXT, GUA_EN, type EightMansions } from '../engines/fengshui/fengshui'
@@ -27,7 +28,7 @@ function common(language: ReadingLanguage, role: string): string[] {
   return [
     `You are LazyOracle, ${role}.`,
     'You receive a JSON object computed by a deterministic engine. Interpret only what it contains; never recompute, add or contradict a listed fact.',
-    `Write in ${LANGUAGE_NAME[language]}, in clear everyday prose. Explain unfamiliar terms briefly. Occasional useful traditional terms are fine, but do not repeatedly mix languages or duplicate translations. No headings, no emoji.`,
+    `Use ${LANGUAGE_NAME[language]} by default, and naturally follow the language the reader uses or explicitly requests. Write in clear everyday prose. Explain unfamiliar terms briefly. Occasional useful traditional terms are fine, but do not repeatedly mix languages or duplicate translations. No headings, no emoji.`,
     'Name the specific facts as you use them, so the reader can see where each statement comes from. Every paragraph must rest on at least one listed fact.',
     'If a question was asked, answer that question directly in the first two sentences and return to it at the end. If none was asked, read the whole picture instead of inventing a concern.',
     'Prefer one concrete observation to three vague ones. Never pad, never repeat a fact in different words, and do not list what you are about to say before saying it.',
@@ -485,18 +486,18 @@ export function almanacContext(day: AlmanacDay, activity: Activity | null, langu
     language,
     question,
     date: day.date,
-    lunar: `${day.lunar.text}（${day.lunar.yearGanZhi}年 ${day.lunar.zodiac}）`,
-    ganzhi: `${day.lunar.yearGanZhi} ${day.lunar.monthGanZhi} ${day.lunar.dayGanZhi}`,
-    solarTerm: day.solarTerm,
-    yi: day.yi,
-    ji: day.ji,
-    clash: day.clash,
-    harmDirection: day.harmDirection,
-    dayOfficer: day.dayOfficer,
-    mansion: `${day.mansion.name}（${day.mansion.animal}·${day.mansion.direction}·${day.mansion.beast}）`,
-    spirit: `${day.spirit.name}·${day.spirit.road}·${day.spirit.luck}`,
+    lunar: language === 'en' ? `${lunarDateText(day.lunar.text, language)} (${readingTerm(day.lunar.yearGanZhi, language)}, ${readingTerm(day.lunar.zodiac, language)})` : `${day.lunar.text}（${day.lunar.yearGanZhi}年 ${day.lunar.zodiac}）`,
+    ganzhi: [day.lunar.yearGanZhi, day.lunar.monthGanZhi, day.lunar.dayGanZhi].map(value => readingTerm(value, language)).join(' · '),
+    solarTerm: day.solarTerm ? readingTerm(day.solarTerm, language) : day.solarTerm,
+    yi: day.yi.map(value => readingTerm(value, language)),
+    ji: day.ji.map(value => readingTerm(value, language)),
+    clash: day.clash ? readingTerm(day.clash, language) : day.clash,
+    harmDirection: day.harmDirection ? readingTerm(day.harmDirection, language) : day.harmDirection,
+    dayOfficer: day.dayOfficer ? readingTerm(day.dayOfficer, language) : day.dayOfficer,
+    mansion: [day.mansion.name, day.mansion.animal, day.mansion.direction, day.mansion.beast].map(value => readingTerm(value, language)).join(' · '),
+    spirit: [day.spirit.name, day.spirit.road, day.spirit.luck].map(value => readingTerm(value, language)).join(' · '),
     standing: STANDING_TEXT[day.standing][l],
-    luckyHours: luckyHours(day).map((hour) => `${hour.ganzhi} ${hour.range} ${hour.spirit}`),
+    luckyHours: luckyHours(day).map((hour) => `${readingTerm(hour.ganzhi, language)} ${hour.range} ${readingTerm(hour.spirit, language)}`),
     asked: activity && judgement ? { activity: activity.name[l], verdict: VERDICT_TEXT[judgement.verdict][l], basis: judgement.basis[l] } : null,
   }
 }

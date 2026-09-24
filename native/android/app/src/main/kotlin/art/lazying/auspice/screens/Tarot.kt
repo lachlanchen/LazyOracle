@@ -34,10 +34,10 @@ import kotlinx.serialization.json.buildJsonObject
 
 @Composable
 fun TarotScreen(navController: NavController) {
-    var spreadId by remember { mutableStateOf("three") }
-    var question by remember { mutableStateOf("") }
-    var draw by remember { mutableStateOf<TarotDraw?>(null) }
-    var revealed by remember { mutableStateOf(setOf<String>()) }
+    var spreadId by rememberPracticeState("tarot.spreadId", "three")
+    var question by rememberPracticeState("tarot.question", "")
+    var draw by rememberPracticeState<TarotDraw?>("tarot.draw", null)
+    var revealed by rememberPracticeState("tarot.revealed", setOf<String>())
     var error by remember { mutableStateOf<String?>(null) }
     var dealCount by remember { mutableIntStateOf(0) }
 
@@ -77,7 +77,6 @@ fun TarotScreen(navController: NavController) {
         error?.let { Panel(title = t("common.notComputed")) { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
 
         draw?.let { result ->
-            ExplainReading(Json.encodeToString(result))
             Panel {
                 SpreadStage(result, revealed) { card ->
                     revealed = revealed + card.position.id
@@ -91,6 +90,7 @@ fun TarotScreen(navController: NavController) {
                 }
             }
             result.cards.filter { revealed.contains(it.position.id) }.forEach { CardReading(it) }
+            ExplainReading(Json.encodeToString(result))
         }
     }
 }

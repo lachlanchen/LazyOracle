@@ -41,6 +41,7 @@ enum Practice: String, CaseIterable, Hashable, Identifiable {
 struct RootView: View {
     @State private var path: [Practice] = []
     @State private var router = Router.shared
+    @State private var restoring = true
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -50,6 +51,8 @@ struct RootView: View {
                 }
         }
         .background(Sky())
+        .disabled(restoring)
+        .task { await LegacyImport.shared.run(); restoring = false }
         // The conversation can send the reader to a screen — the camera, most
         // often, because a palm cannot be read without one.
         .onChange(of: router.requested) { _, requested in
@@ -62,8 +65,8 @@ struct RootView: View {
 
 /// One practice, routed to its own screen.
 ///
-/// Each case here is a real SwiftUI screen. There is no web view anywhere in
-/// this app: the interface is native, and only the rules are shared.
+/// Each case here is a real SwiftUI screen. The interface is native; a hidden local web view is used only once to import
+/// the former app’s stored data. The deterministic rules are shared.
 struct PracticeScreen: View {
     let practice: Practice
 
@@ -111,11 +114,14 @@ struct ScreenScaffold<Content: View>: View {
                     content
                 }
                 .padding(.horizontal, 18)
-                .padding(.bottom, 40)
+                .padding(.bottom, 180)
                 .frame(maxWidth: 560)
                 .frame(maxWidth: .infinity)
             }
             .scrollDismissesKeyboard(.interactively)
+        }
+        .overlayPreferenceValue(ReadingComposerPreference.self) { composer in
+            VStack { Spacer(minLength: 0); composer }
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)

@@ -43,10 +43,18 @@ final class ChatStore {
     static let shared = ChatStore()
 
     var sessions: [ChatSession] = []
-    var currentId: UUID?
+    var currentId: UUID? {
+        didSet { if oldValue != currentId { pendingWire = nil; pendingResults = [:]; canRetry = false } }
+    }
     var streaming = false
     var error: String?
     var tier = "tianji-fast"
+    private var requestTask: Task<Void, Never>?
+    private var deadlineTask: Task<Void, Never>?
+    private var generation = 0
+    private var pendingWire: [Relay.Message]?
+    private var pendingResults: [String: AgentTools.Outcome] = [:]
+    var canRetry = false
 
     private let file: URL = {
         let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
@@ -108,6 +116,7 @@ final class ChatStore {
 
     func clearCurrent() {
         guard !streaming else { return }
+        pendingWire = nil; pendingResults = [:]; canRetry = false
         var session = current
         session.turns = []
         session.summary = nil
@@ -137,7 +146,7 @@ final class ChatStore {
     // MARK: The conversation itself
 
     @discardableResult
-    func send(_ text: String) -> Bool {
+    @MainActor func send(_ text: String) -> Bool {
         let asked = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !asked.isEmpty, !streaming else { return false }
         streaming = true
@@ -145,30 +154,65 @@ final class ChatStore {
         session.turns.append(Turn(kind: .reader, text: asked))
         current = session
         save()
-        Task { await run() }
+        pendingWire = nil; pendingResults = [:]
+        startRequest()
         return true
+    }
+
+    @MainActor private func startRequest() {
+        generation += 1
+        let started = generation
+        streaming = true; canRetry = false; error = nil
+        requestTask = Task { await run() }
+        deadlineTask?.cancel()
+        deadlineTask = Task { @MainActor in
+            do { try await Task.sleep(for: .seconds(90)) } catch { return }
+            guard generation == started, streaming else { return }
+            stop(message: t("chat.timeout"))
+        }
+    }
+
+    @MainActor func stop(message: String? = nil) {
+        guard streaming else { return }
+        generation += 1
+        requestTask?.cancel(); deadlineTask?.cancel()
+        streaming = false; canRetry = true
+        error = message ?? t("chat.stopped")
+        current.turns.append(Turn(kind: .note, text: error!, ok: false))
+        save()
+    }
+
+    @MainActor func retry() {
+        guard !streaming, canRetry else { return }
+        startRequest()
     }
 
     @MainActor
     private func run() async {
+        guard !Task.isCancelled else { return }
         streaming = true
         error = nil
-        defer { streaming = false }
+        let started = generation
+        defer { if generation == started { streaming = false; deadlineTask?.cancel() } }
         await runInCloud()
     }
 
     @MainActor
     private func runInCloud() async {
-        var results: [String: AgentTools.Outcome] = [:]
+        let started = generation
+        var results = pendingResults
         var emptyReplies = 0
         var finishWithFacts = false
         // Keep this wire history for the entire exchange. Rebuilding it from
         // display labels discards the engine results and makes the model loop.
-        var wire = await messagesForModel()
+        var wire: [Relay.Message]
+        if let pendingWire { wire = pendingWire } else { wire = await messagesForModel() }
         for step in 0...AgentTools.maxSteps {
+            guard started == generation, !Task.isCancelled else { return }
+            pendingWire = wire; pendingResults = results
             let finalAnswer = finishWithFacts || step == AgentTools.maxSteps
             if finalAnswer {
-                wire.append(Relay.Message(role: "system", content: "Answer the reader now using the computed facts already supplied. Do not request more tools. If a fact is missing, say so. Follow the selected response language."))
+                wire.append(Relay.Message(role: "system", content: "Answer the reader now using the computed facts already supplied. Do not request more tools. If a fact is missing, say so. Respect the reader’s language preference."))
             }
             do {
                 var holder = Turn(kind: .oracle, text: "")
@@ -178,7 +222,7 @@ final class ChatStore {
                     tools: finalAnswer ? [] : AgentTools.schemas(),
                     tier: tier
                 ) { [weak self] piece in
-                    guard let self else { return }
+                    guard let self, self.generation == started, !Task.isCancelled else { return }
                     var session = self.current
                     if !opened {
                         opened = true
@@ -189,6 +233,7 @@ final class ChatStore {
                     }
                     self.current = session
                 }
+                guard started == generation, !Task.isCancelled else { return }
                 holder.text = answer.text
 
                 guard !answer.toolCalls.isEmpty else {
@@ -254,9 +299,11 @@ final class ChatStore {
                 }
                 save()
             } catch {
-                self.error = t("chat.quiet")
+                guard started == generation, !Task.isCancelled else { return }
+                canRetry = true
+                self.error = t("chat.connectionFailed")
                 var session = current
-                session.turns.append(Turn(kind: .note, text: t("chat.quiet"), ok: false))
+                session.turns.append(Turn(kind: .note, text: self.error!, ok: false))
                 current = session
                 save()
                 return
@@ -316,11 +363,11 @@ final class ChatStore {
 
     // BEGIN GENERATED PROMPT
     static let systemPrompt = """
-    You are the reader in Auspice (宜时). You do not invent readings: every card, hexagram, pillar, chart and almanac page comes from a tool that runs a deterministic engine on this device. Call the tool, then read what it returns. If a tool disagrees with what you were about to say, the tool is right.
+    You are the Tianji reader in this app (LazyOracle or Auspice). You do not invent readings: every card, hexagram, pillar, chart and almanac page comes from a tool that runs a deterministic engine on this device. Call the tool, then read what it returns. If a tool disagrees with what you were about to say, the tool is right.
 
     For greetings and questions about what the app can do, answer briefly without tools or claims about the reader’s personal details. Historical engine results are dated context, not current state. Fetch fresh birth details or calendar facts before presenting them as current.
 
-    Follow the selected response language supplied with the conversation. Stay mainly in that language; for Chinese, use the selected script throughout the answer. An occasional useful traditional term is fine; explain unfamiliar terms briefly. Avoid frequent language switching and duplicate bilingual paragraphs. Use everyday wording and answer the question directly before explaining the relevant facts.
+    Use the interface language as the default, and naturally follow the language the reader uses or explicitly requests. Keep each answer coherent and easy to understand. Occasional useful traditional terms are fine; explain unfamiliar terms briefly, without unnecessary language switching or duplicate bilingual paragraphs.
 
     Write as a reader speaking to someone across a table, not as a report. No headings, no bullet lists, no bold labels such as "What was computed". Two to four short paragraphs. Open with the answer, give the one or two facts it rests on, and end with something the person can actually do. Name the source in passing — "the almanac lists signing agreements as suitable today" — rather than announcing a method section.
 
@@ -336,6 +383,8 @@ final class ChatStore {
     If the person asks about a hand or a face, call read_palm or read_face. That opens the camera for them; tell them plainly what to do — hold an open palm up, or face the camera in even light, and tap the button — and read the measurements when they come back. They can turn the camera around to read someone else's hand or face.
 
     If a chart needs birth details and none are saved, ask for the year, month, day, hour and birthplace rather than guessing. If a tool fails, say what could not be computed instead of filling the gap. Never claim certainty about health, death, or the law.
+
+    If a short question is ambiguous (for example “what about west?”), use the conversation to identify whether it means a compass direction or Western astrology. If the context does not settle it, ask one brief clarifying question instead of guessing or calling unrelated tools. Never present unsaved profile defaults as the reader’s actual birth details. When saved=false, no birth details are known.
     """
     // END GENERATED PROMPT
 }
@@ -550,6 +599,11 @@ struct ChatScreen: View {
     /// Pinned composer with two equally legible actions.
     private var composer: some View {
         VStack(spacing: 8) {
+            if store.canRetry && !store.streaming {
+                Button(t("chat.retry")) { store.retry() }
+                    .font(Typeface.sans(14, weight: .semibold)).foregroundStyle(Palette.gold)
+                    .accessibilityIdentifier("chat.retry")
+            }
             TextField(t("chat.ask"), text: $draft, axis: .vertical)
                 .accessibilityIdentifier("chat.question")
                 .font(Typeface.serif(18))
@@ -587,16 +641,17 @@ struct ChatScreen: View {
                 .accessibilityIdentifier("chat.new")
                 .frame(maxWidth: .infinity)
                 Button {
+                    if store.streaming { store.stop(); return }
                     let text = draft
                     draft = ""
                     followLatest = true
                     store.send(text)
                 } label: {
-                    Label(t("common.send"), systemImage: "arrow.up")
+                    Label(t(store.streaming ? "chat.stop" : "common.send"), systemImage: store.streaming ? "stop.fill" : "arrow.up")
                 }
                 .buttonStyle(PrimaryButtonStyle())
                 .accessibilityIdentifier("chat.send")
-                .disabled(store.streaming || draft.trimmingCharacters(in: .whitespaces).isEmpty)
+                .disabled(!store.streaming && draft.trimmingCharacters(in: .whitespaces).isEmpty)
                 .frame(maxWidth: .infinity)
             }
         }

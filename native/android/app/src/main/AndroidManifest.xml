@@ -17,7 +17,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Auspice">
         <activity
-            android:name=".MainActivity"
+            android:name="art.lazying.auspice.MainActivity"
             android:exported="true"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
             android:windowSoftInputMode="adjustResize"

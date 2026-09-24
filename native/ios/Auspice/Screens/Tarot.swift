@@ -1,11 +1,11 @@
 import SwiftUI
 
 struct TarotScreen: View {
-    @State private var spreadId = "three"
-    @State private var question = ""
+    @SavedPractice("tarot.spreadId") private var spreadId = "three"
+    @SavedPractice("tarot.question") private var question = ""
     @FocusState private var questionFocused: Bool
-    @State private var draw: TarotDraw?
-    @State private var revealed: Set<String> = []
+    @SavedPractice("tarot.draw") private var draw: TarotDraw? = nil
+    @SavedPractice("tarot.revealed") private var revealed: Set<String> = []
     @State private var dealing = false
     @State private var selected: DrawnCard?
     @State private var error: String?
@@ -56,7 +56,6 @@ struct TarotScreen: View {
             }
 
             if let draw {
-                ExplainReading(result: draw).id(draw.seed)
                 Panel {
                     SpreadStage(draw: draw, revealed: revealed, tap: { card in
                         if revealed.contains(card.id) {
@@ -79,6 +78,7 @@ struct TarotScreen: View {
                 ForEach(draw.cards.filter { revealed.contains($0.id) }) { card in
                     CardReading(card: card)
                 }
+                ExplainReading(result: draw).id(draw.seed)
             }
         }
         .sheet(item: $selected) { card in

@@ -1,10 +1,10 @@
 import SwiftUI
 
 struct AnswersScreen: View {
-    @State private var book = "answers"
-    @State private var question = ""
-    @State private var opening: BookOpening?
-    @State private var open = false
+    @SavedPractice("answers.book") private var book = "answers"
+    @SavedPractice("answers.question") private var question = ""
+    @SavedPractice("answers.opening") private var opening: BookOpening? = nil
+    @SavedPractice("answers.open") private var open = false
     @State private var error: String?
 
     var body: some View {
@@ -36,10 +36,10 @@ struct AnswersScreen: View {
             }
 
             if let opening {
-                ExplainReading(result: opening).id(opening.seed)
                 page(opening)
                     .rotation3DEffect(.degrees(open ? 0 : 92), axis: (x: 1, y: 0, z: 0), anchor: .top, perspective: 0.5)
                     .opacity(open ? 1 : 0)
+                ExplainReading(result: opening).id(opening.seed)
             }
         }
     }

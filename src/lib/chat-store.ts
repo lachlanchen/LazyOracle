@@ -8,6 +8,8 @@
 export interface StoredTurn {
   role: 'user' | 'assistant' | 'tool'
   content: string
+  /** Exact deterministic output, retained for later questions. */
+  facts?: string
 }
 
 export interface Conversation {

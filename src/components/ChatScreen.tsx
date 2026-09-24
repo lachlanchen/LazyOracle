@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { ArrowDown, History, Plus, Send, Square, Trash2, Wand2 } from 'lucide-react'
+import { ArrowDown, History, RotateCcw, Plus, Send, Square, Trash2, Wand2 } from 'lucide-react'
 import type { UICopy } from '../i18n'
 import { MAX_STEPS, parseToolCall, runTool, toolInstructions, toolResultMessage, toolSchemas } from '../lib/agent'
 import { conversationTitle, deleteConversation, loadConversations, newConversationId, saveConversation, type Conversation } from '../lib/chat-store'
@@ -25,20 +25,21 @@ const VISIBLE_TURNS = 24
 interface Turn {
   role: 'user' | 'assistant' | 'tool'
   content: string
+  facts?: string
 }
 
 function persona(language: ReadingLanguage): string {
   if (language === 'en') {
     return [
       'You are Tianji, the reader inside LazyOracle. You work with tarot, BaZi (four pillars), the I Ching, astrology, feng shui, palmistry, face reading and the two books.',
-      'Answer mainly in English, warmly and plainly, in at most 200 words unless more is asked for. An occasional useful traditional term is fine; explain it briefly and avoid repeated language switching or duplicate translations.',
+      'English is the interface default. Naturally follow the language the reader uses or explicitly requests. Answer warmly and plainly, in at most 200 words unless more is asked for. An occasional useful traditional term is fine; explain it briefly and avoid repeated language switching or duplicate translations.',
       'Name the tradition you are reading from, and base every claim on facts you were given or that a tool returned.',
       'Treat all of this as a mirror for reflection rather than prediction, and say so only when it matters. No medical, legal or financial promises.',
     ].join(' ')
   }
   return [
     '你是「天机」，LazyOracle 中的解读者。你精通塔罗、四柱八字、周易、星座、风水、手相、面相与两本书。',
-    '主要用简体中文回答，语气温和直白，除非对方要求，否则不超过 300 字。必要时可以偶尔用一个外语术语并简单解释，不要频繁中英切换或重复双语翻译。',
+    '界面语言是简体中文，默认用中文；自然尊重用户所用的语言和明确的语言要求。语气温和直白，除非对方要求，否则不超过 300 字。必要时可以偶尔用一个外语术语并简单解释，不要频繁中英切换或重复双语翻译。',
     '点明你所依据的术数传统；每一句判断都要基于给定的事实或工具返回的结果。',
     '这一切是用来自省的镜子，而非预言，仅在必要时提醒一次。不做医疗、法律或财务上的承诺。',
   ].join('')
@@ -63,6 +64,9 @@ export function ChatScreen({ copy, language, pending, onPendingConsumed }: ChatS
   const conversationId = useRef(loadConversations()[0]?.id ?? newConversationId())
   const abort = useRef<AbortController | null>(null)
   const asked = useRef('')
+  const retryState = useRef<{ working: ChatMessage[]; results: Map<string, ReturnType<typeof runTool>>; visible: Turn[] } | null>(null)
+  const [canRetry, setCanRetry] = useState(false)
+  useEffect(() => () => { abort.current?.abort(); abort.current = null }, [])
   const log = useRef<HTMLElement>(null)
   const followLatest = useRef(true)
   const earlierHeight = useRef<number | null>(null)
@@ -101,18 +105,19 @@ export function ChatScreen({ copy, language, pending, onPendingConsumed }: ChatS
    * tool calls; a model on the phone writes them as a line of text instead.
    * Neither is shown to the reader.
    */
-  const ask = async (messages: ChatMessage[], signal: AbortSignal): Promise<{ text: string; calls: ToolCallRequest[] }> => {
+  const ask = async (messages: ChatMessage[], controller: AbortController, allowTools: boolean): Promise<{ text: string; calls: ToolCallRequest[] }> => {
     let latest = ''
     let calls: ToolCallRequest[] = []
     await generateChat(
       messages,
       (update) => {
+        if (abort.current !== controller || controller.signal.aborted) return
         latest = update.text
         if (update.toolCalls?.length) calls = update.toolCalls
         setStreaming(update.text.trimStart().startsWith('<tool') ? '' : update.text)
       },
-      signal,
-      toolSchemas(language),
+      controller.signal,
+      allowTools ? toolSchemas(language) : [],
     )
     return { text: latest, calls }
   }
@@ -137,17 +142,16 @@ export function ChatScreen({ copy, language, pending, onPendingConsumed }: ChatS
    * context is folded into a short account written by the model.
    */
   const compact = async (all: Turn[], signal: AbortSignal) => {
-    const pending = all.slice(summarised.current).filter((turn) => turn.role !== 'tool')
+    const pending = all.slice(summarised.current).map(turn => ({ ...turn, content: turn.facts ?? turn.content }))
     const { older } = fitToBudget(pending, historyBudget())
     if (older.length < 2) return
     try {
-      summary.current = await summariseTurns(summary.current, older, language, signal)
-      summarised.current += older.length
+      const result = await summariseTurns(summary.current, older, language, signal)
+      if (!signal.aborted) { summary.current = result; summarised.current += older.length }
     } catch (error) {
       // A failed summary is not worth interrupting the reader for; the next
       // turn simply sends a little less history.
       console.warn('could not compact the conversation', error)
-      summarised.current += older.length
     }
   }
 
@@ -156,100 +160,89 @@ export function ChatScreen({ copy, language, pending, onPendingConsumed }: ChatS
    * engines; each tool call runs here on the device and its facts go back to
    * the model, up to `MAX_STEPS` times before it must answer.
    */
-  const send = async (text?: string) => {
+  const send = async (text?: string, retrying = false) => {
     const question = (text ?? draft).trim()
-    if (!question || busy) return
+    if ((!question && !retrying) || busy) return
+    const cached = retrying ? retryState.current : null
+    if (retrying && !cached) return
     goToBottom()
-    const visible: Turn[] = [...turns, { role: 'user', content: question }]
+    let visible: Turn[] = cached?.visible ?? [...turns, { role: 'user', content: question }]
     setTurns(visible)
-    setDraft('')
-    setError('')
-    setBusy(true)
-    setStreaming('')
+    remember(visible)
+    setDraft(''); setError(''); setBusy(true); setStreaming(''); setCanRetry(false)
     const controller = new AbortController()
     abort.current = controller
-    // Guards against a model that keeps asking for the same thing.
-    const attempted = new Set<string>()
-
-    // Everything the reader can see is kept. What travels with the question
-    // is the summary of the older part plus as many recent turns as the
-    // model's context allows.
-    const pending = visible.slice(summarised.current).filter((turn) => turn.role !== 'tool')
+    let timedOut = false
+    const deadline = setTimeout(() => { timedOut = true; controller.abort() }, 90_000)
+    const attempted = cached?.results ?? new Map<string, ReturnType<typeof runTool>>()
+    const pending = visible.slice(summarised.current)
+      .filter(turn => turn.role !== 'tool' || turn.facts)
+      .map(turn => ({ ...turn, content: turn.role === 'tool' ? `Historical engine result (reuse these facts): ${turn.facts}` : turn.content }))
     const { keep } = fitToBudget(pending, historyBudget())
-    let working: ChatMessage[] = [
-      { role: 'system', content: `${persona(language)}\n\n${toolInstructions(language)}` },
-      ...(summary.current
-        ? [{ role: 'system' as const, content: language === 'en' ? `Earlier in this conversation: ${summary.current}` : `此前的对话要点：${summary.current}` }]
-        : []),
-      ...keep.map((turn) => ({ role: turn.role === 'user' ? ('user' as const) : ('assistant' as const), content: turn.content })),
+    let working: ChatMessage[] = cached?.working ?? [
+      { role: 'system', content: `${persona(language)}\n\n${toolInstructions(language)}\nReuse historical engine results for follow-up questions. Make a new draw or cast only when the reader asks for one. If a direction or question is ambiguous, ask a short clarification.` },
+      ...(summary.current ? [{ role: 'system' as const, content: `Earlier conversation: ${summary.current}` }] : []),
+      ...keep.map(turn => ({ role: turn.role === 'assistant' ? 'assistant' as const : 'user' as const, content: turn.content })),
     ]
-
+    const retain = () => { retryState.current = { working, results: attempted, visible } }
+    retain()
+    let forceAnswer = false
+    let quiet = 0
     try {
       for (let step = 0; step <= MAX_STEPS; step += 1) {
-        const { text: reply, calls } = await ask(working, controller.signal)
-        if (controller.signal.aborted) break
-        const last = step >= MAX_STEPS
-
-        // A provider with function calling: run each call it asked for.
-        if (!last && calls.length > 0) {
-          working = [
-            ...working,
-            { role: 'assistant', content: reply || null, tool_calls: calls.map((call) => ({ id: call.id, type: 'function' as const, function: { name: call.name, arguments: call.arguments } })) },
-          ]
-          for (const call of calls) {
+        const last = step >= MAX_STEPS || forceAnswer
+        if (last) working = [...working, { role: 'user', content: 'Answer now using the computed facts above. Do not call any more tools; explain any limitation briefly.' }]
+        const { text: reply, calls } = await ask(working, controller, !last)
+        controller.signal.throwIfAborted()
+        const written = parseToolCall(reply)
+        if (calls.length || written) {
+          if (last) throw new Error('The reader did not return an explanation')
+          const requested = calls.length ? calls : [{ id: 'written', name: written!.name, arguments: JSON.stringify(written!.arguments) }]
+          working = [...working, calls.length
+            ? { role: 'assistant', content: reply || null, tool_calls: calls.map(call => ({ id: call.id, type: 'function', function: { name: call.name, arguments: call.arguments } })) }
+            : { role: 'assistant', content: reply }]
+          for (const call of requested) {
             let args: Record<string, unknown> = {}
-            try {
-              args = call.arguments ? (JSON.parse(call.arguments) as Record<string, unknown>) : {}
-            } catch {
-              args = {}
+            try { args = JSON.parse(call.arguments || '{}') } catch { /* engine reports invalid input */ }
+            const signature = `${call.name}:${JSON.stringify(args, Object.keys(args).sort())}`
+            let result = attempted.get(signature)
+            if (result) forceAnswer = true
+            else {
+              result = runTool({ name: call.name, arguments: args }, language)
+              attempted.set(signature, result)
+              visible = [...visible, { role: 'tool', content: result.label, facts: result.output }]
+              setTurns(visible); remember(visible)
             }
-            const signature = `${call.name}:${JSON.stringify(args)}`
-            if (attempted.has(signature)) {
-              working = [...working, { role: 'tool', content: JSON.stringify({ ok: false, error: 'already called with these arguments; use the earlier result' }), tool_call_id: call.id, name: call.name }]
-              continue
-            }
-            attempted.add(signature)
-            const result = runTool({ name: call.name, arguments: args }, language)
-            setTurns((current) => [...current, { role: 'tool', content: result.label }])
-            working = [...working, { role: 'tool', content: result.output, tool_call_id: call.id, name: call.name }]
+            working = [...working, calls.length
+              ? { role: 'tool', content: result.output, tool_call_id: call.id, name: call.name }
+              : { role: 'user', content: toolResultMessage(result) }]
           }
-          setStreaming('')
-          continue
+          retain(); setStreaming(''); continue
         }
-
-        // A model on the phone writes the call as a line of text.
-        const written = last ? null : parseToolCall(reply)
-        if (written && attempted.has(`${written.name}:${JSON.stringify(written.arguments)}`)) {
-          working = [...working, { role: 'assistant', content: reply }, { role: 'user', content: 'TOOL RESULT: that call was already made; use its result and answer now.' }]
-          continue
+        if (!reply.trim()) {
+          if (quiet++ === 0 && !last) { forceAnswer = true; continue }
+          throw new Error('Empty reading')
         }
-        if (written) {
-          attempted.add(`${written.name}:${JSON.stringify(written.arguments)}`)
-          const result = runTool(written, language)
-          setTurns((current) => [...current, { role: 'tool', content: result.label }])
-          setStreaming('')
-          working = [...working, { role: 'assistant', content: reply }, { role: 'user', content: toolResultMessage(result) }]
-          continue
-        }
-
-        setTurns((current) => {
-          const next: Turn[] = [...current, { role: 'assistant', content: reply }]
-          remember(next)
-          return next
-        })
+        visible = [...visible, { role: 'assistant', content: reply }]
+        setTurns(visible); remember(visible)
+        retryState.current = null
+        await compact(visible, controller.signal)
+        if (!controller.signal.aborted) remember(visible)
         break
       }
-      // Fold away anything that will not fit next time, before the reader asks again.
-      await compact([...visible, { role: 'assistant', content: '' }], controller.signal)
     } catch (chatError) {
-      if (!controller.signal.aborted) {
-        console.warn('chat failed', chatError)
-        setError(t.failed)
+      if (abort.current === controller) {
+        if (!controller.signal.aborted || timedOut) {
+          console.warn('chat failed', chatError)
+          setError(t.failed)
+        }
+        setCanRetry(true)
       }
     } finally {
-      abort.current = null
-      setBusy(false)
-      setStreaming('')
+      clearTimeout(deadline)
+      if (abort.current === controller) {
+        abort.current = null; setBusy(false); setStreaming('')
+      }
     }
   }
 
@@ -267,12 +260,12 @@ export function ChatScreen({ copy, language, pending, onPendingConsumed }: ChatS
 
   const stop = () => {
     abort.current?.abort()
-    if (streaming) setTurns((current) => [...current, { role: 'assistant', content: streaming }])
-    setStreaming('')
-    setBusy(false)
+    abort.current = null
+    setStreaming(''); setBusy(false); setCanRetry(Boolean(retryState.current))
   }
 
   const startNew = () => {
+    stop(); retryState.current = null; setCanRetry(false)
     goToBottom()
     setTurns([])
     setStreaming('')
@@ -317,6 +310,7 @@ export function ChatScreen({ copy, language, pending, onPendingConsumed }: ChatS
                     type="button"
                     className="link-button"
                     onClick={() => {
+                      stop(); retryState.current = null; setCanRetry(false); setError('')
                       goToBottom()
                       setTurns(conversation.turns as Turn[])
                       conversationId.current = conversation.id
@@ -390,6 +384,7 @@ export function ChatScreen({ copy, language, pending, onPendingConsumed }: ChatS
             />
           </label>
           <div className="chat-actions">
+            {canRetry && !busy && <button type="button" className="chip" data-testid="chat-retry" onClick={() => void send(undefined, true)}><RotateCcw size={16} /> {language === 'en' ? 'Retry' : '重试'}</button>}
             <button
               type="button"
               className="ghost-button chat-clear"

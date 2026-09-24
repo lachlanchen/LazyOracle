@@ -47,8 +47,8 @@ fun PalmScreen(navController: NavController) {
     LaunchedEffect(Unit) { if (!granted) ask.launch(Manifest.permission.CAMERA) }
     DisposableEffect(Unit) { onDispose { session.stop(context) } }
 
-    var lines by remember { mutableStateOf(LineTraits()) }
-    var features by remember { mutableStateOf<PalmFeatures?>(null) }
+    var lines by rememberPracticeState("palm.lines", LineTraits())
+    var features by rememberPracticeState<PalmFeatures?>("palm.features", null)
     var error by remember { mutableStateOf<String?>(null) }
     var reads by remember { mutableIntStateOf(0) }
 
@@ -138,7 +138,6 @@ fun PalmScreen(navController: NavController) {
         error?.let { Panel(title = t("common.notComputed")) { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
 
         features?.let { f ->
-            ExplainReading(Json.encodeToString(f))
             Panel(title = t("palm.hand")) {
                 Measure(l("Shape"), l(f.shape.replaceFirstChar { it.uppercase() }))
                 Measure(l("Palm width to length"), String.format("%.2f", f.palmRatio))
@@ -193,6 +192,7 @@ fun PalmScreen(navController: NavController) {
                     style = Type.serif(16), color = Palette.inkSoft
                 )
             }
+            ExplainReading(Json.encodeToString(f))
         }
     }
 }

@@ -26,9 +26,9 @@ import kotlinx.serialization.json.buildJsonObject
 
 @Composable
 fun AnswersScreen(navController: NavController) {
-    var book by remember { mutableStateOf("answers") }
-    var question by remember { mutableStateOf("") }
-    var opening by remember { mutableStateOf<BookOpening?>(null) }
+    var book by rememberPracticeState("answers.book", "answers")
+    var question by rememberPracticeState("answers.question", "")
+    var opening by rememberPracticeState<BookOpening?>("answers.opening", null)
     var error by remember { mutableStateOf<String?>(null) }
     var opens by remember { mutableIntStateOf(0) }
 
@@ -63,7 +63,6 @@ fun AnswersScreen(navController: NavController) {
         error?.let { Panel(title = t("common.notComputed")) { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
 
         opening?.let { page ->
-            ExplainReading(Json.encodeToString(page))
             Column(
                 Modifier
                     .fillMaxWidth()
@@ -88,6 +87,7 @@ fun AnswersScreen(navController: NavController) {
                     )
                 }
             }
+            ExplainReading(Json.encodeToString(page))
         }
     }
 }

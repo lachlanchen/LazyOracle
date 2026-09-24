@@ -8,6 +8,8 @@ import { ReadingPanel } from './ReadingPanel'
 vi.mock('../lib/readings', () => ({ generateReading: vi.fn() }))
 afterEach(cleanup)
 beforeEach(() => {
+  localStorage.clear()
+  Element.prototype.scrollIntoView = vi.fn()
   vi.mocked(generateReading).mockReset()
   vi.mocked(generateReading).mockImplementation((_request, emit) => {
     emit({ source: 'model', text: 'The original explanation.', done: true })

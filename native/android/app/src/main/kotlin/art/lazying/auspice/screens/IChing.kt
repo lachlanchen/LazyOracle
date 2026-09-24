@@ -24,15 +24,15 @@ import kotlinx.serialization.json.buildJsonObject
 
 @Composable
 fun IChingScreen(navController: NavController) {
-    var method by remember { mutableStateOf("coins") }
-    var question by remember { mutableStateOf("") }
-    var cast by remember { mutableStateOf<IChingCast?>(null) }
-    var shown by remember { mutableIntStateOf(0) }
+    var method by rememberPracticeState("iching.method", "coins")
+    var question by rememberPracticeState("iching.question", "")
+    var cast by rememberPracticeState<IChingCast?>("iching.cast", null)
+    var shown by rememberPracticeState("iching.shown", 0)
     var error by remember { mutableStateOf<String?>(null) }
     var casts by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(casts) {
-        if (casts == 0) return@LaunchedEffect
+        if (casts == 0) { if (cast != null) shown = 6; return@LaunchedEffect }
         runCatching {
             Engines.evaluateAs<IChingCast>("iching.cast", buildJsonObject {
                 put("method", JsonPrimitive(method))
@@ -87,7 +87,6 @@ fun IChingScreen(navController: NavController) {
             }
 
             if (shown >= 6) {
-            ExplainReading(Json.encodeToString(result))
                 Panel(title = t("iching.judgement")) {
                     Text(l(result.primary.judgement), style = Type.serif(20), color = Palette.ink)
                     Text(l(result.primary.sense.en), style = Type.serif(17), color = Palette.inkSoft)
@@ -119,6 +118,7 @@ fun IChingScreen(navController: NavController) {
                     Relative(l("Inverse hexagram"), result.inverse)
                 }
             }
+            ExplainReading(Json.encodeToString(result))
         }
     }
 }

@@ -121,4 +121,28 @@ class ConversationsTest {
         assertEquals(AgentTools.MAX_STEPS + 1, requests)
         assertEquals(answer, Conversations.current.turns.last().text)
     }
+    @Test fun retryKeepsTheOriginalDrawAndQuestion() = runBlocking {
+        var requests = 0
+        var draws = 0
+        val stream: suspend (List<JsonObject>, JsonArray?, String, suspend (String) -> Unit) -> Relay.Answer = { messages, _, _, _ ->
+            requests++
+            when (requests) {
+                1 -> Relay.Answer("", listOf(Relay.ToolCall("draw", "draw_tarot", "{}")))
+                2 -> throw java.io.IOException("connection interrupted")
+                else -> {
+                    assertEquals(facts, messages.last { it["role"]?.jsonPrimitive?.content == "tool" }["content"]?.jsonPrimitive?.content)
+                    Relay.Answer(answer, emptyList())
+                }
+            }
+        }
+        val tool: suspend (String, JsonObject) -> AgentTools.Outcome = { _, _ -> draws++; AgentTools.Outcome("draw", facts, true) }
+        Conversations.send("Draw once", stream, tool)
+        assertTrue(Conversations.canRetry)
+        assertFalse(Conversations.streaming)
+        Conversations.send("Draw once", stream, tool, retrying = true)
+        assertEquals(1, draws)
+        assertEquals(1, Conversations.current.turns.count { it.kind == "reader" })
+        assertEquals(answer, Conversations.current.turns.last().text)
+    }
+
 }

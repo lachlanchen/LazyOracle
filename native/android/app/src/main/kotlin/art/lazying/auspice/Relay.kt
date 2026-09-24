@@ -2,6 +2,8 @@ package art.lazying.auspice
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.ensureActive
 import kotlinx.serialization.json.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -17,11 +19,12 @@ import java.util.concurrent.TimeUnit
  * faster of the two hosts from most networks here.
  */
 object Relay {
-    private const val BASE = "https://oracle-fast.lazying.art/v1"
+    private val ENDPOINTS = listOf("https://oracle-fast.lazying.art/v1", "https://oracle.lazying.art/v1")
 
     private val client = OkHttpClient.Builder()
         .connectTimeout(20, TimeUnit.SECONDS)
-        .readTimeout(180, TimeUnit.SECONDS)
+        .readTimeout(20, TimeUnit.SECONDS)
+        .callTimeout(45, TimeUnit.SECONDS)
         .build()
 
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
@@ -38,11 +41,29 @@ object Relay {
         tools: JsonArray?,
         tier: String,
         onDelta: suspend (String) -> Unit
+    ): Answer {
+        var last: Exception = Failure("The reading service could not be reached.")
+        for (endpoint in ENDPOINTS) {
+            var emitted = false
+            try {
+                return streamAt(endpoint, messages, tools, tier) { piece -> emitted = true; onDelta(piece) }
+            } catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
+            catch (error: Exception) {
+                last = error
+                if (emitted || error.message?.contains("answered 400") == true || error.message?.contains("answered 429") == true) throw error
+            }
+        }
+        throw last
+    }
+
+    private suspend fun streamAt(
+        endpoint: String, messages: List<JsonObject>, tools: JsonArray?, tier: String,
+        onDelta: suspend (String) -> Unit
     ): Answer = withContext(Dispatchers.IO) {
         val body = buildJsonObject {
             put("model", JsonPrimitive(tier))
             put("stream", JsonPrimitive(true))
-            put("temperature", JsonPrimitive(0.7))
+            put("temperature", JsonPrimitive(0.3))
             put("messages", JsonArray(messages))
             if (tools != null && tools.isNotEmpty()) {
                 put("tools", tools)
@@ -51,11 +72,18 @@ object Relay {
             }
         }
         val request = Request.Builder()
-            .url("$BASE/chat/completions")
+            .url("$endpoint/chat/completions")
             .post(body.toString().toRequestBody("application/json".toMediaType()))
             .build()
 
-        client.newCall(request).execute().use { response ->
+        val call = client.newCall(request)
+        // A separate cancellation hook closes the blocking response body as
+        // soon as Stop or the overall deadline cancels this coroutine.
+        kotlinx.coroutines.coroutineScope {
+        val cancellation = launch(start = kotlinx.coroutines.CoroutineStart.UNDISPATCHED) {
+            try { kotlinx.coroutines.awaitCancellation() } finally { call.cancel() }
+        }
+        try { call.execute().use { response ->
             if (!response.isSuccessful) {
                 val detail = response.body?.string()?.take(160).orEmpty()
                 throw Failure(
@@ -69,12 +97,15 @@ object Relay {
             val names = linkedMapOf<Int, String>()
             val ids = linkedMapOf<Int, String>()
 
+            var finished = false
             while (true) {
+                kotlinx.coroutines.currentCoroutineContext().ensureActive()
                 val line = source.readUtf8Line() ?: break
                 if (!line.startsWith("data:")) continue
                 val payload = line.removePrefix("data:").trim()
-                if (payload == "[DONE]") break
+                if (payload == "[DONE]") { finished = true; break }
                 val chunk = runCatching { json.parseToJsonElement(payload).jsonObject }.getOrNull() ?: continue
+                if (chunk["error"] != null) throw Failure("The reading was interrupted.")
                 val delta = chunk["choices"]?.jsonArray?.firstOrNull()?.jsonObject?.get("delta")?.jsonObject ?: continue
                 delta["content"]?.jsonPrimitive?.contentOrNull?.takeIf { it.isNotEmpty() }?.let {
                     text.append(it)
@@ -94,6 +125,8 @@ object Relay {
                     }
                 }
             }
+            if (!finished) throw Failure("The reading was interrupted.")
+            if (text.isBlank() && names.isEmpty()) throw Failure("The reading service sent no answer.")
             Answer(
                 text.toString(),
                 names.keys.sorted().map { index ->
@@ -104,6 +137,7 @@ object Relay {
                     )
                 }
             )
+        } } finally { cancellation.cancel() }
         }
     }
 
@@ -235,7 +269,7 @@ object AgentTools {
                     put("question", JsonPrimitive(text("question").orEmpty()))
                 }, "Opened the Book of ${if (book == "questions") "Questions" else "Answers"}")
             }
-            "birth_details" -> Outcome(
+            "birth_details" -> if (!profile.isComplete) Outcome("No birth details", """{"saved":false,"note":"No birth details saved. Do not use form defaults as personal information."}""", true) else Outcome(
                 "Read the saved birth details",
                 buildJsonObject {
                     put("saved", JsonPrimitive(profile.isComplete))
@@ -283,11 +317,11 @@ object AgentTools {
 
     // BEGIN GENERATED PROMPT
     val SYSTEM_PROMPT = """
-        You are the reader in Auspice (宜时). You do not invent readings: every card, hexagram, pillar, chart and almanac page comes from a tool that runs a deterministic engine on this device. Call the tool, then read what it returns. If a tool disagrees with what you were about to say, the tool is right.
+        You are the Tianji reader in this app (LazyOracle or Auspice). You do not invent readings: every card, hexagram, pillar, chart and almanac page comes from a tool that runs a deterministic engine on this device. Call the tool, then read what it returns. If a tool disagrees with what you were about to say, the tool is right.
 
         For greetings and questions about what the app can do, answer briefly without tools or claims about the reader’s personal details. Historical engine results are dated context, not current state. Fetch fresh birth details or calendar facts before presenting them as current.
 
-        Follow the selected response language supplied with the conversation. Stay mainly in that language; for Chinese, use the selected script throughout the answer. An occasional useful traditional term is fine; explain unfamiliar terms briefly. Avoid frequent language switching and duplicate bilingual paragraphs. Use everyday wording and answer the question directly before explaining the relevant facts.
+        Use the interface language as the default, and naturally follow the language the reader uses or explicitly requests. Keep each answer coherent and easy to understand. Occasional useful traditional terms are fine; explain unfamiliar terms briefly, without unnecessary language switching or duplicate bilingual paragraphs.
 
         Write as a reader speaking to someone across a table, not as a report. No headings, no bullet lists, no bold labels such as "What was computed". Two to four short paragraphs. Open with the answer, give the one or two facts it rests on, and end with something the person can actually do. Name the source in passing — "the almanac lists signing agreements as suitable today" — rather than announcing a method section.
 
@@ -303,6 +337,8 @@ object AgentTools {
         If the person asks about a hand or a face, call read_palm or read_face. That opens the camera for them; tell them plainly what to do — hold an open palm up, or face the camera in even light, and tap the button — and read the measurements when they come back. They can turn the camera around to read someone else's hand or face.
 
         If a chart needs birth details and none are saved, ask for the year, month, day, hour and birthplace rather than guessing. If a tool fails, say what could not be computed instead of filling the gap. Never claim certainty about health, death, or the law.
+
+        If a short question is ambiguous (for example “what about west?”), use the conversation to identify whether it means a compass direction or Western astrology. If the context does not settle it, ask one brief clarifying question instead of guessing or calling unrelated tools. Never present unsaved profile defaults as the reader’s actual birth details. When saved=false, no birth details are known.
     """.trimIndent()
     // END GENERATED PROMPT
 }

@@ -32,16 +32,19 @@ import kotlinx.serialization.json.buildJsonObject
 
 @Composable
 fun AstrologyScreen(navController: NavController) {
-    var chart by remember { mutableStateOf<NatalChart?>(null) }
-    var report by remember { mutableStateOf<TransitReport?>(null) }
+    var chart by rememberPracticeState<NatalChart?>("astrology.chart", null)
+    var report by rememberPracticeState<TransitReport?>("astrology.report", null)
     var error by remember { mutableStateOf<String?>(null) }
     var editing by remember { mutableStateOf(false) }
     val profile = Profiles.profile
 
+    var computedProfile by rememberPracticeState<BirthProfile?>("astrology.profile", null)
     LaunchedEffect(profile) {
+        if (chart != null && computedProfile == profile) return@LaunchedEffect
         if (!profile.isComplete) { chart = null; return@LaunchedEffect }
         runCatching { Engines.evaluateAs<NatalChart>("astrology.chart", profile.engineInput()) }
-            .onSuccess { chart = it; error = null }
+            .onSuccess { chart = it; error = null
+                computedProfile = profile }
             .onFailure { error = l("This reading could not be computed. Please try again.") }
         report = runCatching {
             Engines.evaluateAs<TransitReport>(
@@ -64,7 +67,6 @@ fun AstrologyScreen(navController: NavController) {
         error?.let { Panel(title = t("common.notComputed")) { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
 
         chart?.let { c ->
-            ExplainReading(Json.encodeToString(c))
             Panel {
                 ChartWheel(c)
                 Row(
@@ -150,6 +152,7 @@ fun AstrologyScreen(navController: NavController) {
                     style = Type.serif(16), color = Palette.inkSoft
                 )
             }
+            ExplainReading(Json.encodeToString(c))
         }
     }
 }

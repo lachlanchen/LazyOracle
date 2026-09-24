@@ -40,15 +40,18 @@ fun elementColour(element: String) = when (element) {
 
 @Composable
 fun BaziScreen(navController: NavController) {
-    var chart by remember { mutableStateOf<BaziChart?>(null) }
+    var chart by rememberPracticeState<BaziChart?>("bazi.chart", null)
     var error by remember { mutableStateOf<String?>(null) }
     var editing by remember { mutableStateOf(false) }
     val profile = Profiles.profile
 
+    var computedProfile by rememberPracticeState<BirthProfile?>("bazi.profile", null)
     LaunchedEffect(profile) {
+        if (chart != null && computedProfile == profile) return@LaunchedEffect
         if (!profile.isComplete) { chart = null; return@LaunchedEffect }
         runCatching { Engines.evaluateAs<BaziChart>("bazi.chart", profile.engineInput()) }
-            .onSuccess { chart = it; error = null }
+            .onSuccess { chart = it; error = null
+                computedProfile = profile }
             .onFailure { error = l("This reading could not be computed. Please try again.") }
     }
 
@@ -67,7 +70,6 @@ fun BaziScreen(navController: NavController) {
         error?.let { Panel(title = t("common.notComputed")) { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
 
         chart?.let { c ->
-            ExplainReading(Json.encodeToString(c))
             Panel {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     PillarColumn(t("bazi.hour"), c.pillars.hour, false, Modifier.weight(1f))
@@ -169,6 +171,7 @@ fun BaziScreen(navController: NavController) {
                     style = Type.serif(15), color = Palette.inkMute
                 )
             }
+            ExplainReading(Json.encodeToString(c))
         }
     }
 }

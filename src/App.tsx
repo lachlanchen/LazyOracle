@@ -134,7 +134,7 @@ function App() {
         />
       )}
 
-      {view !== 'chat' && (
+      {(view === 'home' || view === 'settings') && (
         <ChatDock
           copy={copy}
           onAsk={(question) => {

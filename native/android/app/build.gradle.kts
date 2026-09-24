@@ -17,6 +17,24 @@ android {
         versionName = "0.1.0"
     }
 
+    flavorDimensions += "identity"
+    productFlavors {
+        create("lazyoracle") {
+            dimension = "identity"
+            applicationId = "art.lazying.lazyoracle"
+            versionCode = 14
+            versionName = "1.0.0"
+            resValue("string", "app_name", "LazyOracle")
+        }
+        create("auspice") {
+            dimension = "identity"
+            applicationId = "art.lazying.auspice"
+            versionCode = 7
+            versionName = "0.1.0"
+            resValue("string", "app_name", "Auspice")
+        }
+    }
+
     signingConfigs {
         create("upload") {
             val store = file(System.getenv("AUSPICE_KEYSTORE") ?: "${System.getProperty("user.home")}/.config/lazyoracle/android/upload-keystore.jks")

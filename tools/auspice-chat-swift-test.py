@@ -17,7 +17,7 @@ source = source.replace('.appendingPathComponent("Auspice", isDirectory: true)',
 wire = (root/'native/ios/Auspice/Relay.swift').read_text().split('    // MARK: Wire format')[1].split('    private struct Delta')[0]
 stubs = r'''
 func t(_ key: String) -> String { key }
-func readingLanguageInstruction() -> String { "Write mainly in en." }
+func readingLanguageInstruction() -> String { "English is the interface default. Naturally follow the language used or explicitly requested by the reader." }
 enum AgentTools {
     static let maxSteps = 6
     struct Outcome { var label: String; var output: String; var ok: Bool }
@@ -31,9 +31,9 @@ enum AgentTools {
 enum Relay {
 WIRE
     struct Answer { var text: String; var toolCalls: [ToolCall] }
-    @MainActor static var handler: (([Message], [[String: Any]], (String) -> Void) -> Answer)!
+    @MainActor static var handler: (([Message], [[String: Any]], (String) -> Void) async throws -> Answer)!
     @MainActor static func stream(messages: [Message], tools: [[String: Any]], tier: String,
-        onDelta: @escaping (String) -> Void) async throws -> Answer { handler(messages, tools, onDelta) }
+        onDelta: @escaping (String) -> Void) async throws -> Answer { try await handler(messages, tools, onDelta) }
 }
 enum Fixture {
     static let facts = #"{"date":"2026-09-23","yi":["祭祀"],"ji":["出行"]}"#
@@ -84,6 +84,38 @@ enum Fixture {
             precondition(history.contains { $0.content?.contains(Fixture.facts) == true }, "Follow-up lost facts")
             print("PASS iOS production ChatStore: \(mode)")
         }
+        store.clearCurrent()
+        store.current.turns.append(Turn(kind: .reader, text: "Draw once"))
+        AgentTools.runs = 0
+        var requests = 0
+        Relay.handler = { messages, _, _ in
+            requests += 1
+            if requests == 1 { return .init(text: "", toolCalls: Fixture.calls) }
+            if requests == 2 { throw URLError(.networkConnectionLost) }
+            Fixture.checkFacts(messages)
+            return .init(text: Fixture.prose, toolCalls: [])
+        }
+        await store.runInCloud()
+        precondition(store.canRetry)
+        await store.runInCloud()
+        precondition(AgentTools.runs == 2)
+        precondition(store.current.turns.filter { $0.kind == .reader }.count == 1)
+        precondition(store.current.turns.last?.text == Fixture.prose)
+        print("PASS iOS retry retains original facts and question")
+
+        store.clearCurrent()
+        Relay.handler = { _, _, _ in
+            try await Task.sleep(for: .seconds(30))
+            return .init(text: "Must not appear", toolCalls: [])
+        }
+        store.send("Stop this slow request")
+        await Task.yield()
+        store.stop()
+        precondition(!store.streaming && store.canRetry)
+        store.newSession()
+        await Task.yield()
+        precondition(store.current.turns.isEmpty && !store.streaming)
+        print("PASS iOS Stop and session isolation")
     }
 }
 '''.replace('WIRE', wire)
@@ -97,7 +129,7 @@ if '--live' in sys.argv:
     profile = (root/'native/ios/Auspice/Profile.swift').read_text().split('@Observable')[0].replace('import SwiftUI', '')
     stubs = relay + engines + profile + r'''
 func t(_ key: String) -> String { key }
-func readingLanguageInstruction() -> String { "Write mainly in en." }
+func readingLanguageInstruction() -> String { "English is the interface default. Naturally follow the language used or explicitly requested by the reader." }
 class ProfileStore { static let shared = ProfileStore(); var profile = BirthProfile() }
 class Router {
     static let shared = Router()

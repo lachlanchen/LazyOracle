@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { usePracticeState } from '../lib/practice-state'
 import { BookOpen } from 'lucide-react'
 import { openBook, type Opening } from '../engines/answers/answers'
 import type { UICopy } from '../i18n'
@@ -12,10 +12,10 @@ interface AnswersScreenProps {
 }
 
 export function AnswersScreen({ copy, language }: AnswersScreenProps) {
-  const [question, setQuestion] = useState('')
-  const [book, setBook] = useState<'answers' | 'questions'>('answers')
-  const [opening, setOpening] = useState<Opening | null>(null)
-  const [opened, setOpened] = useState(false)
+  const [question, setQuestion] = usePracticeState('answers.question', '')
+  const [book, setBook] = usePracticeState<'answers' | 'questions'>('answers.book', 'answers')
+  const [opening, setOpening] = usePracticeState<Opening | null>('answers.opening', null)
+  const [opened, setOpened] = usePracticeState('answers.opened', false)
   const t = copy.answers
   const l = language === 'en' ? 'en' : 'zh'
 

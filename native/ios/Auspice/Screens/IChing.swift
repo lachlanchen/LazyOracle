@@ -1,11 +1,11 @@
 import SwiftUI
 
 struct IChingScreen: View {
-    @State private var method = "coins"
-    @State private var question = ""
+    @SavedPractice("iching.method") private var method = "coins"
+    @SavedPractice("iching.question") private var question = ""
     @FocusState private var questionFocused: Bool
-    @State private var cast: IChingCast?
-    @State private var shown = 0
+    @SavedPractice("iching.cast") private var cast: IChingCast? = nil
+    @SavedPractice("iching.shown") private var shown = 0
     @State private var error: String?
 
     var body: some View {
@@ -60,7 +60,6 @@ struct IChingScreen: View {
                 }
 
                 if shown >= 6 {
-                    ExplainReading(result: cast).id(cast.seed)
                     Panel(title: t("iching.judgement")) {
                         Text(l(cast.primary.judgement))
                             .font(Typeface.serif(20))
@@ -106,9 +105,11 @@ struct IChingScreen: View {
                         relative("Opposite hexagram", cast.opposite)
                         relative("Inverse hexagram", cast.inverse)
                     }
+                    ExplainReading(result: cast).id(cast.seed)
                 }
             }
         }
+        .onAppear { if cast != nil { shown = 6 } }
     }
 
     private func relative(_ label: String, _ hexagram: Hexagram) -> some View {

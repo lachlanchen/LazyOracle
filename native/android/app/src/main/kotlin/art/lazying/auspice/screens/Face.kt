@@ -50,7 +50,7 @@ fun FaceScreen(navController: NavController) {
     LaunchedEffect(Unit) { if (!granted) ask.launch(Manifest.permission.CAMERA) }
     DisposableEffect(Unit) { onDispose { session.stop(context) } }
 
-    var features by remember { mutableStateOf<FaceFeatures?>(null) }
+    var features by rememberPracticeState<FaceFeatures?>("face.features", null)
     var error by remember { mutableStateOf<String?>(null) }
     var reads by remember { mutableIntStateOf(0) }
 
@@ -117,7 +117,6 @@ fun FaceScreen(navController: NavController) {
         error?.let { Panel(title = t("common.notComputed")) { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
 
         features?.let { f ->
-            ExplainReading(Json.encodeToString(f))
             Panel(title = t("face.element")) {
                 Text(l(ELEMENT_FACES[f.element] ?: f.element), style = Type.display(28), color = Palette.gold)
                 Text(l("Read from the height of the face against its width, and from how the jaw and forehead stand against the cheekbones."),
@@ -194,6 +193,7 @@ fun FaceScreen(navController: NavController) {
                     style = Type.serif(16), color = Palette.inkSoft
                 )
             }
+            ExplainReading(Json.encodeToString(f))
         }
     }
 }

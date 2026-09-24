@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { usePracticeState } from '../lib/practice-state'
+import { useEffect } from 'react'
 import { Moon, RefreshCw } from 'lucide-react'
 import { castHexagram, type Hexagram, type IChingCast } from '../engines/iching/cast'
 import type { UICopy } from '../i18n'
@@ -38,10 +39,10 @@ export function HexagramFigure({ hexagram, changing = [], drawn = 6, size = 'lar
 }
 
 export function IChingScreen({ copy, language }: IChingScreenProps) {
-  const [question, setQuestion] = useState('')
-  const [method, setMethod] = useState<'coins' | 'yarrow'>('coins')
-  const [cast, setCast] = useState<IChingCast | null>(null)
-  const [drawn, setDrawn] = useState(0)
+  const [question, setQuestion] = usePracticeState('iching.question', '')
+  const [method, setMethod] = usePracticeState<'coins' | 'yarrow'>('iching.method', 'coins')
+  const [cast, setCast] = usePracticeState<IChingCast | null>('iching.cast', null)
+  const [drawn, setDrawn] = usePracticeState('iching.drawn', 0)
   const l = language === 'en' ? 'en' : 'zh'
 
   // Lines appear one by one, bottom to top, so the cast feels like a cast.
@@ -49,7 +50,7 @@ export function IChingScreen({ copy, language }: IChingScreenProps) {
     if (!cast || drawn >= 6) return
     const timer = setTimeout(() => setDrawn((d) => d + 1), 260)
     return () => clearTimeout(timer)
-  }, [cast, drawn])
+  }, [cast, drawn, setDrawn])
 
   const doCast = () => {
     setCast(castHexagram({ method, question }))

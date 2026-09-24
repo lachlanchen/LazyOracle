@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { readingTerm, lunarDateText } from '../lib/reading-localisation'
+import { usePracticeState } from '../lib/practice-state'
 import { CalendarDays } from 'lucide-react'
 import { ACTIVITIES, almanacFor, judgeActivity, luckyHours, STANDING_TEXT, VERDICT_TEXT } from '../engines/almanac/almanac'
 import type { UICopy } from '../i18n'
@@ -28,10 +29,10 @@ function shiftDays(value: string, days: number): string {
 }
 
 export function AlmanacScreen({ copy, language }: AlmanacScreenProps) {
-  const [date, setDate] = useState(isoToday)
-  const [activityId, setActivityId] = useState<string>('')
-  const [question, setQuestion] = useState('')
-  const [round, setRound] = useState(0)
+  const [date, setDate] = usePracticeState('almanac.date', isoToday)
+  const [activityId, setActivityId] = usePracticeState<string>('almanac.activityId', '')
+  const [question, setQuestion] = usePracticeState('almanac.question', '')
+  const [round, setRound] = usePracticeState('almanac.round', 0)
   const t = copy.almanac
   const l = language === 'en' ? 'en' : 'zh'
 
@@ -66,9 +67,9 @@ export function AlmanacScreen({ copy, language }: AlmanacScreenProps) {
             {t.today}
           </button>
           <span className="seed">
-            {day.lunar.text} · {day.lunar.yearGanZhi}
-            {day.lunar.zodiac} · {day.lunar.dayGanZhi}
-            {day.solarTerm ? ` · ${day.solarTerm}` : ''}
+            {lunarDateText(day.lunar.text, language)} · {readingTerm(day.lunar.yearGanZhi, language)}
+            {readingTerm(day.lunar.zodiac, language)} · {readingTerm(day.lunar.dayGanZhi, language)}
+            {day.solarTerm ? ` · ${readingTerm(day.solarTerm, language)}` : ''}
           </span>
         </div>
       </section>
@@ -76,22 +77,22 @@ export function AlmanacScreen({ copy, language }: AlmanacScreenProps) {
       <section className="panel" data-testid="almanac-page">
         <dl className="facts">
           <dt>{t.suitable}</dt>
-          <dd className="almanac-yi">{day.yi.join(l === 'en' ? ' · ' : '　') || t.nothingListed}</dd>
+          <dd className="almanac-yi">{day.yi.map(value => readingTerm(value, language)).join(l === 'en' ? ' · ' : '　') || t.nothingListed}</dd>
           <dt>{t.avoid}</dt>
-          <dd className="almanac-ji">{day.ji.join(l === 'en' ? ' · ' : '　') || t.nothingListed}</dd>
+          <dd className="almanac-ji">{day.ji.map(value => readingTerm(value, language)).join(l === 'en' ? ' · ' : '　') || t.nothingListed}</dd>
           <dt>{t.officer}</dt>
           <dd>
-            {day.dayOfficer} · {day.spirit.name} {day.spirit.road} · {day.mansion.name}
-            {day.mansion.animal}
+            {readingTerm(day.dayOfficer, language)} · {readingTerm(day.spirit.name, language)} {readingTerm(day.spirit.road, language)} · {readingTerm(day.mansion.name, language)}
+            {readingTerm(day.mansion.animal, language)}
           </dd>
           <dt>{t.clash}</dt>
           <dd>
-            {day.clash} · {t.harm} {day.harmDirection} · {STANDING_TEXT[day.standing][l]}
+            {readingTerm(day.clash, language)} · {t.harm} {readingTerm(day.harmDirection, language)} · {STANDING_TEXT[day.standing][l]}
           </dd>
           <dt>{t.hours}</dt>
-          <dd>{luckyHours(day).map((hour) => `${hour.ganzhi} ${hour.range}`).join(l === 'en' ? ' · ' : '　')}</dd>
+          <dd>{luckyHours(day).map((hour) => `${readingTerm(hour.ganzhi, language)} ${hour.range}`).join(l === 'en' ? ' · ' : '　')}</dd>
           <dt>{t.pengzu}</dt>
-          <dd>{day.pengzu.join(' ')}</dd>
+          <dd>{day.pengzu.map(value => readingTerm(value, language)).join(' ')}</dd>
         </dl>
       </section>
 
@@ -135,7 +136,7 @@ export function AlmanacScreen({ copy, language }: AlmanacScreenProps) {
           system={almanacSystemPrompt(language)}
           user={`Question: ${question || '(none)'}\n\n${JSON.stringify(context, null, 1)}`}
           offline={almanacOffline(context)}
-          header={`${copy.appName} · ${t.eyebrow}\n${date} ${day.lunar.text}`}
+          header={`${copy.appName} · ${t.eyebrow}\n${date} ${lunarDateText(day.lunar.text, language)}`}
         />
       )}
     </main>

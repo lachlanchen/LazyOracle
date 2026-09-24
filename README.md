@@ -41,15 +41,15 @@ The current testing builds use two reading sources:
 
 Cards, charts, hexagrams and measurements are computed on the device. Photos for palmistry and face reading are measured in memory and never stored, uploaded or matched against anything. Birth profiles are saved in local storage. There is no account, no analytics and no advertising identifier. With Tianji Cloud switched on, requests carry your question, relevant conversation history or its summary, and structured reading facts (which may include birth details) through our relay to the model provider. Turning it off stops cloud reading requests. The full policy is at [oracle.lazying.art/privacy.html](https://oracle.lazying.art/privacy.html).
 
-Auspice / 宜时 is the separate native sibling: SwiftUI on iOS and Compose on Android, the same tested engines, eleven interface languages, and live hand/face landmarks. See [the takeover recap](docs/handoffs/2026-09-23-codex-takeover.md) for the current decisions and release boundaries.
+LazyOracle now uses the native SwiftUI and Compose implementation developed as Auspice / 宜时, with eleven interface languages and live hand/face landmarks. The PWA shares its deterministic engines and receives corresponding fixes. Classic Capacitor builds remain available for rollback. See [the native migration plan](docs/plans/native-main-2026-09-24.md).
 
 ## Platforms
 
 | Platform | Implementation | Verification |
 | --- | --- | --- |
 | Web/PWA | React 19, TypeScript, Vite, Workbox | Chromium flows for every practice, offline precache, the Safari code path exercised with `tools/safari-path-test.py` |
-| Android | Capacitor 8 | Signed bundle and APK, installed and launched on API 36 |
-| iOS | Capacitor 8 | Signed archive uploaded to App Store Connect, distributed through TestFlight |
+| Android | Jetpack Compose, CameraX | Signed bundle, conversation regressions, emulator UI and upgrade checks |
+| iOS | SwiftUI, AVFoundation | Native UI, camera lifecycle, conversation and upgrade checks; TestFlight distribution |
 
 ## Build and test
 
@@ -58,15 +58,17 @@ Requirements: Node.js 22+ and npm; Android Studio with JDK 21 for Android; Xcode
 ```bash
 npm install
 npm run dev     # the PWA at http://localhost:5173
-npm run check   # lint, 66 tests, production build
+npm run check   # lint, regression tests, production PWA build
 ```
 
 Two browser checks run against a built `dist/`, with Playwright's Chromium:
 
 ```bash
-python3 tools/safari-path-test.py   # on-device models still load on Safari and iOS
+python3 tools/safari-path-test.py   # retained classic-model compatibility check
 python3 tools/agent-chat-test.py    # the chat really runs the engines it claims to
 ```
+
+Native build commands and platform requirements are in [native/README.md](native/README.md).
 
 ## Repository layout
 

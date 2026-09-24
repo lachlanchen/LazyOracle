@@ -1,3 +1,4 @@
+import { readingTerm, lunarDateText } from '../lib/reading-localisation'
 import { almanacFor } from '../engines/almanac/almanac'
 import type { UICopy } from '../i18n'
 import type { ReadingLanguage } from '../types'
@@ -19,13 +20,13 @@ export function TodayStrip({ copy, language, onOpen }: TodayStripProps) {
   const day = almanacFor(new Date())
   const t = copy.almanac
   const l = language === 'en' ? 'en' : 'zh'
-  const join = (items: string[]) => items.slice(0, 3).join(l === 'en' ? ' · ' : '　') || t.nothingListed
+  const join = (items: string[]) => items.slice(0, 3).map(value => readingTerm(value, language)).join(l === 'en' ? ' · ' : '　') || t.nothingListed
 
   return (
     <button type="button" className="today-strip" onClick={onOpen} data-testid="today-strip">
       <span className="today-date">
-        {day.lunar.text} · {day.lunar.dayGanZhi}
-        {day.solarTerm ? ` · ${day.solarTerm}` : ''}
+        {lunarDateText(day.lunar.text, language)} · {readingTerm(day.lunar.dayGanZhi, language)}
+        {day.solarTerm ? ` · ${readingTerm(day.solarTerm, language)}` : ''}
       </span>
       <span className="today-line">
         <b className="almanac-yi">{t.suitable}</b> {join(day.yi)}

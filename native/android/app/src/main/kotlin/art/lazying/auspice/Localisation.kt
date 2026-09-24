@@ -63,6 +63,7 @@ object Localisation {
 
 /** Look a string up in the language in force. */
 fun t(key: String): String =
+    if (key == "app.name" && BuildConfig.APPLICATION_ID == "art.lazying.lazyoracle") "LazyOracle" else
     Catalogue.table[key]?.get(Localisation.code)
         ?: Catalogue.table[key]?.get("en")
         ?: key
@@ -106,9 +107,9 @@ fun lunarDateText(source: String): String {
         return cleaned.map { digits[it] ?: it.toString() }.joinToString("")
     }
     val parts = source.split('年', '月', '日').filter { it.isNotEmpty() }
-    if (parts.size != 3) return l(source)
+    if (parts.size !in 2..3) return l(source)
     val date = parts.joinToString("-") { number(it.replace("闰", "")) }
-    return lf(if (parts[1].contains("闰")) "Lunar date: {0} (leap month)" else "Lunar date: {0}", date)
+    return lf(if (source.contains("闰")) "Lunar date: {0} (leap month)" else "Lunar date: {0}", date)
 }
 
-fun readingLanguageInstruction(): String = "Write mainly in the selected app language: ${Localisation.code}. Use clear everyday language and the selected Chinese script. An occasional conventional term from another language is allowed when useful, but do not alternate languages or duplicate paragraphs in translation. Explain unfamiliar terms once. Honor an explicit request for a different response language."
+fun readingLanguageInstruction(): String = "The interface language is ${Localisation.code}. Use it as the default, but naturally follow the language the reader uses or explicitly requests. Keep each answer coherent and easy to understand. Occasional useful terms from another language are fine; avoid unnecessary switching or duplicate translated paragraphs."

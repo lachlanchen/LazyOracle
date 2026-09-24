@@ -1,3 +1,4 @@
+import { usePracticeState } from '../lib/practice-state'
 import { useEffect, useMemo, useState } from 'react'
 import { Compass } from 'lucide-react'
 import { DIRECTION_TEXT, DIRECTIONS, eightMansions, GUA_EN, sectorForHeading, type Direction } from '../engines/fengshui/fengshui'
@@ -87,9 +88,9 @@ export function BaguaRose({ sectors, heading, en }: { sectors: { direction: Dire
 export function FengShuiScreen({ copy, language }: FengShuiScreenProps) {
   const [profile, setProfile] = useState<BirthProfile | null>(() => loadProfile())
   const [editing, setEditing] = useState(profile === null)
-  const [question, setQuestion] = useState('')
-  const [asked, setAsked] = useState('')
-  const [round, setRound] = useState(0)
+  const [question, setQuestion] = usePracticeState('fengshui.question', '')
+  const [asked, setAsked] = usePracticeState('fengshui.asked', '')
+  const [round, setRound] = usePracticeState('fengshui.round', 0)
   const { heading, state, enable } = useCompass()
   const en = language === 'en'
   const t = copy.fengshui

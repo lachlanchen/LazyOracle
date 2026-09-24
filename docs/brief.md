@@ -2,7 +2,33 @@
 
 Written 2026-09-21 from the owner's request (chat with the L & N session). Treat this as the contract; refine it in place as decisions are made and record the date of each change.
 
-## Current owner decisions — 2026-09-23
+## Current owner decisions — 2026-09-24, native LazyOracle
+
+These supersede the earlier product split below.
+
+- LazyOracle is the main maintained app. Its next test builds use the shared
+  SwiftUI/Compose implementation previously shipped as Auspice, with native
+  live face and palm views. Keep LazyOracle's existing store identities,
+  signing, name and icon. There is one native interface, with no classic switch.
+- Retain Auspice as an alternate build identity and its previous test builds as
+  backup. No new Auspice release is required for this migration.
+- Deprecate the classic Capacitor mobile wrappers; retain their reproducible
+  source and previous signed builds. The PWA remains supported and receives
+  corresponding fixes alongside Android and iOS.
+- Restore each practice's inputs, exact deterministic result and follow-up
+  conversation across navigation and relaunch. Explicit new readings remain.
+- Pin the contextual Ask Tianji composer to the bottom of each practice.
+  Explanations and replies follow the deterministic analysis in the page.
+- Use the interface language by default, naturally respect the user's language
+  and explicit language requests, and allow occasional useful foreign terms.
+- Import existing LazyOracle profiles, language and chats locally, retaining
+  the original storage for rollback. Bound chat waits and provide Stop/Retry
+  without repeating an already computed draw or cast.
+- Publish native LazyOracle to testing and submit beta review when required.
+  Preserve the existing formal production reviews. See the
+  [migration plan](plans/native-main-2026-09-24.md).
+
+## Earlier owner decisions — 2026-09-23
 
 These supersede older local-model and native-migration plans below. The full
 request history and outstanding work are in
@@ -69,7 +95,7 @@ local LLM on the phone  ──fallback──▶  workstation LocalLLM via LazyEd
 narrative reading, cited to the structured facts
 ```
 
-- **Shell:** React + TypeScript + Vite PWA inside Capacitor for Android and iOS, exactly like `../L-And-N` (copy its `tools/`, `store/` layout, i18n pattern, Android flavors, iOS project conventions). Interface languages: zh-Hans, zh-Hant, yue, en (ja later).
+- **Current clients:** SwiftUI on iOS, Compose on Android, and React + TypeScript + Vite for the PWA. The former Capacitor wrappers are retained for rollback. Earlier shell setup followed `../L-And-N` (copy its `tools/`, `store/` layout, i18n pattern, Android flavors, iOS project conventions). Interface languages: zh-Hans, zh-Hant, yue, en (ja later).
 - **Engines** live in `src/engines/<practice>/` with golden tests against known charts (e.g. published BaZi examples, Swiss Ephemeris reference positions). This is where errors are prevented; the model never calculates.
 - **On-device LLM:** llama.cpp. iOS: llama.cpp Swift package with Metal; Android: llama.cpp JNI with Vulkan/CPU (ExecuTorch or MediaPipe LLM Inference are acceptable alternatives if faster on the MIX 2S / Mi 10 Pro test phones). Default model Qwen3-4B Q4_K_M (~2.5 GB) with Qwen3-1.7B Q4 as the small option; the app downloads the model on first use from our own host (`lazying.art` CDN path, mirrored from Hugging Face) and shows size and speed before downloading. Target: first token under 2 s and >8 tok/s on a 2020 flagship.
 - **Domain:** `oracle.lazying.art` → 179.236.105.35 (Huanayun, the LazyEdge/LazyTunnel public edge), set by the owner on 2026-09-21.

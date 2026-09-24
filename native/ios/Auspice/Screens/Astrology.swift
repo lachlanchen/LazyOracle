@@ -2,9 +2,10 @@ import SwiftUI
 
 struct AstrologyScreen: View {
     @State private var store = ProfileStore.shared
-    @State private var chart: NatalChart?
-    @State private var report: TransitReport?
+    @SavedPractice("astrology.chart") private var chart: NatalChart? = nil
+    @SavedPractice("astrology.report") private var report: TransitReport? = nil
     @State private var error: String?
+    @SavedPractice("astrology.profile") private var computedProfile: BirthProfile? = nil
     @State private var editing = false
     @State private var wheelIn = false
 
@@ -23,7 +24,6 @@ struct AstrologyScreen: View {
             }
 
             if let chart {
-                ExplainReading(result: chart)
                 Panel {
                     ChartWheel(chart: chart, appeared: wheelIn)
                         .aspectRatio(1, contentMode: .fit)
@@ -99,12 +99,13 @@ struct AstrologyScreen: View {
                         .foregroundStyle(Palette.inkSoft)
                         .fixedSize(horizontal: false, vertical: true)
                 }
+                ExplainReading(result: chart)
             }
         }
         .sheet(isPresented: $editing) {
             BirthForm(profile: $store.profile) { compute() }
         }
-        .onAppear(perform: compute)
+        .onAppear { if chart == nil || computedProfile != store.profile { compute() } }
     }
 
     private func angle(_ label: String, _ degrees: Double) -> some View {
@@ -176,6 +177,7 @@ struct AstrologyScreen: View {
             chart = try Engines.shared.evaluate("astrology.chart", input, as: NatalChart.self)
             report = try? Engines.shared.evaluate("astrology.transits", ["birth": input], as: TransitReport.self)
             error = nil
+            computedProfile = store.profile
         } catch {
             self.error = l("This reading could not be computed. Please try again.")
         }

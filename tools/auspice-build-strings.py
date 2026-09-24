@@ -116,3 +116,9 @@ for relative in ["native/ios/Auspice/Resources", "native/android/app/src/main/as
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_text(json.dumps(CONTENT, ensure_ascii=False, separators=(",", ":")) + "\n")
 print(f"{len(CONTENT)} reading phrases × {len(LANGS)} languages bundled into both apps")
+
+# The PWA uses the same translations for deterministic reading terms.
+web = REPO / 'src/generated/reading-content.json'
+web.parent.mkdir(exist_ok=True)
+web.write_text(json.dumps({source: {code: row[code] for code in ['en', 'zh-Hans']}
+    for source, row in {**GLOSSARY, **CONTENT}.items()}, ensure_ascii=False, separators=(',', ':')) + '\n')

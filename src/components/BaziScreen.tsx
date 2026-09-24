@@ -1,3 +1,4 @@
+import { usePracticeState } from '../lib/practice-state'
 import { useMemo, useState } from 'react'
 import { Hexagon } from 'lucide-react'
 import { computeBazi, ELEMENT_EN, TEN_GOD_EN, type BaziChart, type Pillar } from '../engines/bazi/bazi'
@@ -35,9 +36,9 @@ function branchElement(branch: string): string {
 export function BaziScreen({ copy, language }: BaziScreenProps) {
   const [profile, setProfile] = useState<BirthProfile | null>(() => loadProfile())
   const [editing, setEditing] = useState(profile === null)
-  const [question, setQuestion] = useState('')
-  const [asked, setAsked] = useState<string>('')
-  const [round, setRound] = useState(0)
+  const [question, setQuestion] = usePracticeState('bazi.question', '')
+  const [asked, setAsked] = usePracticeState<string>('bazi.asked', '')
+  const [round, setRound] = usePracticeState('bazi.round', 0)
   const en = language === 'en'
   const t = copy.bazi
 

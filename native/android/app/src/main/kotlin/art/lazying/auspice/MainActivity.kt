@@ -68,6 +68,7 @@ fun AuspiceApp() {
         Engines.start(context)
         Profiles.load(context)
         Conversations.load(context)
+        LegacyImport.run(context)
         loaded = true
     }
 

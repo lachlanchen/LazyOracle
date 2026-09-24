@@ -120,10 +120,24 @@ export async function streamMessagesFull(settings: ModelSettings, messages: Chat
   if (!settings.endpointEnabled || !settings.endpointUrl) throw new ModelUnavailable('endpoint disabled')
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
   if (settings.endpointToken) headers.Authorization = `Bearer ${settings.endpointToken}`
+  const controller = new AbortController()
+  let reader: ReadableStreamDefaultReader<Uint8Array> | undefined
+  const stop = () => {
+    controller.abort(options.signal?.reason)
+    void reader?.cancel().catch(() => {})
+  }
+  options.signal?.addEventListener('abort', stop, { once: true })
+  if (options.signal?.aborted) stop()
+  const deadline = setTimeout(() => {
+    controller.abort(new ModelUnavailable('reading timed out'))
+    void reader?.cancel().catch(() => {})
+  }, 45_000)
+  try {
+  controller.signal.throwIfAborted()
   const response = await fetchImpl(chatUrl(settings.endpointUrl), {
     method: 'POST',
     headers,
-    signal: options.signal,
+    signal: controller.signal,
     body: JSON.stringify({
       model: settings.model,
       stream: true,
@@ -135,7 +149,7 @@ export async function streamMessagesFull(settings: ModelSettings, messages: Chat
     }),
   })
   if (!response.ok || !response.body) throw new ModelUnavailable(`endpoint answered ${response.status}`)
-  const reader = response.body.getReader()
+  reader = response.body.getReader()
   const decoder = new TextDecoder()
   const calls: { id: string; name: string; arguments: string }[] = []
   let buffer = ''
@@ -143,7 +157,8 @@ export async function streamMessagesFull(settings: ModelSettings, messages: Chat
   let thinking = false
   for (;;) {
     const { value, done } = await reader.read()
-    if (done) break
+    controller.signal.throwIfAborted()
+    if (done) throw new ModelUnavailable('reading stream interrupted')
     buffer += decoder.decode(value, { stream: true })
     const lines = buffer.split('\n')
     buffer = lines.pop() ?? ''
@@ -151,11 +166,17 @@ export async function streamMessagesFull(settings: ModelSettings, messages: Chat
       const trimmed = line.trim()
       if (!trimmed.startsWith('data:')) continue
       const payload = trimmed.slice(5).trim()
-      if (payload === '[DONE]') continue
-      try {
-        const chunk = JSON.parse(payload) as {
+      if (payload === '[DONE]') {
+        const result = { text: stripThinking(text), toolCalls: calls.filter(call => call.name) }
+        if (!result.text && !result.toolCalls.length) throw new ModelUnavailable('empty reading')
+        return result
+      }
+      let chunk: {
+          error?: unknown
           choices?: { delta?: { content?: string; tool_calls?: { index?: number; id?: string; function?: { name?: string; arguments?: string } }[] } }[]
-        }
+      }
+      try { chunk = JSON.parse(payload) } catch { continue }
+      if (chunk.error) throw new ModelUnavailable('reading service error')
         // Tool calls stream in pieces, one index per call.
         for (const part of chunk.choices?.[0]?.delta?.tool_calls ?? []) {
           const at = part.index ?? calls.length
@@ -180,12 +201,14 @@ export async function streamMessagesFull(settings: ModelSettings, messages: Chat
         if (!visible) continue
         text += visible
         options.onToken?.(visible)
-      } catch {
-        // Ignore keep-alive or malformed lines.
-      }
+
     }
   }
-  return { text: stripThinking(text), toolCalls: calls.filter((call) => call.name) }
+  } finally {
+    clearTimeout(deadline)
+    options.signal?.removeEventListener('abort', stop)
+    void reader?.cancel().catch(() => {})
+  }
 }
 
 /** The text of a conversation, for callers that do not use tools. */

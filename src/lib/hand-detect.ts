@@ -1,7 +1,9 @@
+import { ensureVisionSupport } from './vision-support'
 import type { Point } from '../engines/palm/palm'
 
 /** Runs MediaPipe Hand Landmarker on an image element, entirely on the device. */
 export async function detectHand(image: HTMLImageElement): Promise<Point[] | null> {
+  ensureVisionSupport()
   const vision = await import('@mediapipe/tasks-vision')
   const base = `${import.meta.env.BASE_URL}mediapipe`
   const fileset = await vision.FilesetResolver.forVisionTasks(base)

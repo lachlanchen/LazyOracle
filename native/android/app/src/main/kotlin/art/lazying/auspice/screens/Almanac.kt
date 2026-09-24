@@ -30,8 +30,9 @@ import kotlinx.serialization.json.buildJsonObject
 
 @Composable
 fun AlmanacScreen(navController: NavController) {
-    var date by remember { mutableStateOf(LocalDate.now()) }
-    var activity by remember { mutableStateOf<String?>(null) }
+    var dateText by rememberPracticeState("almanac.date", LocalDate.now().toString())
+    val date = LocalDate.parse(dateText)
+    var activity by rememberPracticeState<String?>("almanac.activity", null)
     var day by remember { mutableStateOf<AlmanacDay?>(null) }
     var activities by remember { mutableStateOf<List<AlmanacActivity>>(emptyList()) }
     var error by remember { mutableStateOf<String?>(null) }
@@ -62,7 +63,7 @@ fun AlmanacScreen(navController: NavController) {
             Icon(
                 Icons.Default.ChevronLeft, "Previous day", tint = Palette.inkSoft,
                 modifier = Modifier.size(44.dp).clip(CircleShape)
-                    .clickable { date = date.minusDays(1) }.padding(10.dp)
+                    .clickable { dateText = date.minusDays(1).toString() }.padding(10.dp)
             )
             Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
@@ -74,7 +75,7 @@ fun AlmanacScreen(navController: NavController) {
             Icon(
                 Icons.Default.ChevronRight, "Next day", tint = Palette.inkSoft,
                 modifier = Modifier.size(44.dp).clip(CircleShape)
-                    .clickable { date = date.plusDays(1) }.padding(10.dp)
+                    .clickable { dateText = date.plusDays(1).toString() }.padding(10.dp)
             )
         }
 

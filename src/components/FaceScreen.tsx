@@ -1,3 +1,4 @@
+import { usePracticeState } from '../lib/practice-state'
 import { useRef, useState } from 'react'
 import { Camera, Image as ImageIcon, ScanFace } from 'lucide-react'
 import { COURT_TEXT, ELEMENT_TEXT, FACE_PALACE_TEXT, faceFeatures, type FaceFeatures, type Point } from '../engines/face/face'
@@ -12,7 +13,7 @@ interface FaceScreenProps {
   language: ReadingLanguage
 }
 
-type Phase = 'idle' | 'analysing' | 'found' | 'noface'
+type Phase = 'failed' | 'idle' | 'analysing' | 'found' | 'noface'
 
 /** The outline points drawn over the photo, enough to show the reading grid. */
 const GUIDES = [10, 152, 234, 454, 172, 397, 127, 356, 33, 133, 362, 263, 105, 334, 107, 336, 46, 276, 1, 2, 129, 358, 61, 291]
@@ -21,9 +22,9 @@ export function FaceScreen({ copy, language }: FaceScreenProps) {
   const [phase, setPhase] = useState<Phase>('idle')
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [landmarks, setLandmarks] = useState<Point[] | null>(null)
-  const [features, setFeatures] = useState<FaceFeatures | null>(null)
-  const [question, setQuestion] = useState('')
-  const [round, setRound] = useState(0)
+  const [features, setFeatures] = usePracticeState<FaceFeatures | null>('face.features', null)
+  const [question, setQuestion] = usePracticeState('face.question', '')
+  const [round, setRound] = usePracticeState('face.round', 0)
   const cameraRef = useRef<HTMLInputElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const t = copy.face
@@ -47,7 +48,7 @@ export function FaceScreen({ copy, language }: FaceScreenProps) {
     } catch (error) {
       console.warn('face detection failed', error)
       setLandmarks(null)
-      setPhase('noface')
+      setPhase('failed')
     }
   }
 
@@ -92,6 +93,7 @@ export function FaceScreen({ copy, language }: FaceScreenProps) {
             {phase === 'analysing' && <p className="palm-status">{t.analysing}</p>}
           </div>
         )}
+        {phase === 'failed' && <p className="status failed">{t.processingFailed}</p>}
         {phase === 'noface' && <p className="status failed">{t.noFace}</p>}
       </section>
 

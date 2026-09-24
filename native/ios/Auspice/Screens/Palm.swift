@@ -3,10 +3,10 @@ import SwiftUI
 struct PalmScreen: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var camera = LandmarkSession(kind: .hand)
-    @State private var lines = LineTraits()
-    @State private var features: PalmFeatures?
+    @SavedPractice("palm.lines") private var lines = LineTraits()
+    @SavedPractice("palm.features") private var features: PalmFeatures? = nil
     @State private var error: String?
-    @State private var captured = false
+    @SavedPractice("palm.captured") private var captured = false
 
     private let fingerNames = [
         "jupiter": "Index finger", "saturn": "Middle finger",
@@ -68,7 +68,6 @@ struct PalmScreen: View {
             }
 
             if let features {
-                ExplainReading(result: features)
                 Panel(title: t("palm.hand")) {
                     measure(l("Shape"), shapeWord(features.shape))
                     measure(l("Palm width to length"), String(format: "%.2f", features.palmRatio))
@@ -133,9 +132,10 @@ struct PalmScreen: View {
                         .foregroundStyle(Palette.inkSoft)
                         .fixedSize(horizontal: false, vertical: true)
                 }
+                ExplainReading(result: features)
             }
         }
-        .onAppear { camera.start() }
+        .onAppear { Router.shared.palm = features; camera.start() }
         .onDisappear { camera.stop() }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { camera.start() } else { camera.stop() }

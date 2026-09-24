@@ -133,5 +133,8 @@ in all twelve, retaining the exact measured height ratios of 1.11–1.12. This i
 one fixture, not population-wide validation. The production Swift model and
 JavaScriptCore bridge pass old-snapshot decoding, reclassification and encoding
 round trips. Live Chinese, English, explicit-English and practical-follow-up
-requests were reviewed against a synthetic saved mixed-type fixture. Physical
+requests were reviewed against a synthetic saved mixed-type fixture. All five
+forms were also checked through live Tianji responses in English and Chinese.
+Ten Android unit tests pass, including optional old-model decoding and new
+classification persistence. Physical
 iPhone SE 3 repeatability remains pending.

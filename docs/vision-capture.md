@@ -136,5 +136,8 @@ round trips. Live Chinese, English, explicit-English and practical-follow-up
 requests were reviewed against a synthetic saved mixed-type fixture. All five
 forms were also checked through live Tianji responses in English and Chinese.
 Ten Android unit tests pass, including optional old-model decoding and new
-classification persistence. Physical
+classification persistence. Native iOS screens were inspected in Chinese and
+English; a clean-build English UI test also passed with the real relay. Android
+passed saved-scan migration, a live Tianji explanation and force-stop/reopen on
+the ARM64-translated emulator; its crash buffer was empty. Physical
 iPhone SE 3 repeatability remains pending.

@@ -34,9 +34,10 @@ These supersede the earlier product split below.
 
 ## Native-main checkpoint — 2026-09-24
 
-LazyOracle native iOS17 is in internal and public TestFlight; Android16 is
-available to internal testers. This native update stabilizes face/palm
-measurements with a checked multi-frame capture; see [the method and tests](vision-capture.md).
+LazyOracle native iOS18 is in internal and public TestFlight; Android17 is
+available to internal testers. Face readings now resolve one consistent primary
+form and offer focused symbolic interpretations, retaining the checked multi-frame
+face/palm measurements; see [the method and tests](vision-capture.md).
 Earlier PWA fixes remain live on both hosts. The classic
 Auspice swap is available to internal testers as iOS12/Android7, preserving its native data and
 both app IDs. See [the current handoff](handoffs/2026-09-24-native-main.md).

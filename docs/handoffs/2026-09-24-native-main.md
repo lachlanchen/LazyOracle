@@ -9,15 +9,16 @@ remain native and web, rather than two separate copies of business logic.
 
 ## Native LazyOracle release
 
-Native measurement update: iOS source `19e3258`, Android source `5098ecc`.
+Native face-reading update: shared iOS/Android source `58e44ae`.
+Earlier measurement update: iOS source `19e3258`, Android source `5098ecc`.
 The earlier native-main release and deployed PWA use `95dec209`.
 
-- iOS **1.0.0 (17)**: Apple validation passed; internal and public TestFlight
+- iOS **1.0.0 (18)**: Apple validation passed; internal and public TestFlight
   `IN_BETA_TESTING`. Public link: https://testflight.apple.com/join/JZJM3PFb.
-- Android **1.0.0 (16)**: signed bundle published and verified **Available to
+- Android **1.0.0 (17)**: signed bundle published and verified **Available to
   internal testers** at https://play.google.com/apps/internaltest/4701677916092886102.
 - The PWA fixes are deployed to `oracle.lazying.art` and `oracle-fast.lazying.art`.
-- Current receipt: [native-vision-2026-09-24.json](../../store/artifacts/native-vision-2026-09-24.json).
+- Current receipt: [native-face-reading-2026-09-24.json](../../store/artifacts/native-face-reading-2026-09-24.json).
 - Earlier receipt and rollback: [native-main-2026-09-24.json](../../store/artifacts/native-main-2026-09-24.json).
 
 Each practice retains its inputs, exact deterministic result, follow-up
@@ -42,8 +43,11 @@ root cause; the bounded recovery behavior prevents an endless loading state.
 
 The owner clarified that the measurements and face/hand type were changing.
 Native LazyOracle now combines eight steady frames, corrects image aspect
-ratio and roll, checks framing/pose/freshness and reports mixed categories
-near traditional cutoffs. Editing manual palm-line answers preserves the
+ratio and roll, checks framing/pose/freshness and resolves one primary face
+silhouette with a matching symbolic theme. Palm categories retain boundary
+uncertainty. Saved version-2 face captures update their classification without
+changing measured ratios. The revised facts start a fresh contextual explanation;
+older stored replies are not deleted. Editing manual palm-line answers preserves the
 measured geometry. Unanswered lines remain unknown; skeletal joints are no
 longer used as evidence of palm skin/mount fullness. The shared implementation
 and validation are documented in [vision-capture.md](../vision-capture.md).
@@ -67,8 +71,8 @@ currently offers English and Simplified Chinese.
 
 ## Validation and limits
 
-- 129 shared tests, lint, type checks and production web build for the vision update.
-- Nine Android unit tests: six conversation and three capture-buffer tests.
+- 138 shared tests, lint, type checks and production web build for the face update.
+- Ten Android unit tests: six conversation, three capture-buffer and one face-persistence test.
   The earlier six Swift chat harness cases remain recorded.
 - Current native iOS fresh-frame/unknown-line UI checks pass in English and
   Simplified Chinese. Earlier five native iOS UI tests: eleven-language navigation, home chat, explanations,
@@ -80,6 +84,10 @@ currently offers English and Simplified Chinese.
   24 current real MediaPipe simulator lifecycle cycles, 288 perturbed frames.
 - Six Android fallback navigation/resume visits plus four ARM model
   preview/front-back/resume visits pass without crashes after the fix.
+- Face update: saved-result/response evidence on iOS in Chinese and English;
+  clean English UI test passed. Android migration, live response and force-stop/
+  reopen passed with an empty crash buffer. Twelve captured real-model portrait
+  bursts resolve one form; all five forms were reviewed through live EN/zh narration.
 - Physical iPhone SE 3 camera/orientation/background/memory testing is still
   pending. Simulator/browser checks do not establish physical-device stability.
 
@@ -97,8 +105,8 @@ Do not overwrite previous signed packages or private migration backups.
 LazyOracle's separate formal Apple build12 remains `WAITING_FOR_REVIEW`, and
 Play production11 remains in **Changes in review**, verified after native16/14
 publication, and again after the vision update. Auspice has no formal release submitted. Test releases do not replace
-these production submissions. Apple accepted LazyOracle17 for public beta testing. Native iOS16/Android14
-remain available as the immediately previous signed rollback packages.
+these production submissions. Apple approved LazyOracle18 for public beta testing. Native iOS17/Android16
+remain retained as the immediately previous signed rollback packages.
 
 The reverse Auspice swap is implemented in `d746040`, using the maintained PWA
 source and a read-only native archive import. Classic iOS **0.1.0 (12)** is `VALID` and `IN_BETA_TESTING` in the existing

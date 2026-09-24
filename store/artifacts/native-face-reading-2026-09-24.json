@@ -1,0 +1,70 @@
+{
+  "verified_at": "2026-09-24T07:24:15.341401+00:00",
+  "app": "LazyOracle",
+  "implementation": "native SwiftUI / Compose",
+  "source_commit": "58e44aea3c69f6e99e9986784643d3663b35a988",
+  "changes": [
+    "One deterministic primary five-form silhouette shared by result card and Tianji",
+    "Version-2 saved face scans reclassified without changing measured ratios",
+    "Localized short symbolic reflections in eleven interface languages",
+    "One shared follow-up prompt with focused element imagery and optional actions"
+  ],
+  "ios": {
+    "version": "1.0.0",
+    "build": "18",
+    "bundle_id": "art.lazying.lazyoracle",
+    "bytes": 28318041,
+    "sha256": "79d526c9f9622dc21d6002643e40971ea7374aee6ff075493cdaed28a96855ec",
+    "final_engine_and_prompt": true,
+    "delivery": "ce476a5e-8da0-40b9-bbfb-93f77cf2ebfb",
+    "artifact": "Mac: ~/Projects/Auspice/release/export-lazyoracle-1.0.0-18/Auspice.ipa",
+    "processing": "VALID",
+    "internal_testflight": "IN_BETA_TESTING",
+    "public_testflight": "IN_BETA_TESTING",
+    "beta_review": "APPROVED",
+    "groups_verified": {
+      "internal": {
+        "id": "b45d710d-856f-46bd-9999-684372ca04d0",
+        "contains_build": true
+      },
+      "public": {
+        "id": "b75f41b9-12e8-4e6f-89fc-4c42e7c24d20",
+        "contains_build": true
+      }
+    },
+    "public_link": "https://testflight.apple.com/join/JZJM3PFb",
+    "previous_signed_build": 17
+  },
+  "android": {
+    "versionCode": 17,
+    "bytes": 43566376,
+    "sha256": "a3920ff6680230c5d934104f14a45a715f8e3407808f8aedcf866582742b6980",
+    "final_engine_and_prompt": true,
+    "artifact": "native/android/app/build/outputs/bundle/lazyoracleRelease/app-lazyoracle-release.aab",
+    "internal_testing": "Available to internal testers",
+    "release_name": "17 (1.0.0) clear face readings",
+    "internal_link": "https://play.google.com/apps/internaltest/4701677916092886102",
+    "previous_signed_build": 16
+  },
+  "validation": {
+    "shared_tests": 138,
+    "android_unit_tests": 10,
+    "lint_typecheck_web_build": "passed",
+    "swift_production_bridge": "Saved mixed-face decoding, classification migration and persistence round trip; existing tarot/other-practice contracts passed",
+    "camera_replay": "All twelve recorded real-model portrait bursts resolve Water; measured ratios unchanged",
+    "live_tianji": "All five forms in English and Chinese, explicit language request and practical follow-up reviewed",
+    "ios_ui": "Chinese result/response evidence inspected; clean-build English saved-result and live-response UI test passed",
+    "android_ui": "ARM64-translated emulator: saved-scan migration, live explanation, force-stop/reopen; empty crash buffer",
+    "release_contents": "Signed iOS/Android packages contain exact tested engine bundle and final prompt"
+  },
+  "production_reviews_preserved": {
+    "apple": "1.0.0 build12 WAITING_FOR_REVIEW; API verified",
+    "google_play": "1.0.0 (11) Changes in review; console verified"
+  },
+  "scope": "Native LazyOracle. Classic Auspice iOS12/Android7 and both live PWA hosts unchanged.",
+  "limits": [
+    "Physical iPhone SE 3 and physical Android repeatability testing remains pending",
+    "Template distances are an app approximation of traditional form vocabulary, not validated personal or clinical inference",
+    "A migrated classification gets a fresh contextual explanation; older stored replies are not deleted"
+  ]
+}

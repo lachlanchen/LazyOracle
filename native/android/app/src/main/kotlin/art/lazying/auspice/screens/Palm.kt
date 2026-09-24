@@ -45,20 +45,21 @@ fun PalmScreen(navController: NavController) {
     }
     val ask = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted = it }
     LaunchedEffect(Unit) { if (!granted) ask.launch(Manifest.permission.CAMERA) }
-    DisposableEffect(Unit) { onDispose { session.stop(context) } }
+    DisposableEffect(Unit) { onDispose { session.stop() } }
 
     var lines by rememberPracticeState("palm.lines", LineTraits())
-    var features by rememberPracticeState<PalmFeatures?>("palm.features", null)
+    var features by rememberPracticeState<PalmFeatures?>("palm.capture", null)
     var error by remember { mutableStateOf<String?>(null) }
     var reads by remember { mutableIntStateOf(0) }
+    LaunchedEffect(features) { Router.palm = features }
 
     LaunchedEffect(reads) {
         if (reads == 0) return@LaunchedEffect
-        val points = session.landmarksJson()
-        if (points.size < 21) { error = l("No hand is in view."); return@LaunchedEffect }
+        val frames = session.captureFrames()
+        if (frames.isEmpty()) { error = t("vision.hold"); return@LaunchedEffect }
         runCatching {
-            Engines.evaluateAs<PalmFeatures>("palm.features", buildJsonObject {
-                put("landmarks", points)
+            Engines.evaluateAs<PalmFeatures>("palm.capture", buildJsonObject {
+                put("frames", frames)
                 put("lines", buildJsonObject {
                     put("heart", JsonPrimitive(lines.heart))
                     put("head", JsonPrimitive(lines.head))
@@ -66,7 +67,7 @@ fun PalmScreen(navController: NavController) {
                     put("fate", JsonPrimitive(lines.fate))
                 })
             })
-        }.onSuccess { features = it; Router.palm = it; error = null }.onFailure { error = l("This reading could not be computed. Please try again.") }
+        }.onSuccess { features = it; Router.palm = it; error = null }.onFailure { error = visionError(it) }
     }
 
     ScreenScaffold(
@@ -90,7 +91,7 @@ fun PalmScreen(navController: NavController) {
             ) {
                 if (granted) {
                     CameraPreview(session, owner, Modifier.fillMaxSize())
-                    LandmarkOverlay(session.overlay, joined = true, modifier = Modifier.fillMaxSize())
+                    LandmarkOverlay(session.overlay, joined = true, modifier = Modifier.fillMaxSize(), imageAspect = session.imageAspect)
                     if (!session.detecting) {
                         Text(
                             t("palm.hint"),
@@ -110,10 +111,12 @@ fun PalmScreen(navController: NavController) {
                 }
             }
             session.message?.let { Text(it, style = Type.sans(13), color = Palette.inkMute) }
+            Text(t(if(session.ready) "vision.ready" else "vision.hold"), style = Type.sans(13), color = Palette.inkMute)
             PrimaryButton(
                 if (features == null) t("palm.read") else t("palm.readAgain"),
-                enabled = session.detecting
+                enabled = session.ready
             ) { reads++ }
+            Text(t("face.privacy"), style = Type.sans(12), color = Palette.inkMute)
         }
 
         Panel(title = t("palm.lines")) {
@@ -121,25 +124,32 @@ fun PalmScreen(navController: NavController) {
                 t("palm.linesNote"),
                 style = Type.serif(16), color = Palette.inkSoft
             )
-            LineChoice(l("Heart line ends"), listOf("index" to "Under the index", "middle" to "Under the middle", "between" to "Between them"), lines.heart) {
-                lines = lines.copy(heart = it); if (features != null) reads++
+            LineChoice(l("Heart line ends"), listOf("unsure" to "Not sure", "index" to "Under the index", "middle" to "Under the middle", "between" to "Between them"), lines.heart) {
+                lines = lines.copy(heart = it); features = features?.copy(lines = lines); Router.palm = features
             }
-            LineChoice(l("Head line"), listOf("straight" to "Straight", "curved" to "Curved"), lines.head) {
-                lines = lines.copy(head = it); if (features != null) reads++
+            LineChoice(l("Head line"), listOf("unsure" to "Not sure", "straight" to "Straight", "curved" to "Curved"), lines.head) {
+                lines = lines.copy(head = it); features = features?.copy(lines = lines); Router.palm = features
             }
-            LineChoice(l("Life line"), listOf("wide" to "Sweeps wide", "close" to "Hugs the thumb"), lines.life) {
-                lines = lines.copy(life = it); if (features != null) reads++
+            LineChoice(l("Life line"), listOf("unsure" to "Not sure", "wide" to "Sweeps wide", "close" to "Hugs the thumb"), lines.life) {
+                lines = lines.copy(life = it); features = features?.copy(lines = lines); Router.palm = features
             }
             LineChoice(l("Fate line"), listOf("present" to "Present", "absent" to "Absent", "unsure" to "Not sure"), lines.fate) {
-                lines = lines.copy(fate = it); if (features != null) reads++
+                lines = lines.copy(fate = it); features = features?.copy(lines = lines); Router.palm = features
             }
         }
 
         error?.let { Panel(title = t("common.notComputed")) { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
 
         features?.let { f ->
+            Panel(title = t("vision.measurement")) {
+                Text(t(if(f.measurement == null) "vision.legacy" else "vision.measured"), style=Type.sans(14), color=Palette.inkSoft)
+                f.measurement?.takeIf { it.typeCandidates.size>1 }?.let { m ->
+                    Text(m.typeCandidates.joinToString(" / ") { l(it.replaceFirstChar { c->c.uppercase() }) },style=Type.serif(17),color=Palette.gold)
+                    Text(t("vision.boundary"),style=Type.sans(13),color=Palette.inkMute)
+                }
+            }
             Panel(title = t("palm.hand")) {
-                Measure(l("Shape"), l(f.shape.replaceFirstChar { it.uppercase() }))
+                Measure(l("Shape"), if(f.shape=="mixed") t("vision.mixed") else l(f.shape.replaceFirstChar { it.uppercase() }))
                 Measure(l("Palm width to length"), String.format("%.2f", f.palmRatio))
                 Measure(l("Fingers to palm"), String.format("%.2f", f.fingerRatio))
                 Measure(l("Index to ring"), String.format("%.2f", f.indexToRing))
@@ -151,44 +161,14 @@ fun PalmScreen(navController: NavController) {
                     Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                         Text(l(FINGER_NAMES[finger.finger] ?: finger.finger), style = Type.serif(16), color = Palette.ink)
                         Spacer(Modifier.weight(1f))
-                        Text(l(finger.length), style = Type.sans(13, FontWeight.SemiBold), color = Palette.gold)
+                        Text(visionState(finger.length), style = Type.sans(13, FontWeight.SemiBold), color = Palette.gold)
                         Spacer(Modifier.width(8.dp))
                         Text(String.format("%.2f", finger.ratioToSaturn), style = Type.sans(13), color = Palette.inkMute)
                     }
                 }
             }
-            Panel(title = t("palm.mounts")) {
-                f.palaces.forEach { palace ->
-                    Row(
-                        Modifier.fillMaxWidth().padding(vertical = 3.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Text(l(palace.palace), style = Type.serif(17),
-                            color = if (palace.state == "full") Palette.gold else Palette.ink,
-                            modifier = Modifier.width(74.dp)
-                        )
-                        Box(Modifier.weight(1f).height(7.dp).clip(CircleShape).background(Color(0x0FFFFFFF))) {
-                            Box(
-                                Modifier
-                                    .fillMaxHeight()
-                                    .fillMaxWidth(((palace.prominence + 0.1) / 0.2).coerceIn(0.02, 1.0).toFloat())
-                                    .clip(CircleShape)
-                                    .background(if (palace.state == "full") Palette.gold else Palette.inkMute)
-                            )
-                        }
-                        Text(l(palace.state), style = Type.sans(12), color = Palette.inkMute, modifier = Modifier.width(44.dp))
-                    }
-                }
-                if (f.strongPalaces.isNotEmpty()) {
-                    Text(
-                        lf("Standing out: {0}", f.strongPalaces.joinToString(" · ") { l(it) }),
-                        style = Type.serif(16), color = Palette.gold
-                    )
-                }
-            }
             Panel(title = t("common.method")) {
-                Text(l("Proportions follow classical palmistry: the palm is square when its width reaches 0.86 of its length, the fingers long at 0.78 of the palm, and each finger is measured against the middle one. The mounts come from how far each stands out of the palm plane, which the landmarker reports as depth."),
+                Text(t("vision.palmMethod"),
                     style = Type.serif(16), color = Palette.inkSoft
                 )
             }

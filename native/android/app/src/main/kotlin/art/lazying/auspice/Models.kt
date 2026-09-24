@@ -289,9 +289,9 @@ data class PalaceReading(val palace: String = "", val prominence: Double = 0.0, 
 
 @Serializable
 data class LineTraits(
-    val heart: String = "between",
-    val head: String = "curved",
-    val life: String = "wide",
+    val heart: String = "unsure",
+    val head: String = "unsure",
+    val life: String = "unsure",
     val fate: String = "unsure"
 )
 
@@ -310,7 +310,8 @@ data class PalmFeatures(
     val fingers: List<FingerTrait> = emptyList(),
     val palaces: List<PalaceReading> = emptyList(),
     val strongPalaces: List<String> = emptyList(),
-    val lines: LineTraits = LineTraits()
+    val lines: LineTraits = LineTraits(),
+    val measurement: VisionMeasurement? = null
 )
 
 @Serializable
@@ -330,5 +331,6 @@ data class FaceFeatures(
     val foreheadRatio: Double = 0.0,
     val symmetry: Double = 0.0,
     val palaces: List<FacePalaceReading> = emptyList(),
-    val strongPalaces: List<String> = emptyList()
+    val strongPalaces: List<String> = emptyList(),
+    val measurement: VisionMeasurement? = null
 )

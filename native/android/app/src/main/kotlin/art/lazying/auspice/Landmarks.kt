@@ -17,9 +17,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.composed
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -52,145 +50,131 @@ import java.util.concurrent.Executors
  * photograph.
  */
 class LandmarkSession(private val hands: Boolean) {
-    /** One state object for the whole set: 478 face points as 478 separate
-     *  state writes would recompose the overlay four hundred times a frame. */
-    var overlay by mutableStateOf<List<Offset>>(emptyList())
-        private set
-
-    /** The front camera reads your own hand or face; the back one reads the
-     *  person sitting opposite, which is how a reading is actually given. */
-    var front by mutableStateOf(true)
-        private set
-    var canFlip by mutableStateOf(false)
-        private set
-    var points: List<List<Double>> = emptyList()
-        private set
-    var detecting by mutableStateOf(false)
-        private set
-    var message by mutableStateOf<String?>(null)
-
+    var overlay by mutableStateOf<List<Offset>>(emptyList()); private set
+    var front by mutableStateOf(true); private set
+    var canFlip by mutableStateOf(false); private set
+    var detecting by mutableStateOf(false); private set
+    var ready by mutableStateOf(false); private set
+    var imageAspect by mutableStateOf(0.75f); private set
+    var message by mutableStateOf<String?>(null); private set
+    private val window = CaptureWindow()
+    private val main = android.os.Handler(android.os.Looper.getMainLooper())
     private val executor = Executors.newSingleThreadExecutor()
     private var handLandmarker: HandLandmarker? = null
     private var faceLandmarker: FaceLandmarker? = null
+    private var surface: Preview.SurfaceProvider? = null
+    private var provider: ProcessCameraProvider? = null
+    private var uses: List<androidx.camera.core.UseCase> = emptyList()
+    private var lastTimestamp = -1L
+    @Volatile private var generation = 0
+    @Volatile private var closed = false
+    @Volatile private var paused = false
 
-    fun landmarksJson(): JsonArray = JsonArray(
-        points.map { point ->
-            buildJsonObject {
-                put("x", JsonPrimitive(point[0]))
-                put("y", JsonPrimitive(point[1]))
-                put("z", JsonPrimitive(point[2]))
-            }
-        }
-    )
+    fun captureFrames(): JsonArray = window.snapshot()
+    fun pause() { paused=true; clear() }
+    fun resume() { paused=false; clear() }
 
     fun start(context: Context, owner: LifecycleOwner, previewView: PreviewView) {
-        try {
-            val base = BaseOptions.builder()
-                .setModelAssetPath(if (hands) "hand_landmarker.task" else "face_landmarker.task")
-                .build()
-            if (hands) {
-                handLandmarker = HandLandmarker.createFromOptions(
-                    context,
-                    HandLandmarker.HandLandmarkerOptions.builder()
-                        .setBaseOptions(base)
-                        .setRunningMode(RunningMode.LIVE_STREAM)
-                        .setNumHands(1)
-                        .setResultListener { result, _ ->
-                            val hand = result.landmarks().firstOrNull()
-                            if (hand == null || hand.size < 21) clear()
-                            else publish(hand.map { listOf(it.x().toDouble(), it.y().toDouble(), it.z().toDouble()) })
-                        }
-                        .setErrorListener { message = t("camera.retry") }
-                        .build()
-                )
-            } else {
-                faceLandmarker = FaceLandmarker.createFromOptions(
-                    context,
-                    FaceLandmarker.FaceLandmarkerOptions.builder()
-                        .setBaseOptions(base)
-                        .setRunningMode(RunningMode.LIVE_STREAM)
-                        .setNumFaces(1)
-                        .setResultListener { result, _ ->
-                            val face = result.faceLandmarks().firstOrNull()
-                            if (face == null || face.size < 400) clear()
-                            else publish(face.map { listOf(it.x().toDouble(), it.y().toDouble(), it.z().toDouble()) })
-                        }
-                        .setErrorListener { message = t("camera.retry") }
-                        .build()
-                )
-            }
-        } catch (error: Throwable) {
-            message = t("camera.retry")
-            return
-        }
-
         surface = previewView.surfaceProvider
-        bind(context, owner)
+        val token = generation
+        // Model creation, video inference and teardown share one serial worker.
+        executor.execute {
+            try {
+                val base=BaseOptions.builder().setModelAssetPath(if(hands) "hand_landmarker.task" else "face_landmarker.task").build()
+                if(hands) handLandmarker=HandLandmarker.createFromOptions(context,
+                    HandLandmarker.HandLandmarkerOptions.builder().setBaseOptions(base).setRunningMode(RunningMode.VIDEO)
+                        .setNumHands(1).setMinHandDetectionConfidence(0.7f).setMinHandPresenceConfidence(0.7f).setMinTrackingConfidence(0.7f).build())
+                else faceLandmarker=FaceLandmarker.createFromOptions(context,
+                    FaceLandmarker.FaceLandmarkerOptions.builder().setBaseOptions(base).setRunningMode(RunningMode.VIDEO)
+                        .setNumFaces(1).setMinFaceDetectionConfidence(0.7f).setMinFacePresenceConfidence(0.7f).setMinTrackingConfidence(0.7f).build())
+                main.post { if(!closed && token==generation) bind(context,owner) }
+            } catch (_: Exception) { main.post { if(!closed) { clear();message=t("camera.retry") } } }
+        }
     }
-
-    private var surface: Preview.SurfaceProvider? = null
 
     private fun bind(context: Context, owner: LifecycleOwner) {
-        val providerFuture = ProcessCameraProvider.getInstance(context)
-        providerFuture.addListener({
-            val provider = providerFuture.get()
-            canFlip = provider.hasCamera(CameraSelector.DEFAULT_FRONT_CAMERA) &&
-                provider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA)
-            val preview = Preview.Builder().build().also { it.surfaceProvider = surface }
-            val analysis = ImageAnalysis.Builder()
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-                .build()
-            analysis.setAnalyzer(executor) { proxy -> analyse(proxy) }
-            val lens = if (front) CameraSelector.DEFAULT_FRONT_CAMERA else CameraSelector.DEFAULT_BACK_CAMERA
+        val token=generation
+        val future=ProcessCameraProvider.getInstance(context)
+        future.addListener({
+            if(closed || token!=generation) return@addListener
             runCatching {
-                provider.unbindAll()
-                provider.bindToLifecycle(owner, lens, preview, analysis)
-            }.onFailure { message = t("camera.unavailable") }
-        }, ContextCompat.getMainExecutor(context))
+                val p=future.get(); provider=p
+                canFlip=p.hasCamera(CameraSelector.DEFAULT_FRONT_CAMERA) && p.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA)
+                val preview=Preview.Builder().setTargetAspectRatio(androidx.camera.core.AspectRatio.RATIO_4_3).build().also { it.surfaceProvider=surface }
+                val analysis=ImageAnalysis.Builder().setTargetResolution(android.util.Size(640,480))
+                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                    .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888).build()
+                val mirror=front
+                analysis.setAnalyzer(executor) { proxy -> analyse(proxy,token,mirror) }
+                if(uses.isNotEmpty()) p.unbind(*uses.toTypedArray())
+                uses=listOf(preview,analysis)
+                p.bindToLifecycle(owner,if(front) CameraSelector.DEFAULT_FRONT_CAMERA else CameraSelector.DEFAULT_BACK_CAMERA,preview,analysis)
+            }.onFailure { clear();message=t("camera.unavailable") }
+        },ContextCompat.getMainExecutor(context))
     }
 
-    private fun analyse(proxy: ImageProxy) {
+    private fun analyse(proxy: ImageProxy, token: Int, mirror: Boolean) {
+        var source: android.graphics.Bitmap? = null
+        var oriented: android.graphics.Bitmap? = null
+        var image: com.google.mediapipe.framework.image.MPImage? = null
         try {
-            val bitmap = proxy.toBitmap()
-            val image = BitmapImageBuilder(bitmap).build()
-            val stamp = proxy.imageInfo.timestamp / 1_000_000
-            if (hands) handLandmarker?.detectAsync(image, stamp)
-            else faceLandmarker?.detectAsync(image, stamp)
-        } catch (_: Throwable) {
-            // A dropped frame is not worth reporting; the next one arrives in 33ms.
-        } finally {
+            val stamp=System.nanoTime()/1_000_000
+            if(closed || paused || token!=generation || stamp-lastTimestamp<100) return
+            lastTimestamp=stamp
+            val bitmap=proxy.toBitmap();source=bitmap
+            val matrix=android.graphics.Matrix().apply {
+                postRotate(proxy.imageInfo.rotationDegrees.toFloat())
+                if(mirror) postScale(-1f,1f)
+            }
+            val upright=android.graphics.Bitmap.createBitmap(bitmap,0,0,bitmap.width,bitmap.height,matrix,true);oriented=upright
+            val input=BitmapImageBuilder(upright).build();image=input
+            val points=if(hands) handLandmarker?.detectForVideo(input,stamp)?.landmarks()?.firstOrNull()
+                else faceLandmarker?.detectForVideo(input,stamp)?.faceLandmarks()?.firstOrNull()
+            val values=points?.map { listOf(it.x().toDouble(),it.y().toDouble(),it.z().toDouble()) } ?: emptyList()
+            val frame=LandmarkFrame(values,upright.width,upright.height,stamp)
+            main.post {
+                if(!closed && !paused && token==generation) {
+                    if(values.size<(if(hands)21 else 468) || values.any { p->p.any { !it.isFinite() } }) clear()
+                    else {
+                        window.append(frame);ready=window.ready;detecting=true;message=null
+                        imageAspect=frame.width.toFloat()/frame.height
+                        overlay=values.map { Offset(it[0].toFloat(),it[1].toFloat()) }
+                    }
+                }
+            }
+        } catch (_: Exception) { main.post { if(!closed && token==generation) { clear();message=t("camera.retry") } } }
+        finally {
+            image?.close()
+            if(oriented!==source) oriented?.recycle()
+            source?.recycle()
             proxy.close()
         }
     }
 
-    private fun publish(values: List<List<Double>>) {
-        points = values
-        overlay = values.map { Offset(it[0].toFloat(), it[1].toFloat()) }
-        detecting = true
+    private fun clear() { overlay=emptyList();detecting=false;ready=false;window.clear() }
+    fun flip(context: Context,owner: LifecycleOwner) {
+        if(closed || !canFlip) return
+        generation++;front=!front;clear();bind(context,owner)
     }
-
-    private fun clear() {
-        overlay = emptyList()
-        detecting = false
-    }
-
-    /** Turn the camera round, rebinding the same analyser to the other lens. */
-    fun flip(context: Context, owner: LifecycleOwner) {
-        front = !front
-        clear()
-        bind(context, owner)
-    }
-
-    fun stop(context: Context) {
-        runCatching { ProcessCameraProvider.getInstance(context).get().unbindAll() }
-        handLandmarker?.close()
-        faceLandmarker?.close()
+    fun stop() {
+        if(closed) return
+        closed=true;generation++;clear()
+        provider?.let { if(uses.isNotEmpty()) it.unbind(*uses.toTypedArray()) };uses=emptyList()
+        executor.execute { handLandmarker?.close();faceLandmarker?.close();handLandmarker=null;faceLandmarker=null }
+        executor.shutdown()
     }
 }
 
 @Composable
 fun CameraPreview(session: LandmarkSession, owner: LifecycleOwner, modifier: Modifier = Modifier) {
+    androidx.compose.runtime.DisposableEffect(owner,session) {
+        val observer=androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if(event==androidx.lifecycle.Lifecycle.Event.ON_STOP) session.pause()
+            if(event==androidx.lifecycle.Lifecycle.Event.ON_START) session.resume()
+        }
+        owner.lifecycle.addObserver(observer)
+        onDispose { owner.lifecycle.removeObserver(observer) }
+    }
     AndroidView(
         factory = { context ->
             PreviewView(context).also { view ->
@@ -204,7 +188,7 @@ fun CameraPreview(session: LandmarkSession, owner: LifecycleOwner, modifier: Mod
 
 /** The points themselves: small for a face mesh, larger and joined for a hand. */
 @Composable
-fun LandmarkOverlay(points: List<Offset>, joined: Boolean, modifier: Modifier = Modifier) {
+fun LandmarkOverlay(points: List<Offset>, joined: Boolean, modifier: Modifier = Modifier, imageAspect: Float = 0.75f) {
     val bones = listOf(
         0 to 1, 1 to 2, 2 to 3, 3 to 4,
         0 to 5, 5 to 6, 6 to 7, 7 to 8,
@@ -214,7 +198,9 @@ fun LandmarkOverlay(points: List<Offset>, joined: Boolean, modifier: Modifier = 
     )
     Canvas(modifier) {
         if (points.isEmpty()) return@Canvas
-        val scaled = points.map { Offset(it.x * size.width, it.y * size.height) }
+        val height = maxOf(size.height, size.width/imageAspect)
+        val width = height*imageAspect
+        val scaled = points.map { Offset(it.x*width-(width-size.width)/2, it.y*height-(height-size.height)/2) }
         if (joined && scaled.size >= 21) {
             bones.forEach { (a, b) ->
                 drawLine(Palette.gold.copy(alpha = 0.75f), scaled[a], scaled[b], 2f)

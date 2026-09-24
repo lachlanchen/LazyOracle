@@ -48,19 +48,20 @@ fun FaceScreen(navController: NavController) {
     }
     val ask = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted = it }
     LaunchedEffect(Unit) { if (!granted) ask.launch(Manifest.permission.CAMERA) }
-    DisposableEffect(Unit) { onDispose { session.stop(context) } }
+    DisposableEffect(Unit) { onDispose { session.stop() } }
 
-    var features by rememberPracticeState<FaceFeatures?>("face.features", null)
+    var features by rememberPracticeState<FaceFeatures?>("face.capture", null)
     var error by remember { mutableStateOf<String?>(null) }
     var reads by remember { mutableIntStateOf(0) }
+    LaunchedEffect(features) { Router.face = features }
 
     LaunchedEffect(reads) {
         if (reads == 0) return@LaunchedEffect
-        val points = session.landmarksJson()
-        if (points.size < 400) { error = l("No face is in view."); return@LaunchedEffect }
+        val frames = session.captureFrames()
+        if (frames.isEmpty()) { error = t("vision.hold"); return@LaunchedEffect }
         runCatching {
-            Engines.evaluateAs<FaceFeatures>("face.features", buildJsonObject { put("landmarks", points) })
-        }.onSuccess { features = it; Router.face = it; error = null }.onFailure { error = l("This reading could not be computed. Please try again.") }
+            Engines.evaluateAs<FaceFeatures>("face.capture", buildJsonObject { put("frames", frames) })
+        }.onSuccess { features = it; Router.face = it; error = null }.onFailure { error = visionError(it) }
     }
 
     ScreenScaffold(
@@ -84,7 +85,7 @@ fun FaceScreen(navController: NavController) {
             ) {
                 if (granted) {
                     CameraPreview(session, owner, Modifier.fillMaxSize())
-                    LandmarkOverlay(session.overlay, joined = false, modifier = Modifier.fillMaxSize())
+                    LandmarkOverlay(session.overlay, joined = false, modifier = Modifier.fillMaxSize(), imageAspect = session.imageAspect)
                     if (!session.detecting) {
                         Text(
                             t("face.hint"),
@@ -104,9 +105,10 @@ fun FaceScreen(navController: NavController) {
                 }
             }
             session.message?.let { Text(it, style = Type.sans(13), color = Palette.inkMute) }
+            Text(t(if(session.ready) "vision.ready" else "vision.hold"), style = Type.sans(13), color = Palette.inkMute)
             PrimaryButton(
                 if (features == null) t("face.read") else t("palm.readAgain"),
-                enabled = session.detecting
+                enabled = session.ready
             ) { reads++ }
             Text(
                 t("face.privacy"),
@@ -117,8 +119,15 @@ fun FaceScreen(navController: NavController) {
         error?.let { Panel(title = t("common.notComputed")) { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
 
         features?.let { f ->
+            Panel(title = t("vision.measurement")) {
+                Text(t(if(f.measurement == null) "vision.legacy" else "vision.measured"), style=Type.sans(14), color=Palette.inkSoft)
+                f.measurement?.takeIf { it.typeCandidates.size>1 }?.let { m ->
+                    Text(m.typeCandidates.joinToString(" / ") { l(it.replaceFirstChar { c->c.uppercase() }) },style=Type.serif(17),color=Palette.gold)
+                    Text(t("vision.boundary"),style=Type.sans(13),color=Palette.inkMute)
+                }
+            }
             Panel(title = t("face.element")) {
-                Text(l(ELEMENT_FACES[f.element] ?: f.element), style = Type.display(28), color = Palette.gold)
+                Text(if(f.element=="mixed") t("vision.mixed") else l(ELEMENT_FACES[f.element] ?: f.element), style = Type.display(28), color = Palette.gold)
                 Text(l("Read from the height of the face against its width, and from how the jaw and forehead stand against the cheekbones."),
                     style = Type.serif(16), color = Palette.inkSoft
                 )
@@ -150,7 +159,7 @@ fun FaceScreen(navController: NavController) {
                         )
                     }
                 }
-                Text(l("Each court occupies one third of an evenly proportioned face. The upper court represents early life, the middle court the middle years, and the lower court later life."),
+                Text(t("vision.courts"),
                     style = Type.sans(13), color = Palette.inkMute
                 )
             }
@@ -175,7 +184,7 @@ fun FaceScreen(navController: NavController) {
                             color = if (palace.state == "generous") Palette.gold else Palette.ink,
                             modifier = Modifier.width(70.dp)
                         )
-                        Text(l(palace.state), style = Type.sans(13, FontWeight.SemiBold), color = Palette.inkSoft)
+                        Text(visionState(palace.state), style = Type.sans(13, FontWeight.SemiBold), color = Palette.inkSoft)
                         Spacer(Modifier.weight(1f))
                         Text(String.format("%.2f", palace.value), style = Type.sans(13), color = Palette.inkMute)
                     }
@@ -189,7 +198,7 @@ fun FaceScreen(navController: NavController) {
             }
 
             Panel(title = t("common.method")) {
-                Text(l("The three-court, five-eye method divides the face at the hairline, brows, base of the nose and chin. Width is measured in eye-widths. Eight facial regions can be measured from landmarks; the other four are not assessed."),
+                Text(t("vision.faceMethod"),
                     style = Type.serif(16), color = Palette.inkSoft
                 )
             }

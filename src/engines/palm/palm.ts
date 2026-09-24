@@ -27,11 +27,11 @@ export type HandShape = 'earth' | 'air' | 'fire' | 'water'
 
 export interface LineTraits {
   /** Heart line ends under the index finger (idealistic) or the middle finger (pragmatic). */
-  heart: 'index' | 'middle' | 'between'
+  heart: 'index' | 'middle' | 'between' | 'unsure'
   /** Head line straight (analytical) or curved (imaginative). */
-  head: 'straight' | 'curved'
+  head: 'straight' | 'curved' | 'unsure'
   /** Life line sweeps wide (energetic, outgoing) or hugs the thumb (cautious, reserved). */
-  life: 'wide' | 'close'
+  life: 'wide' | 'close' | 'unsure'
   /** A fate line running up the centre of the palm, which the reader looks for. */
   fate: 'present' | 'absent' | 'unsure'
 }
@@ -230,15 +230,18 @@ export const SHAPE_TEXT: Record<HandShape, { zh: string; en: string; keywords: {
 
 export const LINE_TEXT = {
   heart: {
+    unsure: { zh: '感情线尚未确认。', en: 'Heart line not identified.' },
     index: { zh: '感情线止于食指下：理想主义，对感情期望高。', en: 'Heart line ends under the index finger: idealistic, high hopes in love.' },
     middle: { zh: '感情线止于中指下：务实，重视安全感。', en: 'Heart line ends under the middle finger: pragmatic, values security.' },
     between: { zh: '感情线止于两指之间：理想与务实兼有。', en: 'Heart line ends between the two: a mix of idealism and pragmatism.' },
   },
   head: {
+    unsure: { zh: '智慧线尚未确认。', en: 'Head line not identified.' },
     straight: { zh: '智慧线平直：思路清晰，偏好逻辑与结构。', en: 'Straight head line: clear thinking, a taste for logic and structure.' },
     curved: { zh: '智慧线弯曲：富想象，善于联想与创造。', en: 'Curved head line: imaginative, associative, creative.' },
   },
   life: {
+    unsure: { zh: '生命线尚未确认。', en: 'Life line not identified.' },
     wide: { zh: '生命线弧度开阔：精力充沛，外向好动。', en: 'Wide life line: plenty of energy, outgoing.' },
     close: { zh: '生命线贴近拇指：谨慎稳重，偏好熟悉的环境。', en: 'Life line close to the thumb: cautious, steady, fond of the familiar.' },
   },

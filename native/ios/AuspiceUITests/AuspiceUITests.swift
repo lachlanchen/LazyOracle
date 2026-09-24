@@ -20,6 +20,26 @@ final class AuspiceUITests: XCTestCase {
         shot.name = name; shot.lifetime = .keepAlways; add(shot)
     }
 
+    func testCameraCaptureNeedsFreshFrames() {
+        for language in ["en", "zh-Hans"] {
+            launch(language)
+            for practice in ["face", "palm"] {
+                open(practice)
+                let measure = app.buttons["\(practice).measure"]
+                XCTAssertTrue(measure.waitForExistence(timeout: 10))
+                XCTAssertFalse(measure.isEnabled)
+                XCTAssertTrue(app.staticTexts[language == "en" ? "Hold steady for a moment before measuring." : "请保持不动片刻，再开始测量。"].exists)
+                if practice == "palm" {
+                    app.swipeUp()
+                    XCTAssertTrue(app.buttons[language == "en" ? "Not sure" : "不确定"].firstMatch.exists)
+                }
+                evidence("capture-needs-frames-\(practice)-\(language)")
+                app.navigationBars.buttons.element(boundBy: 0).tap()
+            }
+            app.terminate()
+        }
+    }
+
     func testTarotBlankThenChineseQuestion() {
         launch("zh-Hant"); open("tarot")
         let draw = app.buttons["tarot.compute"]

@@ -12,6 +12,10 @@ final class LandmarkSession {
     private(set) var landmarks: [[String: Double]] = []
     private(set) var overlay: [CGPoint] = []
     private(set) var detecting = false
+    private(set) var captureWindow = CaptureWindow()
+    private(set) var imageAspect: CGFloat = 0.75
+    var ready: Bool { captureWindow.ready }
+    func captureFrames() -> [[String: Any]] { captureWindow.snapshot() }
     private(set) var messageKey: String?
     var message: String? { messageKey.map(t) }
     private(set) var position: AVCaptureDevice.Position = .front
@@ -48,6 +52,8 @@ final class LandmarkSession {
         worker.start { [weak self] update in
             Task { @MainActor in
                 guard let self, self.wanted, self.generation == token else { return }
+                self.captureWindow.append(LandmarkFrame(landmarks: update.points, width: update.width, height: update.height, timestamp: update.timestamp))
+                if update.height > 0 { self.imageAspect = CGFloat(update.width) / CGFloat(update.height) }
                 self.landmarks = update.points
                 self.overlay = update.points.map { CGPoint(x: $0["x"]!, y: $0["y"]!) }
                 self.detecting = !update.points.isEmpty
@@ -62,12 +68,13 @@ final class LandmarkSession {
         wanted = false
         generation += 1 // Ignore a frame/permission reply queued before leaving.
         detecting = false
+        captureWindow.clear()
         landmarks = []
         overlay = []
         worker.stop()
     }
 
-    func flip() { worker.flip() }
+    func flip() { captureWindow.clear(); detecting = false; landmarks = []; overlay = []; worker.flip() }
 }
 
 /// Video mode returns each result before the next frame/stop can execute.
@@ -77,6 +84,9 @@ final class LandmarkSession {
 final class LandmarkWorker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
     struct Update {
         var points: [[String: Double]] = []
+        var width = 0
+        var height = 0
+        var timestamp = 0
         var position: AVCaptureDevice.Position
         var canFlip: Bool
         var messageKey: String?
@@ -191,20 +201,26 @@ final class LandmarkWorker: NSObject, AVCaptureVideoDataOutputSampleBufferDelega
             options.baseOptions.modelAssetPath = path
             options.runningMode = .video
             options.numHands = 1
+            options.minHandDetectionConfidence = 0.7
+            options.minHandPresenceConfidence = 0.7
+            options.minTrackingConfidence = 0.7
             handLandmarker = try HandLandmarker(options: options)
         case .face:
             let options = FaceLandmarkerOptions()
             options.baseOptions.modelAssetPath = path
             options.runningMode = .video
             options.numFaces = 1
+            options.minFaceDetectionConfidence = 0.7
+            options.minFacePresenceConfidence = 0.7
+            options.minTrackingConfidence = 0.7
             faceLandmarker = try FaceLandmarker(options: options)
         }
     }
 
-    private func publish(_ points: [NormalizedLandmark], messageKey: String? = nil) {
+    private func publish(_ points: [NormalizedLandmark], width: Int = 0, height: Int = 0, timestamp: Int = 0, messageKey: String? = nil) {
         let finite = points.allSatisfy { $0.x.isFinite && $0.y.isFinite && $0.z.isFinite }
         deliver?(Update(points: finite ? points.map { ["x": Double($0.x), "y": Double($0.y), "z": Double($0.z)] } : [],
-                        position: position, canFlip: canFlip, messageKey: messageKey))
+                        width: width, height: height, timestamp: timestamp, position: position, canFlip: canFlip, messageKey: messageKey))
     }
 
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
@@ -221,13 +237,15 @@ final class LandmarkWorker: NSObject, AVCaptureVideoDataOutputSampleBufferDelega
         autoreleasepool {
             do {
                 let image = try MPImage(sampleBuffer: sampleBuffer)
+                guard let pixels = CMSampleBufferGetImageBuffer(sampleBuffer) else { publish([]); return }
+                let width = CVPixelBufferGetWidth(pixels), height = CVPixelBufferGetHeight(pixels)
                 switch kind {
                 case .hand:
                     let result = try handLandmarker?.detect(videoFrame: image, timestampInMilliseconds: stamp)
-                    publish(result?.landmarks.first ?? [])
+                    publish(result?.landmarks.first ?? [], width: width, height: height, timestamp: stamp)
                 case .face:
                     let result = try faceLandmarker?.detect(videoFrame: image, timestampInMilliseconds: stamp)
-                    publish(result?.faceLandmarks.first ?? [])
+                    publish(result?.faceLandmarks.first ?? [], width: width, height: height, timestamp: stamp)
                 }
             } catch { publish([], messageKey: "camera.retry") }
         }
@@ -238,6 +256,7 @@ final class LandmarkWorker: NSObject, AVCaptureVideoDataOutputSampleBufferDelega
 /// The live preview, with the landmarks drawn over it.
 struct CameraView: UIViewRepresentable {
     let session: AVCaptureSession
+    var mirrored = true
 
     func makeUIView(context: Context) -> PreviewView {
         let view = PreviewView()
@@ -246,7 +265,14 @@ struct CameraView: UIViewRepresentable {
         return view
     }
 
-    func updateUIView(_ uiView: PreviewView, context: Context) {}
+    func updateUIView(_ uiView: PreviewView, context: Context) {
+        guard let connection = uiView.layer.connection else { return }
+        if connection.isVideoRotationAngleSupported(90) { connection.videoRotationAngle = 90 }
+        if connection.isVideoMirroringSupported {
+            connection.automaticallyAdjustsVideoMirroring = false
+            connection.isVideoMirrored = mirrored
+        }
+    }
 
     final class PreviewView: UIView {
         override class var layerClass: AnyClass { AVCaptureVideoPreviewLayer.self }
@@ -258,6 +284,7 @@ struct CameraView: UIViewRepresentable {
 struct LandmarkOverlay: View {
     let points: [CGPoint]
     let joined: Bool
+    var imageAspect: CGFloat = 0.75
 
     private static let handBones: [(Int, Int)] = [
         (0, 1), (1, 2), (2, 3), (3, 4),
@@ -270,7 +297,8 @@ struct LandmarkOverlay: View {
     var body: some View {
         Canvas { context, size in
             guard !points.isEmpty else { return }
-            let scaled = points.map { CGPoint(x: $0.x * size.width, y: $0.y * size.height) }
+            let height = max(size.height, size.width / imageAspect), width = height * imageAspect
+            let scaled = points.map { CGPoint(x: $0.x * width - (width-size.width)/2, y: $0.y * height - (height-size.height)/2) }
             if joined, scaled.count >= 21 {
                 var path = Path()
                 for bone in Self.handBones {

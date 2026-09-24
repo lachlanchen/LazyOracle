@@ -21,8 +21,8 @@ struct FaceScreen: View {
         ) {
             Panel {
                 ZStack {
-                    CameraView(session: camera.session)
-                    LandmarkOverlay(points: camera.overlay, joined: false)
+                    CameraView(session: camera.session, mirrored: camera.position == .front)
+                    LandmarkOverlay(points: camera.overlay, joined: false, imageAspect: camera.imageAspect)
                     if !camera.detecting {
                         Text(t("face.hint"))
                             .font(Typeface.serif(17))
@@ -42,12 +42,14 @@ struct FaceScreen: View {
                 if let message = camera.message {
                     Text(message).font(Typeface.sans(13)).foregroundStyle(Palette.inkMute)
                 }
+                Text(t(camera.ready ? "vision.ready" : "vision.hold")).font(Typeface.sans(13)).foregroundStyle(Palette.inkMute)
                 Button(action: read) {
                     Label(captured ? t("palm.readAgain") : t("face.read"), systemImage: "face.smiling")
                 }
                 .buttonStyle(PrimaryButtonStyle())
-                .disabled(!camera.detecting)
-                .opacity(camera.detecting ? 1 : 0.5)
+                .accessibilityIdentifier("face.measure")
+                .disabled(!camera.ready)
+                .opacity(camera.ready ? 1 : 0.5)
                 Text(t("face.privacy"))
                     .font(Typeface.sans(12))
                     .foregroundStyle(Palette.inkMute)
@@ -61,8 +63,17 @@ struct FaceScreen: View {
             }
 
             if let features {
+                Panel(title: t("vision.measurement")) {
+                    Text(t(features.measurement == nil ? "vision.legacy" : "vision.measured"))
+                        .font(Typeface.sans(14)).foregroundStyle(Palette.inkSoft)
+                    if let measurement = features.measurement, measurement.typeCandidates.count > 1 {
+                        Text(measurement.typeCandidates.map { l($0.capitalized) }.joined(separator: " / "))
+                            .font(Typeface.serif(17)).foregroundStyle(Palette.gold)
+                        Text(t("vision.boundary")).font(Typeface.sans(13)).foregroundStyle(Palette.inkMute)
+                    }
+                }
                 Panel(title: t("face.element")) {
-                    Text(l(elementNames[features.element] ?? features.element))
+                    Text(features.element == "mixed" ? t("vision.mixed") : l(elementNames[features.element] ?? features.element))
                         .font(Typeface.display(28))
                         .foregroundStyle(Palette.gold)
                     Text(l("Read from the height of the face against its width, and from how the jaw and forehead stand against the cheekbones."))
@@ -94,7 +105,7 @@ struct FaceScreen: View {
                         }
                         .padding(.vertical, 4)
                     }
-                    Text(l("Each court occupies one third of an evenly proportioned face. The upper court represents early life, the middle court the middle years, and the lower court later life."))
+                    Text(t("vision.courts"))
                         .font(Typeface.sans(13))
                         .foregroundStyle(Palette.inkMute)
                         .fixedSize(horizontal: false, vertical: true)
@@ -116,7 +127,7 @@ struct FaceScreen: View {
                                 .font(Typeface.serif(17))
                                 .foregroundStyle(palace.state == "generous" ? Palette.gold : Palette.ink)
                                 .frame(width: 68, alignment: .leading)
-                            Text(l(palace.state))
+                            Text(visionState(palace.state))
                                 .font(Typeface.sans(13, weight: .semibold))
                                 .foregroundStyle(Palette.inkSoft)
                             Spacer(minLength: 0)
@@ -135,7 +146,7 @@ struct FaceScreen: View {
                 }
 
                 Panel(title: t("common.method")) {
-                    Text(l("The three-court, five-eye method divides the face at the hairline, brows, base of the nose and chin. Width is measured in eye-widths. Eight facial regions can be measured from landmarks; the other four are not assessed."))
+                    Text(t("vision.faceMethod"))
                         .font(Typeface.serif(16))
                         .foregroundStyle(Palette.inkSoft)
                         .fixedSize(horizontal: false, vertical: true)
@@ -168,16 +179,16 @@ struct FaceScreen: View {
     }
 
     private func read() {
-        let points = camera.landmarks
-        guard points.count >= 400 else { error = l("No face is in view."); return }
+        let frames = camera.captureFrames()
+        guard !frames.isEmpty else { error = t("vision.hold"); return }
         do {
-            let measured = try Engines.shared.evaluate("face.features", ["landmarks": points], as: FaceFeatures.self)
+            let measured = try Engines.shared.evaluate("face.capture", ["frames": frames], as: FaceFeatures.self)
             features = measured
             Router.shared.face = measured
             error = nil
             captured = true
         } catch {
-            self.error = l("This reading could not be computed. Please try again.")
+            self.error = visionError(error)
         }
     }
 }

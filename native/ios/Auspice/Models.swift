@@ -340,9 +340,9 @@ struct PalaceReading: Codable, Identifiable {
 }
 
 struct LineTraits: Codable {
-    var heart = "between"
-    var head = "curved"
-    var life = "wide"
+    var heart = "unsure"
+    var head = "unsure"
+    var life = "unsure"
     var fate = "unsure"
 
     var dictionary: [String: Any] { ["heart": heart, "head": head, "life": life, "fate": fate] }
@@ -362,7 +362,8 @@ struct PalmFeatures: Codable {
     let fingers: [FingerTrait]
     let palaces: [PalaceReading]
     let strongPalaces: [String]
-    let lines: LineTraits
+    var lines: LineTraits
+    var measurement: VisionMeasurement? = nil
 }
 
 // MARK: - Face reading
@@ -392,4 +393,5 @@ struct FaceFeatures: Codable {
     let symmetry: Double
     let palaces: [FacePalaceReading]
     let strongPalaces: [String]
+    var measurement: VisionMeasurement? = nil
 }

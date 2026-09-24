@@ -19,6 +19,7 @@ import { computeChart, transitsFor } from './engines/astrology/astrology'
 import { computeBazi } from './engines/bazi/bazi'
 import { eightMansions, sectorForHeading } from './engines/fengshui/fengshui'
 import { faceFeatures } from './engines/face/face'
+import { captureFace, capturePalm, type LandmarkFrame } from './engines/vision/capture'
 import { castHexagram, hexagramByNumber } from './engines/iching/cast'
 import { palmFeatures } from './engines/palm/palm'
 import { drawSpread } from './engines/tarot/draw'
@@ -65,6 +66,8 @@ const ENGINES: Record<string, (input: Input) => unknown> = {
     ),
   'fengshui.sector': (input) => sectorForHeading(need(input.heading as number, 'heading')),
 
+  'face.capture': (input) => captureFace(need(input.frames, 'frames') as LandmarkFrame[]),
+  'palm.capture': (input) => capturePalm(need(input.frames, 'frames') as LandmarkFrame[], need(input.lines, 'lines') as Parameters<typeof palmFeatures>[1]),
   'palm.features': (input) => palmFeatures(need(input.landmarks, 'landmarks') as Parameters<typeof palmFeatures>[0], need(input.lines, 'lines') as Parameters<typeof palmFeatures>[1]),
   'face.features': (input) => faceFeatures(need(input.landmarks, 'landmarks') as Parameters<typeof faceFeatures>[0]),
 

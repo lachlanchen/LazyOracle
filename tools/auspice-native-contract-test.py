@@ -6,6 +6,7 @@ root=Path(__file__).resolve().parent.parent
 native=root/'native/ios/Auspice'
 source=(native/'Engines.swift').read_text().replace('Bundle.main.url(forResource: "lazyoracle-engines", withExtension: "js")','Optional(URL(fileURLWithPath: CommandLine.arguments[1]))')
 source+=(native/'Models.swift').read_text()
+source+=(native/'VisionCapture.swift').read_text().split('func visionError')[0]
 source+=(native/'Screens/Almanac.swift').read_text().split('/// Loads a day')[0].replace('import SwiftUI','')
 source+=(native/'Profile.swift').read_text().split('@Observable')[0].replace('import SwiftUI','')
 source+=r'''

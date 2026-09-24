@@ -21,8 +21,8 @@ struct PalmScreen: View {
         ) {
             Panel {
                 ZStack {
-                    CameraView(session: camera.session)
-                    LandmarkOverlay(points: camera.overlay, joined: true)
+                    CameraView(session: camera.session, mirrored: camera.position == .front)
+                    LandmarkOverlay(points: camera.overlay, joined: true, imageAspect: camera.imageAspect)
                     if !camera.detecting {
                         Text(t("palm.hint"))
                             .font(Typeface.serif(17))
@@ -42,12 +42,15 @@ struct PalmScreen: View {
                 if let message = camera.message {
                     Text(message).font(Typeface.sans(13)).foregroundStyle(Palette.inkMute)
                 }
+                Text(t(camera.ready ? "vision.ready" : "vision.hold")).font(Typeface.sans(13)).foregroundStyle(Palette.inkMute)
                 Button(action: read) {
                     Label(captured ? t("palm.readAgain") : t("palm.read"), systemImage: "hand.raised")
                 }
                 .buttonStyle(PrimaryButtonStyle())
-                .disabled(!camera.detecting)
-                .opacity(camera.detecting ? 1 : 0.5)
+                .accessibilityIdentifier("palm.measure")
+                .disabled(!camera.ready)
+                .opacity(camera.ready ? 1 : 0.5)
+                Text(t("face.privacy")).font(Typeface.sans(12)).foregroundStyle(Palette.inkMute).fixedSize(horizontal: false, vertical: true)
             }
 
             Panel(title: t("palm.lines")) {
@@ -55,9 +58,9 @@ struct PalmScreen: View {
                     .font(Typeface.serif(16))
                     .foregroundStyle(Palette.inkSoft)
                     .fixedSize(horizontal: false, vertical: true)
-                lineChoice(l("Heart line ends"), ["index": "Under the index", "middle": "Under the middle", "between": "Between them"], $lines.heart)
-                lineChoice(l("Head line"), ["straight": "Straight", "curved": "Curved"], $lines.head)
-                lineChoice(l("Life line"), ["wide": "Sweeps wide", "close": "Hugs the thumb"], $lines.life)
+                lineChoice(l("Heart line ends"), ["unsure": "Not sure", "index": "Under the index", "middle": "Under the middle", "between": "Between them"], $lines.heart)
+                lineChoice(l("Head line"), ["unsure": "Not sure", "straight": "Straight", "curved": "Curved"], $lines.head)
+                lineChoice(l("Life line"), ["unsure": "Not sure", "wide": "Sweeps wide", "close": "Hugs the thumb"], $lines.life)
                 lineChoice(l("Fate line"), ["present": "Present", "absent": "Absent", "unsure": "Not sure"], $lines.fate)
             }
 
@@ -68,6 +71,15 @@ struct PalmScreen: View {
             }
 
             if let features {
+                Panel(title: t("vision.measurement")) {
+                    Text(t(features.measurement == nil ? "vision.legacy" : "vision.measured"))
+                        .font(Typeface.sans(14)).foregroundStyle(Palette.inkSoft)
+                    if let measurement = features.measurement, measurement.typeCandidates.count > 1 {
+                        Text(measurement.typeCandidates.map { l($0.capitalized) }.joined(separator: " / "))
+                            .font(Typeface.serif(17)).foregroundStyle(Palette.gold)
+                        Text(t("vision.boundary")).font(Typeface.sans(13)).foregroundStyle(Palette.inkMute)
+                    }
+                }
                 Panel(title: t("palm.hand")) {
                     measure(l("Shape"), shapeWord(features.shape))
                     measure(l("Palm width to length"), String(format: "%.2f", features.palmRatio))
@@ -84,7 +96,7 @@ struct PalmScreen: View {
                                 .font(Typeface.serif(16))
                                 .foregroundStyle(Palette.ink)
                             Spacer(minLength: 0)
-                            Text(l(finger.length))
+                            Text(visionState(finger.length))
                                 .font(Typeface.sans(13, weight: .semibold))
                                 .foregroundStyle(Palette.gold)
                             Text(String(format: "%.2f", finger.ratioToSaturn))
@@ -95,39 +107,8 @@ struct PalmScreen: View {
                     }
                 }
 
-                Panel(title: t("palm.mounts")) {
-                    ForEach(features.palaces) { palace in
-                        HStack(spacing: 10) {
-                            Text(l(palace.palace))
-                                .font(Typeface.serif(17))
-                                .foregroundStyle(palace.state == "full" ? Palette.gold : Palette.ink)
-                                .frame(width: 72, alignment: .leading)
-                            GeometryReader { geometry in
-                                ZStack(alignment: .leading) {
-                                    Capsule().fill(Color.white.opacity(0.06))
-                                    Capsule()
-                                        .fill(palace.state == "full" ? Palette.gold : Palette.inkMute)
-                                        .frame(width: geometry.size.width * min(1, max(0.02, (palace.prominence + 0.1) / 0.2)))
-                                }
-                            }
-                            .frame(height: 7)
-                            Text(l(palace.state))
-                                .font(Typeface.sans(12))
-                                .foregroundStyle(Palette.inkMute)
-                                .frame(width: 42, alignment: .trailing)
-                        }
-                        .padding(.vertical, 3)
-                    }
-                    if !features.strongPalaces.isEmpty {
-                        Text(lf("Standing out: {0}", features.strongPalaces.map(l).joined(separator: " · ")))
-                            .font(Typeface.serif(16))
-                            .foregroundStyle(Palette.gold)
-                            .padding(.top, 4)
-                    }
-                }
-
                 Panel(title: t("common.method")) {
-                    Text(l("Proportions follow classical palmistry: the palm is square when its width reaches 0.86 of its length, the fingers long at 0.78 of the palm, and each finger is measured against the middle one. The mounts come from how far each stands out of the palm plane, which the landmarker reports as depth."))
+                    Text(t("vision.palmMethod"))
                         .font(Typeface.serif(16))
                         .foregroundStyle(Palette.inkSoft)
                         .fixedSize(horizontal: false, vertical: true)
@@ -149,7 +130,7 @@ struct PalmScreen: View {
                 ForEach(options.sorted(by: { $0.key < $1.key }), id: \.key) { key, title in
                     Chip(label: l(title), active: binding.wrappedValue == key) {
                         binding.wrappedValue = key
-                        if captured { read() }
+                        if var saved = features { saved.lines = lines; features = saved; Router.shared.palm = saved }
                     }
                 }
             }
@@ -166,16 +147,16 @@ struct PalmScreen: View {
     }
 
     private func shapeWord(_ shape: String) -> String {
-        l(shape.capitalized)
+        shape == "mixed" ? t("vision.mixed") : l(shape.capitalized)
     }
 
     private func read() {
-        let points = camera.landmarks
-        guard points.count >= 21 else { error = l("No hand is in view."); return }
+        let frames = camera.captureFrames()
+        guard !frames.isEmpty else { error = t("vision.hold"); return }
         do {
             let measured = try Engines.shared.evaluate(
-                "palm.features",
-                ["landmarks": points, "lines": lines.dictionary],
+                "palm.capture",
+                ["frames": frames, "lines": lines.dictionary],
                 as: PalmFeatures.self
             )
             features = measured
@@ -183,7 +164,7 @@ struct PalmScreen: View {
             error = nil
             captured = true
         } catch {
-            self.error = l("This reading could not be computed. Please try again.")
+            self.error = visionError(error)
         }
     }
 }

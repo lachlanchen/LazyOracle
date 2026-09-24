@@ -14,7 +14,7 @@ app.build_configurations.select { |c| ['Debug', 'Release'].include?(c.name) }.ea
   end
   app.build_configurations.find { |c| c.name == name }.build_settings.merge!(
     'PRODUCT_BUNDLE_IDENTIFIER' => 'art.lazying.auspice',
-    'APP_DISPLAY_NAME' => 'Auspice', 'CURRENT_PROJECT_VERSION' => '10',
+    'APP_DISPLAY_NAME' => 'Auspice', 'CURRENT_PROJECT_VERSION' => '11',
     'MARKETING_VERSION' => '0.1.0',
     'PROVISIONING_PROFILE_SPECIFIER' => base == 'Release' ? 'Auspice App Store' : '',
     'ASSETCATALOG_COMPILER_APPICON_NAME' => 'AuspiceIcon'

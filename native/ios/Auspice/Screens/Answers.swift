@@ -16,7 +16,7 @@ struct AnswersScreen: View {
             Panel {
                 FlowRow(spacing: 8) {
                     Chip(label: t("practice.answers"), active: book == "answers") { book = "answers" }
-                    Chip(label: "Book of Questions", detail: "问题之书", active: book == "questions") { book = "questions" }
+                    Chip(label: l("Book of Questions"), active: book == "questions") { book = "questions" }
                 }
                 FieldLabel(t("answers.whatAsking"))
                 TextField("", text: $question, axis: .vertical)
@@ -36,6 +36,7 @@ struct AnswersScreen: View {
             }
 
             if let opening {
+                ExplainReading(result: opening).id(opening.seed)
                 page(opening)
                     .rotation3DEffect(.degrees(open ? 0 : 92), axis: (x: 1, y: 0, z: 0), anchor: .top, perspective: 0.5)
                     .opacity(open ? 1 : 0)
@@ -49,13 +50,9 @@ struct AnswersScreen: View {
                 .font(Typeface.sans(11, weight: .bold))
                 .tracking(2.4)
                 .foregroundStyle(Color(hex: 0x8A6A22))
-            Text(opening.page.en)
+            Text(l(opening.page.en))
                 .font(Typeface.display(27))
                 .foregroundStyle(Color(hex: 0x2A1E06))
-                .fixedSize(horizontal: false, vertical: true)
-            Text(opening.page.zh)
-                .font(Typeface.serif(21))
-                .foregroundStyle(Color(hex: 0x5A4413))
                 .fixedSize(horizontal: false, vertical: true)
             if !opening.question.isEmpty {
                 Divider().overlay(Color(hex: 0x8A6A22).opacity(0.3))
@@ -85,7 +82,7 @@ struct AnswersScreen: View {
             opening = result
             withAnimation(.spring(response: 0.7, dampingFraction: 0.8)) { open = true }
         } catch {
-            self.error = error.localizedDescription
+            self.error = l("This reading could not be computed. Please try again.")
         }
     }
 }

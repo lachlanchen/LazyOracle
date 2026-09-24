@@ -7,19 +7,36 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		91E2051D6C93565EC952EA83 /* AuspiceUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B6F9FF10DA1E06F0C715E9A /* AuspiceUITests.swift */; };
 		A1000101 /* MediaPipeTasksVision.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = A1000111 /* MediaPipeTasksVision.xcframework */; };
 		A1000102 /* MediaPipeTasksCommon.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = A1000112 /* MediaPipeTasksCommon.xcframework */; };
+		BABF71821B909786089C3594 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CF748D45923B60818C5B8EE2 /* Foundation.framework */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		982EE928AC1C40DC92ABF414 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A1000040 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A1000030;
+			remoteInfo = Auspice;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		6B6F9FF10DA1E06F0C715E9A /* AuspiceUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuspiceUITests.swift; sourceTree = "<group>"; };
+		78E970ABA8F6B22478D2B406 /* AuspiceUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AuspiceUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A1000001 /* Auspice.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Auspice.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1000111 /* MediaPipeTasksVision.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = MediaPipeTasksVision.xcframework; path = Frameworks/vision/frameworks/MediaPipeTasksVision.xcframework; sourceTree = "<group>"; };
 		A1000112 /* MediaPipeTasksCommon.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = MediaPipeTasksCommon.xcframework; path = Frameworks/common/frameworks/MediaPipeTasksCommon.xcframework; sourceTree = "<group>"; };
-		A1000001 /* Auspice.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Auspice.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CF748D45923B60818C5B8EE2 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		A1000002 /* Auspice */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = Auspice;
 			sourceTree = "<group>";
 		};
@@ -35,16 +52,51 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		ADD2B350F66FB06C4F9DAE46 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BABF71821B909786089C3594 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8F37C27FE26772FF1B43DEE7 /* AuspiceUITests */ = {
+			isa = PBXGroup;
+			children = (
+				6B6F9FF10DA1E06F0C715E9A /* AuspiceUITests.swift */,
+			);
+			name = AuspiceUITests;
+			path = AuspiceUITests;
+			sourceTree = "<group>";
+		};
+		A0FED4966EC59C7D4B926BA7 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				CF748D45923B60818C5B8EE2 /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
 		A1000020 = {
 			isa = PBXGroup;
 			children = (
 				A1000002 /* Auspice */,
 				A1000022 /* Frameworks */,
 				A1000021 /* Products */,
+				8F37C27FE26772FF1B43DEE7 /* AuspiceUITests */,
 			);
+			sourceTree = "<group>";
+		};
+		A1000021 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A1000001 /* Auspice.app */,
+				78E970ABA8F6B22478D2B406 /* AuspiceUITests.xctest */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 		A1000022 /* Frameworks */ = {
@@ -52,21 +104,32 @@
 			children = (
 				A1000111 /* MediaPipeTasksVision.xcframework */,
 				A1000112 /* MediaPipeTasksCommon.xcframework */,
+				A0FED4966EC59C7D4B926BA7 /* iOS */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		A1000021 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				A1000001 /* Auspice.app */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		9C9C3057555CAC4884451B93 /* AuspiceUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 553D79291110A9F59B59BCC1 /* Build configuration list for PBXNativeTarget "AuspiceUITests" */;
+			buildPhases = (
+				FFB2EC2C4E3248EE726D608A /* Sources */,
+				ADD2B350F66FB06C4F9DAE46 /* Frameworks */,
+				2B3EC7EF57F7010745FE0A53 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				82574DD0A533EF23E4F3B33A /* PBXTargetDependency */,
+			);
+			name = AuspiceUITests;
+			productName = AuspiceUITests;
+			productReference = 78E970ABA8F6B22478D2B406 /* AuspiceUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		A1000030 /* Auspice */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = A1000051 /* Build configuration list for PBXNativeTarget "Auspice" */;
@@ -118,11 +181,19 @@
 			projectRoot = "";
 			targets = (
 				A1000030 /* Auspice */,
+				9C9C3057555CAC4884451B93 /* AuspiceUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		2B3EC7EF57F7010745FE0A53 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A1000012 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -140,9 +211,57 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		FFB2EC2C4E3248EE726D608A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				91E2051D6C93565EC952EA83 /* AuspiceUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		82574DD0A533EF23E4F3B33A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Auspice;
+			target = A1000030 /* Auspice */;
+			targetProxy = 982EE928AC1C40DC92ABF414 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		26F5DEBA820E2A77B3E9F07C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = art.lazying.auspice.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Auspice;
+			};
+			name = Debug;
+		};
+		403D2B73AB549D1FC482D4E2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = art.lazying.auspice.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Auspice;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		A1000060 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -190,8 +309,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Distribution";
 				CODE_SIGN_STYLE = Manual;
-				PROVISIONING_PROFILE_SPECIFIER = "Auspice App Store";
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = Q8M2S2FY77;
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -199,8 +317,6 @@
 					"$(SRCROOT)/Frameworks/vision/frameworks",
 					"$(SRCROOT)/Frameworks/common/frameworks",
 				);
-				"OTHER_LDFLAGS[sdk=iphoneos*]" = "$(inherited) -ObjC -lc++ -force_load \"$(SRCROOT)/Frameworks/common/frameworks/graph_libraries/libMediaPipeTasksCommon_device_graph.a\" -framework AudioToolbox -framework Accelerate -framework CoreMedia -framework CoreGraphics -framework CoreImage -framework QuartzCore -framework AVFoundation -framework CoreVideo";
-				"OTHER_LDFLAGS[sdk=iphonesimulator*]" = "$(inherited) -ObjC -lc++ -force_load \"$(SRCROOT)/Frameworks/common/frameworks/graph_libraries/libMediaPipeTasksCommon_simulator_graph.a\" -framework AudioToolbox -framework Accelerate -framework CoreMedia -framework CoreGraphics -framework CoreImage -framework QuartzCore -framework AVFoundation -framework CoreVideo";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = NO;
@@ -209,8 +325,55 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 0.1.0;
+				"OTHER_LDFLAGS[sdk=iphoneos*]" = (
+					"$(inherited)",
+					"-ObjC",
+					"-lc++",
+					"-force_load",
+					"\"$(SRCROOT)/Frameworks/common/frameworks/graph_libraries/libMediaPipeTasksCommon_device_graph.a\"",
+					"-framework",
+					AudioToolbox,
+					"-framework",
+					Accelerate,
+					"-framework",
+					CoreMedia,
+					"-framework",
+					CoreGraphics,
+					"-framework",
+					CoreImage,
+					"-framework",
+					QuartzCore,
+					"-framework",
+					AVFoundation,
+					"-framework",
+					CoreVideo,
+				);
+				"OTHER_LDFLAGS[sdk=iphonesimulator*]" = (
+					"$(inherited)",
+					"-ObjC",
+					"-lc++",
+					"-force_load",
+					"\"$(SRCROOT)/Frameworks/common/frameworks/graph_libraries/libMediaPipeTasksCommon_simulator_graph.a\"",
+					"-framework",
+					AudioToolbox,
+					"-framework",
+					Accelerate,
+					"-framework",
+					CoreMedia,
+					"-framework",
+					CoreGraphics,
+					"-framework",
+					CoreImage,
+					"-framework",
+					QuartzCore,
+					"-framework",
+					AVFoundation,
+					"-framework",
+					CoreVideo,
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = art.lazying.auspice;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "Auspice App Store";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -223,8 +386,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Distribution";
 				CODE_SIGN_STYLE = Manual;
-				PROVISIONING_PROFILE_SPECIFIER = "Auspice App Store";
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = Q8M2S2FY77;
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -232,8 +394,6 @@
 					"$(SRCROOT)/Frameworks/vision/frameworks",
 					"$(SRCROOT)/Frameworks/common/frameworks",
 				);
-				"OTHER_LDFLAGS[sdk=iphoneos*]" = "$(inherited) -ObjC -lc++ -force_load \"$(SRCROOT)/Frameworks/common/frameworks/graph_libraries/libMediaPipeTasksCommon_device_graph.a\" -framework AudioToolbox -framework Accelerate -framework CoreMedia -framework CoreGraphics -framework CoreImage -framework QuartzCore -framework AVFoundation -framework CoreVideo";
-				"OTHER_LDFLAGS[sdk=iphonesimulator*]" = "$(inherited) -ObjC -lc++ -force_load \"$(SRCROOT)/Frameworks/common/frameworks/graph_libraries/libMediaPipeTasksCommon_simulator_graph.a\" -framework AudioToolbox -framework Accelerate -framework CoreMedia -framework CoreGraphics -framework CoreImage -framework QuartzCore -framework AVFoundation -framework CoreVideo";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = NO;
@@ -242,8 +402,55 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 0.1.0;
+				"OTHER_LDFLAGS[sdk=iphoneos*]" = (
+					"$(inherited)",
+					"-ObjC",
+					"-lc++",
+					"-force_load",
+					"\"$(SRCROOT)/Frameworks/common/frameworks/graph_libraries/libMediaPipeTasksCommon_device_graph.a\"",
+					"-framework",
+					AudioToolbox,
+					"-framework",
+					Accelerate,
+					"-framework",
+					CoreMedia,
+					"-framework",
+					CoreGraphics,
+					"-framework",
+					CoreImage,
+					"-framework",
+					QuartzCore,
+					"-framework",
+					AVFoundation,
+					"-framework",
+					CoreVideo,
+				);
+				"OTHER_LDFLAGS[sdk=iphonesimulator*]" = (
+					"$(inherited)",
+					"-ObjC",
+					"-lc++",
+					"-force_load",
+					"\"$(SRCROOT)/Frameworks/common/frameworks/graph_libraries/libMediaPipeTasksCommon_simulator_graph.a\"",
+					"-framework",
+					AudioToolbox,
+					"-framework",
+					Accelerate,
+					"-framework",
+					CoreMedia,
+					"-framework",
+					CoreGraphics,
+					"-framework",
+					CoreImage,
+					"-framework",
+					QuartzCore,
+					"-framework",
+					AVFoundation,
+					"-framework",
+					CoreVideo,
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = art.lazying.auspice;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "Auspice App Store";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -252,6 +459,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		553D79291110A9F59B59BCC1 /* Build configuration list for PBXNativeTarget "AuspiceUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				403D2B73AB549D1FC482D4E2 /* Release */,
+				26F5DEBA820E2A77B3E9F07C /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		A1000050 /* Build configuration list for PBXProject "Auspice" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

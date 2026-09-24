@@ -11,6 +11,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,7 +49,7 @@ fun BaziScreen(navController: NavController) {
         if (!profile.isComplete) { chart = null; return@LaunchedEffect }
         runCatching { Engines.evaluateAs<BaziChart>("bazi.chart", profile.engineInput()) }
             .onSuccess { chart = it; error = null }
-            .onFailure { error = it.message }
+            .onFailure { error = l("This reading could not be computed. Please try again.") }
     }
 
     if (editing) {
@@ -65,6 +67,7 @@ fun BaziScreen(navController: NavController) {
         error?.let { Panel(title = t("common.notComputed")) { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
 
         chart?.let { c ->
+            ExplainReading(Json.encodeToString(c))
             Panel {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     PillarColumn(t("bazi.hour"), c.pillars.hour, false, Modifier.weight(1f))
@@ -76,10 +79,10 @@ fun BaziScreen(navController: NavController) {
 
             Panel(title = t("bazi.dayMaster")) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(c.dayMaster.stem, style = Type.display(40), color = elementColour(c.dayMaster.element))
+                    Text(l(c.dayMaster.stem), style = Type.display(40), color = elementColour(c.dayMaster.element))
                     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         Text(
-                            "${c.dayMaster.yinYang}${c.dayMaster.element} · ${ELEMENT_NAMES[c.dayMaster.element] ?: ""}",
+                            "${l(c.dayMaster.yinYang)} · ${l(c.dayMaster.element)}",
                             style = Type.display(19), color = Palette.ink
                         )
                         Text(strengthLine(c.strength), style = Type.serif(16), color = Palette.inkSoft)
@@ -87,12 +90,12 @@ fun BaziScreen(navController: NavController) {
                 }
                 if (c.favourable.isNotEmpty()) {
                     Text(
-                        t("bazi.favourable") + ": " + c.favourable.joinToString(" · ") { "$it ${ELEMENT_NAMES[it] ?: ""}" },
+                        t("bazi.favourable") + ": " + c.favourable.joinToString(" · ") { l(it) },
                         style = Type.serif(16), color = Palette.inkSoft
                     )
                 }
                 Text(
-                    "This year ${c.currentYear.year} is ${c.currentYear.ganzhi}, which stands to the day master as ${c.currentYear.god}.",
+                    lf("Year {0}: {1}. Relationship to the day master: {2}.", c.currentYear.year.toString(), c.currentYear.ganzhi, c.currentYear.god),
                     style = Type.serif(16), color = Palette.inkMute
                 )
             }
@@ -109,11 +112,7 @@ fun BaziScreen(navController: NavController) {
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Text(element, style = Type.display(18), color = elementColour(element), modifier = Modifier.width(24.dp))
-                        Text(
-                            ELEMENT_NAMES[element] ?: "",
-                            style = Type.sans(13), color = Palette.inkMute, modifier = Modifier.width(54.dp)
-                        )
+                        Text(l(element), style = Type.display(18), color = elementColour(element), modifier = Modifier.widthIn(min = 48.dp))
                         Box(
                             Modifier.weight(1f).height(8.dp).clip(CircleShape).background(Color(0x0FFFFFFF))
                         ) {
@@ -133,8 +132,7 @@ fun BaziScreen(navController: NavController) {
 
             Panel(title = t("bazi.luck")) {
                 Text(
-                    "The first cycle begins at ${c.luckStart.years} years and ${c.luckStart.months} months, " +
-                        "counted from birth to the governing solar term.",
+                    lf("The first cycle begins {0} years and {1} months after birth, counted to the governing solar term.", c.luckStart.years.toString(), c.luckStart.months.toString()),
                     style = Type.serif(16), color = Palette.inkSoft
                 )
                 Row(
@@ -153,7 +151,7 @@ fun BaziScreen(navController: NavController) {
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(3.dp)
                         ) {
-                            Text(cycle.ganzhi, style = Type.display(21), color = if (current) Palette.gold else Palette.ink)
+                            Text(l(cycle.ganzhi), style = Type.display(21), color = if (current) Palette.gold else Palette.ink)
                             Text("${cycle.startAge}–${cycle.startAge + 9}", style = Type.sans(12), color = Palette.inkMute)
                             Text("${cycle.startYear}", style = Type.sans(11), color = Palette.inkMute)
                         }
@@ -163,13 +161,11 @@ fun BaziScreen(navController: NavController) {
 
             Panel(title = t("common.method")) {
                 Text(
-                    "子平法: the pillars are taken from the solar terms, not the lunar month, and the hour " +
-                        "pillar from true solar time. Your birth time was corrected by " +
-                        "${c.solarCorrectionMinutes.roundToInt()} minutes for longitude and the equation of time.",
+                    lf("The Ziping method uses solar terms and true solar time. Your birth time was corrected by {0} minutes for longitude and the equation of time.", c.solarCorrectionMinutes.roundToInt().toString()),
                     style = Type.serif(16), color = Palette.inkSoft
                 )
                 Text(
-                    "${c.lunar.text} · between ${c.lunar.jieQiBefore} and ${c.lunar.jieQiAfter}",
+                    lf("Between {0} and {1}", c.lunar.jieQiBefore, c.lunar.jieQiAfter),
                     style = Type.serif(15), color = Palette.inkMute
                 )
             }
@@ -185,8 +181,7 @@ private fun PillarColumn(label: String, pillar: Pillar, isDay: Boolean, modifier
             style = Type.sans(10, FontWeight.Bold).copy(letterSpacing = 1.4.sp),
             color = Palette.inkMute
         )
-        Text(
-            pillar.stemGod,
+        Text(l(pillar.stemGod),
             style = Type.sans(12, FontWeight.SemiBold),
             color = if (isDay) Palette.gold else Palette.inkSoft,
             maxLines = 1
@@ -200,13 +195,13 @@ private fun PillarColumn(label: String, pillar: Pillar, isDay: Boolean, modifier
                 .padding(vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(pillar.stem, style = Type.display(30), color = elementColour(pillar.element))
-            Text(pillar.branch, style = Type.display(30), color = Palette.ink)
+            Text(l(pillar.stem), style = Type.display(30), color = elementColour(pillar.element))
+            Text(l(pillar.branch), style = Type.display(30), color = Palette.ink)
         }
         pillar.hiddenStems.forEach {
-            Text("${it.stem}${it.god}", style = Type.sans(10), color = Palette.inkMute, maxLines = 1)
+            Text("${l(it.stem)} · ${l(it.god)}", style = Type.sans(10), color = Palette.inkMute, maxLines = 1)
         }
-        Text(pillar.naYin, style = Type.serif(12), color = Palette.inkMute, maxLines = 1)
+        Text(l(pillar.naYin), style = Type.serif(12), color = Palette.inkMute, maxLines = 1)
     }
 }
 

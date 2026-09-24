@@ -27,7 +27,7 @@ function common(language: ReadingLanguage, role: string): string[] {
   return [
     `You are LazyOracle, ${role}.`,
     'You receive a JSON object computed by a deterministic engine. Interpret only what it contains; never recompute, add or contradict a listed fact.',
-    `Write in ${LANGUAGE_NAME[language]}, in flowing prose. No headings, no bullet lists, no emoji.`,
+    `Write in ${LANGUAGE_NAME[language]}, in clear everyday prose. Explain unfamiliar terms briefly. Occasional useful traditional terms are fine, but do not repeatedly mix languages or duplicate translations. No headings, no emoji.`,
     'Name the specific facts as you use them, so the reader can see where each statement comes from. Every paragraph must rest on at least one listed fact.',
     'If a question was asked, answer that question directly in the first two sentences and return to it at the end. If none was asked, read the whole picture instead of inventing a concern.',
     'Prefer one concrete observation to three vague ones. Never pad, never repeat a fact in different words, and do not list what you are about to say before saying it.',
@@ -42,9 +42,12 @@ export interface IChingContext {
   language: ReadingLanguage
   question: string
   method: string
+  seed: number
+  lineVersesAvailable: false
+  readingFocus: { kind: string; from: string; positions: number[]; rule: string }
   primary: { number: number; name: string; judgement: string; keywords: string[]; sense: string; lower: string; upper: string }
   changingLines: { position: number; meaning: string }[]
-  resulting: { number: number; name: string; keywords: string[]; sense: string } | null
+  resulting: { number: number; name: string; judgement: string; keywords: string[]; sense: string; lower: string; upper: string } | null
   /** 互卦, 错卦, 综卦: what is hidden inside, its counterpart, and the other side's view. */
   related: { nuclear: string; opposite: string; inverse: string }
   /** Where the answer is read, by the classical rule. */
@@ -59,6 +62,9 @@ export function ichingContext(cast: IChingCast, language: ReadingLanguage): IChi
     language,
     question: cast.question,
     method: cast.method,
+    seed: cast.seed,
+    lineVersesAvailable: false,
+    readingFocus: { kind: cast.focus.kind, from: cast.focus.from, positions: cast.focus.positions, rule: cast.focus.rule[l] },
     primary: {
       number: cast.primary.number,
       name: name(cast.primary),
@@ -69,7 +75,7 @@ export function ichingContext(cast: IChingCast, language: ReadingLanguage): IChi
       upper: cast.primary.upperTrigram.name[l],
     },
     changingLines: cast.changingPositions.map((position) => ({ position, meaning: linePositionText(position, l) })),
-    resulting: cast.resulting ? { number: cast.resulting.number, name: name(cast.resulting), keywords: cast.resulting.keywords[l], sense: cast.resulting.sense[l] } : null,
+    resulting: cast.resulting ? { number: cast.resulting.number, name: name(cast.resulting), judgement: cast.resulting.judgement, keywords: cast.resulting.keywords[l], sense: cast.resulting.sense[l], lower: cast.resulting.lowerTrigram.name[l], upper: cast.resulting.upperTrigram.name[l] } : null,
     related: {
       nuclear: `${cast.nuclear.number} ${name(cast.nuclear)}`,
       opposite: `${cast.opposite.number} ${name(cast.opposite)}`,
@@ -84,7 +90,7 @@ export function ichingSystemPrompt(language: ReadingLanguage): string {
     ...common(language, 'a calm reader of the I Ching (周易)'),
     ...methodNote('iching', language),
     'Structure: name the primary hexagram and quote its judgement; explain its sense for the question; say where the answer is read, following the rule given in the facts, and read it there; then each changing line by position; then, if there is a resulting hexagram, what the situation is moving toward; mention the nuclear hexagram once, as what lies inside the situation; finish with two or three sentences of practical advice.',
-    'Follow the reading rule in the facts exactly. Do not move the answer to a different line.',
+    'Follow the reading rule in the facts exactly. Use readingFocus.positions in their supplied priority order from readingFocus.from; these are not necessarily the changing lines. Never infer still lines from yin/yang. Do not move the answer to a different line. Changing-line meanings here describe positions, not individual classical line verses. If the verse needed by the rule is absent, say that limitation briefly; never invent or misquote it.',
     'Length: 220 to 380 words.',
   ].join('\n')
 }

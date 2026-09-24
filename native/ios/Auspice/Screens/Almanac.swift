@@ -2,8 +2,8 @@ import SwiftUI
 
 // MARK: - What the rules hand back
 
-struct AlmanacDay: Decodable {
-    struct Lunar: Decodable {
+struct AlmanacDay: Codable {
+    struct Lunar: Codable {
         let text: String
         let yearGanZhi: String
         let monthGanZhi: String
@@ -11,25 +11,25 @@ struct AlmanacDay: Decodable {
         let zodiac: String
     }
 
-    struct SolarTermRef: Decodable {
+    struct SolarTermRef: Codable {
         let name: String
         let date: String
     }
 
-    struct Mansion: Decodable {
+    struct Mansion: Codable {
         let name: String
         let animal: String
         let direction: String
         let beast: String
     }
 
-    struct Spirit: Decodable {
+    struct Spirit: Codable {
         let name: String
         let road: String
         let luck: String
     }
 
-    struct Hour: Decodable, Identifiable {
+    struct Hour: Codable, Identifiable {
         let ganzhi: String
         let range: String
         let spirit: String
@@ -37,8 +37,8 @@ struct AlmanacDay: Decodable {
         var id: String { ganzhi + range }
     }
 
-    struct Judgement: Decodable {
-        struct Basis: Decodable {
+    struct Judgement: Codable {
+        struct Basis: Codable {
             let zh: String
             let en: String
         }
@@ -68,8 +68,8 @@ struct AlmanacDay: Decodable {
     let judgement: Judgement?
 }
 
-struct AlmanacActivity: Decodable, Identifiable {
-    struct Name: Decodable {
+struct AlmanacActivity: Codable, Identifiable {
+    struct Name: Codable {
         let zh: String
         let en: String
     }
@@ -104,7 +104,7 @@ final class AlmanacStore {
             day = try Engines.shared.evaluate("almanac.day", input, as: AlmanacDay.self)
             error = nil
         } catch {
-            self.error = error.localizedDescription
+            self.error = l("This reading could not be computed. Please try again.")
         }
     }
 
@@ -137,6 +137,7 @@ struct AlmanacScreen: View {
                 listsPanel(day)
                 hoursPanel(day)
                 tablesPanel(day)
+                ExplainReading(result: day).id(day.date)
             }
         }
         .onAppear { if store.day == nil { store.load() } }
@@ -154,7 +155,7 @@ struct AlmanacScreen: View {
                     .font(Typeface.display(18))
                     .foregroundStyle(Palette.ink)
                 if let lunar = store.day?.lunar.text {
-                    Text(lunar).font(Typeface.serif(15)).foregroundStyle(Palette.inkMute)
+                    Text(lunarDateText(lunar)).font(Typeface.serif(15)).foregroundStyle(Palette.inkMute)
                 }
             }
             Spacer()
@@ -172,11 +173,11 @@ struct AlmanacScreen: View {
                 Text(standingWord(day.standing))
                     .font(Typeface.display(26))
                     .foregroundStyle(standingColour(day.standing))
-                Text(day.lunar.dayGanZhi + "日")
+                Text(l(day.lunar.dayGanZhi))
                     .font(Typeface.serif(18))
                     .foregroundStyle(Palette.inkSoft)
                 Spacer()
-                Text(day.dayOfficer + "日")
+                Text(l(day.dayOfficer))
                     .font(Typeface.sans(13, weight: .bold))
                     .foregroundStyle(Palette.gold)
                     .padding(.horizontal, 10)
@@ -199,7 +200,7 @@ struct AlmanacScreen: View {
                         store.load()
                     } label: {
                         HStack(spacing: 6) {
-                            Text(Localisation.shared.code.hasPrefix("zh") ? item.name.zh : item.name.en)
+                            Text(l(item.name.en))
                         }
                         .font(Typeface.sans(14, weight: .semibold))
                         .padding(.horizontal, 14)
@@ -223,13 +224,9 @@ struct AlmanacScreen: View {
                     Text(verdictWord(judgement.verdict))
                         .font(Typeface.display(22))
                         .foregroundStyle(verdictColour(judgement.verdict))
-                    Text(judgement.basis.en)
+                    Text(judgementLine(judgement, day))
                         .font(Typeface.serif(17))
                         .foregroundStyle(Palette.inkSoft)
-                        .fixedSize(horizontal: false, vertical: true)
-                    Text(judgement.basis.zh)
-                        .font(Typeface.serif(16))
-                        .foregroundStyle(Palette.inkMute)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 .padding(.top, 4)
@@ -242,9 +239,9 @@ struct AlmanacScreen: View {
     private func listsPanel(_ day: AlmanacDay) -> some View {
         Panel {
             HStack(alignment: .top, spacing: 14) {
-                termColumn("宜", t("common.suits"), day.yi, Palette.gold)
+                termColumn("", t("common.suits"), day.yi, Palette.gold)
                 Divider().overlay(Palette.line)
-                termColumn("忌", t("common.avoid"), day.ji, Palette.rose)
+                termColumn("", t("common.avoid"), day.ji, Palette.rose)
             }
         }
     }
@@ -252,7 +249,7 @@ struct AlmanacScreen: View {
     private func termColumn(_ mark: String, _ label: String, _ terms: [String], _ colour: Color) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 8) {
-                Text(mark)
+                Text(l(mark))
                     .font(Typeface.display(20))
                     .foregroundStyle(colour)
                 Text(label.uppercased())
@@ -274,7 +271,7 @@ struct AlmanacScreen: View {
             VStack(spacing: 0) {
                 ForEach(day.hours) { hour in
                     HStack(spacing: 10) {
-                        Text(hour.ganzhi)
+                        Text(l(hour.ganzhi))
                             .font(Typeface.display(16))
                             .foregroundStyle(hour.lucky ? Palette.gold : Palette.inkMute)
                             .frame(width: 44, alignment: .leading)
@@ -282,7 +279,7 @@ struct AlmanacScreen: View {
                             .font(Typeface.sans(14))
                             .foregroundStyle(Palette.inkSoft)
                             .frame(width: 104, alignment: .leading)
-                        Text(hour.spirit)
+                        Text(l(hour.spirit))
                             .font(Typeface.serif(16))
                             .foregroundStyle(Palette.inkSoft)
                         Spacer()
@@ -301,30 +298,27 @@ struct AlmanacScreen: View {
 
     private func tablesPanel(_ day: AlmanacDay) -> some View {
         Panel(title: t("almanac.tables")) {
-            row("干支", "\(day.lunar.yearGanZhi)年 \(day.lunar.monthGanZhi)月 \(day.lunar.dayGanZhi)日 · 属\(day.lunar.zodiac)")
-            row("建除", "\(day.dayOfficer)日")
-            row("二十八宿", "\(day.mansion.name)\(day.mansion.animal) · \(day.mansion.direction)方\(day.mansion.beast)")
-            row("值日", "\(day.spirit.name) · \(day.spirit.road) · \(day.spirit.luck)")
-            row("冲煞", "冲\(day.clash) · 煞\(day.harmDirection)")
-            if let term = day.solarTerm {
-                row("节气", term)
-            } else {
-                row("下一节气", "\(day.nextSolarTerm.name) · \(day.nextSolarTerm.date)")
-            }
-            if !day.auspicious.isEmpty { row("吉神", day.auspicious.joined(separator: " ")) }
-            if !day.inauspicious.isEmpty { row("凶煞", day.inauspicious.joined(separator: " ")) }
-            if !day.pengzu.isEmpty { row("彭祖百忌", day.pengzu.joined(separator: "，")) }
+            row(l("Stems and branches"), lf("Year {0} · Month {1} · Day {2} · Zodiac {3}", day.lunar.yearGanZhi, day.lunar.monthGanZhi, day.lunar.dayGanZhi, day.lunar.zodiac))
+            row(l("Day officer"), l(day.dayOfficer))
+            row(l("Lunar mansion"), [day.mansion.name, day.mansion.animal, day.mansion.direction, day.mansion.beast].map(l).joined(separator: " · "))
+            row(l("Day spirit"), [day.spirit.name, day.spirit.road, day.spirit.luck].map(l).joined(separator: " · "))
+            row(l("Clash and direction"), lf("Clash: {0} · Direction: {1}", day.clash, day.harmDirection))
+            if let term = day.solarTerm { row(l("Solar term"), l(term)) }
+            else { row(l("Next solar term"), "\(l(day.nextSolarTerm.name)) · \(day.nextSolarTerm.date)") }
+            if !day.auspicious.isEmpty { row(l("Favourable spirits"), day.auspicious.map(l).joined(separator: " · ")) }
+            if !day.inauspicious.isEmpty { row(l("Unfavourable spirits"), day.inauspicious.map(l).joined(separator: " · ")) }
+            if !day.pengzu.isEmpty { row(l("Peng Zu taboos"), day.pengzu.map(l).joined(separator: " · ")) }
         }
     }
 
     private func row(_ label: String, _ value: String) -> some View {
         HStack(alignment: .top, spacing: 12) {
-            Text(label)
+            Text(l(label))
                 .font(Typeface.sans(12, weight: .bold))
                 .tracking(1.4)
                 .foregroundStyle(Palette.inkMute)
                 .frame(width: 76, alignment: .leading)
-            Text(value)
+            Text(l(value))
                 .font(Typeface.serif(16))
                 .foregroundStyle(Palette.inkSoft)
                 .fixedSize(horizontal: false, vertical: true)
@@ -350,8 +344,14 @@ struct AlmanacScreen: View {
     }
 
     private func standingLine(_ day: AlmanacDay) -> String {
-        "\(day.spirit.name) governs the day on the \(day.spirit.road), and the officer is \(day.dayOfficer). "
-        + "It clashes with the \(day.clash), and its harm stands to the \(day.harmDirection)."
+        lf("{0} governs the day on the {1}. The day officer is {2}. Clash: {3}; direction: {4}.", day.spirit.name, day.spirit.road, day.dayOfficer, day.clash, day.harmDirection)
+    }
+
+    private func judgementLine(_ judgement: AlmanacDay.Judgement, _ day: AlmanacDay) -> String {
+        if let matched = judgement.matched {
+            return lf(judgement.verdict == "avoid" ? "The almanac lists {0} among activities to avoid." : "The almanac lists {0} among suitable activities.", matched)
+        }
+        return lf("This activity is not explicitly listed. The day officer is {0}; the day spirit is {1}.", day.dayOfficer, day.spirit.name)
     }
 
     private func verdictWord(_ verdict: String) -> String {

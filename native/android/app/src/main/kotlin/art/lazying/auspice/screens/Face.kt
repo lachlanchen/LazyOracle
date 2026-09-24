@@ -11,6 +11,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,11 +29,11 @@ import kotlin.math.roundToInt
 import kotlinx.serialization.json.buildJsonObject
 
 private val COURT_NAMES = mapOf(
-    "upper" to "上停 Upper court", "middle" to "中停 Middle court", "lower" to "下停 Lower court"
+    "upper" to "Upper court", "middle" to "Middle court", "lower" to "Lower court"
 )
 private val ELEMENT_FACES = mapOf(
-    "wood" to "木形 Wood", "fire" to "火形 Fire", "earth" to "土形 Earth",
-    "metal" to "金形 Metal", "water" to "水形 Water"
+    "wood" to "Wood", "fire" to "Fire", "earth" to "Earth",
+    "metal" to "Metal", "water" to "Water"
 )
 
 @Composable
@@ -55,10 +57,10 @@ fun FaceScreen(navController: NavController) {
     LaunchedEffect(reads) {
         if (reads == 0) return@LaunchedEffect
         val points = session.landmarksJson()
-        if (points.size < 400) { error = "No face is in view."; return@LaunchedEffect }
+        if (points.size < 400) { error = l("No face is in view."); return@LaunchedEffect }
         runCatching {
             Engines.evaluateAs<FaceFeatures>("face.features", buildJsonObject { put("landmarks", points) })
-        }.onSuccess { features = it; Router.face = it; error = null }.onFailure { error = it.message }
+        }.onSuccess { features = it; Router.face = it; error = null }.onFailure { error = l("This reading could not be computed. Please try again.") }
     }
 
     ScreenScaffold(
@@ -115,11 +117,10 @@ fun FaceScreen(navController: NavController) {
         error?.let { Panel(title = t("common.notComputed")) { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
 
         features?.let { f ->
+            ExplainReading(Json.encodeToString(f))
             Panel(title = t("face.element")) {
-                Text(ELEMENT_FACES[f.element] ?: f.element, style = Type.display(28), color = Palette.gold)
-                Text(
-                    "Read from the height of the face against its width, and from how the jaw and forehead " +
-                        "stand against the cheekbones.",
+                Text(l(ELEMENT_FACES[f.element] ?: f.element), style = Type.display(28), color = Palette.gold)
+                Text(l("Read from the height of the face against its width, and from how the jaw and forehead stand against the cheekbones."),
                     style = Type.serif(16), color = Palette.inkSoft
                 )
             }
@@ -131,8 +132,7 @@ fun FaceScreen(navController: NavController) {
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Text(
-                            COURT_NAMES[court.court] ?: court.court,
+                        Text(l(COURT_NAMES[court.court] ?: court.court),
                             style = Type.serif(16), color = Palette.ink,
                             modifier = Modifier.width(150.dp)
                         )
@@ -151,20 +151,18 @@ fun FaceScreen(navController: NavController) {
                         )
                     }
                 }
-                Text(
-                    "An even face gives each court a third. 上停 is judged for early life, 中停 for the middle " +
-                        "years, 下停 for the later ones.",
+                Text(l("Each court occupies one third of an evenly proportioned face. The upper court represents early life, the middle court the middle years, and the lower court later life."),
                     style = Type.sans(13), color = Palette.inkMute
                 )
             }
 
             Panel(title = t("face.proportion")) {
-                Measure("Eyes across the face (ideal 5.00)", String.format("%.2f", f.eyesAcross))
-                Measure("Gap between the eyes (ideal 1.00)", String.format("%.2f", f.eyeGap))
-                Measure("Height to width", String.format("%.2f", f.heightRatio))
-                Measure("Jaw to cheekbones", String.format("%.2f", f.jawRatio))
-                Measure("Forehead to cheekbones", String.format("%.2f", f.foreheadRatio))
-                Measure("Symmetry (ideal 1.000)", String.format("%.3f", f.symmetry))
+                Measure(l("Eyes across the face") + " (5.00)", String.format("%.2f", f.eyesAcross))
+                Measure(l("Gap between the eyes") + " (1.00)", String.format("%.2f", f.eyeGap))
+                Measure(l("Height to width"), String.format("%.2f", f.heightRatio))
+                Measure(l("Jaw to cheekbones"), String.format("%.2f", f.jawRatio))
+                Measure(l("Forehead to cheekbones"), String.format("%.2f", f.foreheadRatio))
+                Measure(l("Symmetry") + " (1.000)", String.format("%.3f", f.symmetry))
             }
 
             Panel(title = t("face.palaces")) {
@@ -174,30 +172,25 @@ fun FaceScreen(navController: NavController) {
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Text(
-                            palace.palace, style = Type.serif(17),
+                        Text(l(palace.palace), style = Type.serif(17),
                             color = if (palace.state == "generous") Palette.gold else Palette.ink,
                             modifier = Modifier.width(70.dp)
                         )
-                        Text(palace.state, style = Type.sans(13, FontWeight.SemiBold), color = Palette.inkSoft)
+                        Text(l(palace.state), style = Type.sans(13, FontWeight.SemiBold), color = Palette.inkSoft)
                         Spacer(Modifier.weight(1f))
                         Text(String.format("%.2f", palace.value), style = Type.sans(13), color = Palette.inkMute)
                     }
                 }
                 if (f.strongPalaces.isNotEmpty()) {
                     Text(
-                        "Standing out: " + f.strongPalaces.joinToString("、"),
+                        lf("Standing out: {0}", f.strongPalaces.joinToString(" · ") { l(it) }),
                         style = Type.serif(16), color = Palette.gold
                     )
                 }
             }
 
             Panel(title = t("common.method")) {
-                Text(
-                    "三停五眼: the face is divided at the hairline, the brows, the base of the nose and the " +
-                        "chin, and its width is counted in eye-widths. Eight of the twelve palaces are measured " +
-                        "here; the rest ask for things a landmark mesh cannot see, and the app does not pretend " +
-                        "otherwise.",
+                Text(l("The three-court, five-eye method divides the face at the hairline, brows, base of the nose and chin. Width is measured in eye-widths. Eight facial regions can be measured from landmarks; the other four are not assessed."),
                     style = Type.serif(16), color = Palette.inkSoft
                 )
             }

@@ -25,6 +25,7 @@ struct BaziScreen: View {
             }
 
             if let chart {
+                ExplainReading(result: chart)
                 pillarsPanel(chart)
                 dayMasterPanel(chart)
                 elementsPanel(chart)
@@ -55,16 +56,16 @@ struct BaziScreen: View {
                 .font(Typeface.sans(10, weight: .bold))
                 .tracking(1.4)
                 .foregroundStyle(Palette.inkMute)
-            Text(pillar.stemGod)
+            Text(l(pillar.stemGod))
                 .font(Typeface.sans(12, weight: .semibold))
                 .foregroundStyle(isDay ? Palette.gold : Palette.inkSoft)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
             VStack(spacing: 2) {
-                Text(pillar.stem)
+                Text(l(pillar.stem))
                     .font(Typeface.display(30))
                     .foregroundStyle(elementColour(pillar.element))
-                Text(pillar.branch)
+                Text(l(pillar.branch))
                     .font(Typeface.display(30))
                     .foregroundStyle(Palette.ink)
             }
@@ -80,14 +81,14 @@ struct BaziScreen: View {
             )
             VStack(spacing: 1) {
                 ForEach(pillar.hiddenStems) { hidden in
-                    Text("\(hidden.stem)\(hidden.god)")
+                    Text("\(l(hidden.stem)) · \(l(hidden.god))")
                         .font(Typeface.sans(10))
                         .foregroundStyle(Palette.inkMute)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                 }
             }
-            Text(pillar.naYin)
+            Text(l(pillar.naYin))
                 .font(Typeface.serif(12))
                 .foregroundStyle(Palette.inkMute)
                 .lineLimit(1)
@@ -99,11 +100,11 @@ struct BaziScreen: View {
     private func dayMasterPanel(_ chart: BaziChart) -> some View {
         Panel(title: t("bazi.dayMaster")) {
             HStack(alignment: .firstTextBaseline, spacing: 10) {
-                Text(chart.dayMaster.stem)
+                Text(l(chart.dayMaster.stem))
                     .font(Typeface.display(40))
                     .foregroundStyle(elementColour(chart.dayMaster.element))
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("\(chart.dayMaster.yinYang)\(chart.dayMaster.element) · \(elementNames[chart.dayMaster.element] ?? "")")
+                    Text("\(l(chart.dayMaster.yinYang)) · \(l(chart.dayMaster.element))")
                         .font(Typeface.display(19))
                         .foregroundStyle(Palette.ink)
                     Text(strengthLine(chart))
@@ -113,12 +114,12 @@ struct BaziScreen: View {
                 Spacer(minLength: 0)
             }
             if !chart.favourable.isEmpty {
-                Text(t("bazi.favourable") + ": " + chart.favourable.map { "\($0) \(elementNames[$0] ?? "")" }.joined(separator: " · "))
+                Text(t("bazi.favourable") + ": " + chart.favourable.map(l).joined(separator: " · "))
                     .font(Typeface.serif(16))
                     .foregroundStyle(Palette.inkSoft)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            Text("This year \(chart.currentYear.year) is \(chart.currentYear.ganzhi), which stands to the day master as \(chart.currentYear.god).")
+            Text(lf("Year {0}: {1}. Relationship to the day master: {2}.", String(chart.currentYear.year), chart.currentYear.ganzhi, chart.currentYear.god))
                 .font(Typeface.serif(16))
                 .foregroundStyle(Palette.inkMute)
                 .fixedSize(horizontal: false, vertical: true)
@@ -130,14 +131,10 @@ struct BaziScreen: View {
             VStack(spacing: 10) {
                 ForEach(elementOrder, id: \.self) { element in
                     HStack(spacing: 10) {
-                        Text(element)
+                        Text(l(element))
                             .font(Typeface.display(18))
                             .foregroundStyle(elementColour(element))
-                            .frame(width: 24)
-                        Text(elementNames[element] ?? "")
-                            .font(Typeface.sans(13))
-                            .foregroundStyle(Palette.inkMute)
-                            .frame(width: 52, alignment: .leading)
+                            .frame(minWidth: 48, alignment: .leading)
                         GeometryReader { geometry in
                             ZStack(alignment: .leading) {
                                 Capsule().fill(Color.white.opacity(0.06))
@@ -162,7 +159,7 @@ struct BaziScreen: View {
 
     private func luckPanel(_ chart: BaziChart) -> some View {
         Panel(title: t("bazi.luck")) {
-            Text("The first cycle begins at \(chart.luckStart.years) years and \(chart.luckStart.months) months, counted from birth to the governing solar term.")
+            Text(lf("The first cycle begins {0} years and {1} months after birth, counted to the governing solar term.", String(chart.luckStart.years), String(chart.luckStart.months)))
                 .font(Typeface.serif(16))
                 .foregroundStyle(Palette.inkSoft)
                 .fixedSize(horizontal: false, vertical: true)
@@ -170,7 +167,7 @@ struct BaziScreen: View {
                 HStack(spacing: 10) {
                     ForEach(chart.luckCycles) { cycle in
                         VStack(spacing: 4) {
-                            Text(cycle.ganzhi)
+                            Text(l(cycle.ganzhi))
                                 .font(Typeface.display(21))
                                 .foregroundStyle(current(cycle) ? Palette.gold : Palette.ink)
                             Text("\(cycle.startAge)–\(cycle.startAge + 9)")
@@ -199,11 +196,11 @@ struct BaziScreen: View {
 
     private func methodPanel(_ chart: BaziChart) -> some View {
         Panel(title: t("common.method")) {
-            Text("子平法: the pillars are taken from the solar terms, not the lunar month, and the hour pillar from true solar time. Your birth time was corrected by \(Int(chart.solarCorrectionMinutes.rounded())) minutes for longitude and the equation of time.")
+            Text(lf("The Ziping method uses solar terms and true solar time. Your birth time was corrected by {0} minutes for longitude and the equation of time.", String(Int(chart.solarCorrectionMinutes.rounded()))))
                 .font(Typeface.serif(16))
                 .foregroundStyle(Palette.inkSoft)
                 .fixedSize(horizontal: false, vertical: true)
-            Text("\(chart.lunar.text) · between \(chart.lunar.jieQiBefore) and \(chart.lunar.jieQiAfter)")
+            Text(lf("Between {0} and {1}", chart.lunar.jieQiBefore, chart.lunar.jieQiAfter))
                 .font(Typeface.serif(15))
                 .foregroundStyle(Palette.inkMute)
                 .fixedSize(horizontal: false, vertical: true)
@@ -244,7 +241,7 @@ struct BaziScreen: View {
             chart = try Engines.shared.evaluate("bazi.chart", store.profile.engineInput, as: BaziChart.self)
             error = nil
         } catch {
-            self.error = error.localizedDescription
+            self.error = l("This reading could not be computed. Please try again.")
         }
     }
 }

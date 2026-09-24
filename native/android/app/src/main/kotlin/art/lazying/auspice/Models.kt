@@ -76,7 +76,7 @@ data class TarotCard(
     val arcana: String = "",
     val number: Int? = null,
     val suit: String? = null,
-    val rank: String? = null,
+    val rank: kotlinx.serialization.json.JsonPrimitive? = null,
     val label: String = "",
     val element: String = "",
     val text: TarotTexts = TarotTexts()
@@ -139,7 +139,7 @@ data class Hexagram(
 data class CastLine(val value: Int = 0, val yang: Boolean = false, val changing: Boolean = false)
 
 @Serializable
-data class ReadingFocus(val kind: String = "", val explain: Bilingual? = null)
+data class ReadingFocus(val kind: String = "", val rule: Bilingual = Bilingual(), val from: String = "", val positions: List<Int> = emptyList())
 
 @Serializable
 data class IChingCast(
@@ -309,7 +309,8 @@ data class PalmFeatures(
     val openness: Double = 0.0,
     val fingers: List<FingerTrait> = emptyList(),
     val palaces: List<PalaceReading> = emptyList(),
-    val strongPalaces: List<String> = emptyList()
+    val strongPalaces: List<String> = emptyList(),
+    val lines: LineTraits = LineTraits()
 )
 
 @Serializable

@@ -17,6 +17,7 @@ source = source.replace('.appendingPathComponent("Auspice", isDirectory: true)',
 wire = (root/'native/ios/Auspice/Relay.swift').read_text().split('    // MARK: Wire format')[1].split('    private struct Delta')[0]
 stubs = r'''
 func t(_ key: String) -> String { key }
+func readingLanguageInstruction() -> String { "Write mainly in en." }
 enum AgentTools {
     static let maxSteps = 6
     struct Outcome { var label: String; var output: String; var ok: Bool }
@@ -96,6 +97,7 @@ if '--live' in sys.argv:
     profile = (root/'native/ios/Auspice/Profile.swift').read_text().split('@Observable')[0].replace('import SwiftUI', '')
     stubs = relay + engines + profile + r'''
 func t(_ key: String) -> String { key }
+func readingLanguageInstruction() -> String { "Write mainly in en." }
 class ProfileStore { static let shared = ProfileStore(); var profile = BirthProfile() }
 class Router {
     static let shared = Router()

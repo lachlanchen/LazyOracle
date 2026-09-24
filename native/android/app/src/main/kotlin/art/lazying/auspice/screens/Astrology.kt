@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -40,7 +42,7 @@ fun AstrologyScreen(navController: NavController) {
         if (!profile.isComplete) { chart = null; return@LaunchedEffect }
         runCatching { Engines.evaluateAs<NatalChart>("astrology.chart", profile.engineInput()) }
             .onSuccess { chart = it; error = null }
-            .onFailure { error = it.message }
+            .onFailure { error = l("This reading could not be computed. Please try again.") }
         report = runCatching {
             Engines.evaluateAs<TransitReport>(
                 "astrology.transits",
@@ -62,6 +64,7 @@ fun AstrologyScreen(navController: NavController) {
         error?.let { Panel(title = t("common.notComputed")) { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
 
         chart?.let { c ->
+            ExplainReading(Json.encodeToString(c))
             Panel {
                 ChartWheel(c)
                 Row(
@@ -84,8 +87,7 @@ fun AstrologyScreen(navController: NavController) {
                             Zodiac.bodySymbols[placement.body] ?: "",
                             style = Type.display(21), color = Palette.gold, modifier = Modifier.width(26.dp)
                         )
-                        Text(
-                            placement.body,
+                        Text(l(placement.body),
                             style = Type.sans(15, FontWeight.SemiBold), color = Palette.ink,
                             modifier = Modifier.width(80.dp)
                         )
@@ -111,7 +113,7 @@ fun AstrologyScreen(navController: NavController) {
                                 style = Type.display(18), color = aspectColour(aspect.type)
                             )
                             Text(
-                                "${aspect.a} ${aspect.type} ${aspect.b}",
+                                "${l(aspect.a)} · ${l(aspect.type)} · ${l(aspect.b)}",
                                 style = Type.serif(15), color = Palette.inkSoft
                             )
                             Spacer(Modifier.weight(1f))
@@ -134,7 +136,7 @@ fun AstrologyScreen(navController: NavController) {
                                 style = Type.display(18), color = aspectColour(transit.type)
                             )
                             Text(
-                                "transiting ${transit.transiting} ${transit.type} natal ${transit.natal}",
+                                lf("Transiting {0} · {1} · natal {2}", transit.transiting, transit.type, transit.natal),
                                 style = Type.serif(15), color = Palette.inkSoft
                             )
                         }
@@ -144,9 +146,7 @@ fun AstrologyScreen(navController: NavController) {
 
             Panel(title = t("common.method")) {
                 Text(
-                    "Positions come from the astronomy engine for the exact instant of birth in UTC, with " +
-                        "whole-sign houses counted from the ascendant. The moon stands at " +
-                        "${(c.moonPhase * 100).roundToInt()}% of its cycle.",
+                    lf("Positions are calculated at the birth instant in UTC, using whole-sign houses from the ascendant. Lunar cycle: {0}%.", (c.moonPhase * 100).roundToInt().toString()),
                     style = Type.serif(16), color = Palette.inkSoft
                 )
             }

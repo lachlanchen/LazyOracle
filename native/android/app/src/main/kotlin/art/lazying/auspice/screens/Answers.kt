@@ -8,6 +8,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -37,7 +39,7 @@ fun AnswersScreen(navController: NavController) {
                 put("book", JsonPrimitive(book))
                 if (question.isNotBlank()) put("question", JsonPrimitive(question))
             })
-        }.onSuccess { opening = it; error = null }.onFailure { error = it.message }
+        }.onSuccess { opening = it; error = null }.onFailure { error = l("This reading could not be computed. Please try again.") }
     }
 
     val turn by animateFloatAsState(if (opening != null) 0f else 92f, tween(700), label = "page")
@@ -51,7 +53,7 @@ fun AnswersScreen(navController: NavController) {
         Panel {
             FlowRowOf {
                 Chip(t("practice.answers"), null, book == "answers") { book = "answers" }
-                Chip(t("answers.whatAsking"), null, book == "questions") { book = "questions" }
+                Chip(l("Book of Questions"), null, book == "questions") { book = "questions" }
             }
             FieldLabel(t("answers.whatAsking"))
             AuspiceField(question) { question = it }
@@ -61,6 +63,7 @@ fun AnswersScreen(navController: NavController) {
         error?.let { Panel(title = t("common.notComputed")) { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
 
         opening?.let { page ->
+            ExplainReading(Json.encodeToString(page))
             Column(
                 Modifier
                     .fillMaxWidth()
@@ -75,8 +78,7 @@ fun AnswersScreen(navController: NavController) {
                     style = Type.sans(11, FontWeight.Bold).copy(letterSpacing = 2.4.sp),
                     color = Color(0xFF8A6A22)
                 )
-                Text(page.page.en, style = Type.display(27), color = Color(0xFF2A1E06))
-                Text(page.page.zh, style = Type.serif(21), color = Color(0xFF5A4413))
+                Text(l(page.page.en), style = Type.display(27), color = Color(0xFF2A1E06))
                 if (page.question.isNotBlank()) {
                     HorizontalDivider(color = Color(0x4D8A6A22))
                     Text(

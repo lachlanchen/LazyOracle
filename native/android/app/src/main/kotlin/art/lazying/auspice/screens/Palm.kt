@@ -11,6 +11,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,8 +29,8 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 
 private val FINGER_NAMES = mapOf(
-    "jupiter" to "Index · 木星丘", "saturn" to "Middle · 土星丘",
-    "apollo" to "Ring · 太阳丘", "mercury" to "Little · 水星丘"
+    "jupiter" to "Index finger", "saturn" to "Middle finger",
+    "apollo" to "Ring finger", "mercury" to "Little finger"
 )
 
 @Composable
@@ -53,7 +55,7 @@ fun PalmScreen(navController: NavController) {
     LaunchedEffect(reads) {
         if (reads == 0) return@LaunchedEffect
         val points = session.landmarksJson()
-        if (points.size < 21) { error = "No hand is in view."; return@LaunchedEffect }
+        if (points.size < 21) { error = l("No hand is in view."); return@LaunchedEffect }
         runCatching {
             Engines.evaluateAs<PalmFeatures>("palm.features", buildJsonObject {
                 put("landmarks", points)
@@ -64,7 +66,7 @@ fun PalmScreen(navController: NavController) {
                     put("fate", JsonPrimitive(lines.fate))
                 })
             })
-        }.onSuccess { features = it; Router.palm = it; error = null }.onFailure { error = it.message }
+        }.onSuccess { features = it; Router.palm = it; error = null }.onFailure { error = l("This reading could not be computed. Please try again.") }
     }
 
     ScreenScaffold(
@@ -119,16 +121,16 @@ fun PalmScreen(navController: NavController) {
                 t("palm.linesNote"),
                 style = Type.serif(16), color = Palette.inkSoft
             )
-            LineChoice("Heart line ends", listOf("index" to "Under the index", "middle" to "Under the middle", "between" to "Between them"), lines.heart) {
+            LineChoice(l("Heart line ends"), listOf("index" to "Under the index", "middle" to "Under the middle", "between" to "Between them"), lines.heart) {
                 lines = lines.copy(heart = it); if (features != null) reads++
             }
-            LineChoice("Head line", listOf("straight" to "Straight", "curved" to "Curved"), lines.head) {
+            LineChoice(l("Head line"), listOf("straight" to "Straight", "curved" to "Curved"), lines.head) {
                 lines = lines.copy(head = it); if (features != null) reads++
             }
-            LineChoice("Life line", listOf("wide" to "Sweeps wide", "close" to "Hugs the thumb"), lines.life) {
+            LineChoice(l("Life line"), listOf("wide" to "Sweeps wide", "close" to "Hugs the thumb"), lines.life) {
                 lines = lines.copy(life = it); if (features != null) reads++
             }
-            LineChoice("Fate line", listOf("present" to "Present", "absent" to "Absent", "unsure" to "Not sure"), lines.fate) {
+            LineChoice(l("Fate line"), listOf("present" to "Present", "absent" to "Absent", "unsure" to "Not sure"), lines.fate) {
                 lines = lines.copy(fate = it); if (features != null) reads++
             }
         }
@@ -136,20 +138,21 @@ fun PalmScreen(navController: NavController) {
         error?.let { Panel(title = t("common.notComputed")) { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
 
         features?.let { f ->
+            ExplainReading(Json.encodeToString(f))
             Panel(title = t("palm.hand")) {
-                Measure("Shape", f.shape.replace("-", " ").replaceFirstChar { it.uppercase() })
-                Measure("Palm width to length", String.format("%.2f", f.palmRatio))
-                Measure("Fingers to palm", String.format("%.2f", f.fingerRatio))
-                Measure("Index to ring", String.format("%.2f", f.indexToRing))
-                Measure("Thumb angle", String.format("%.0f°", f.thumbAngle))
-                Measure("Openness", String.format("%.2f", f.openness))
+                Measure(l("Shape"), l(f.shape.replaceFirstChar { it.uppercase() }))
+                Measure(l("Palm width to length"), String.format("%.2f", f.palmRatio))
+                Measure(l("Fingers to palm"), String.format("%.2f", f.fingerRatio))
+                Measure(l("Index to ring"), String.format("%.2f", f.indexToRing))
+                Measure(l("Thumb angle"), String.format("%.0f°", f.thumbAngle))
+                Measure(l("Openness"), String.format("%.2f", f.openness))
             }
             Panel(title = t("palm.fingers")) {
                 f.fingers.forEach { finger ->
                     Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Text(FINGER_NAMES[finger.finger] ?: finger.finger, style = Type.serif(16), color = Palette.ink)
+                        Text(l(FINGER_NAMES[finger.finger] ?: finger.finger), style = Type.serif(16), color = Palette.ink)
                         Spacer(Modifier.weight(1f))
-                        Text(finger.length, style = Type.sans(13, FontWeight.SemiBold), color = Palette.gold)
+                        Text(l(finger.length), style = Type.sans(13, FontWeight.SemiBold), color = Palette.gold)
                         Spacer(Modifier.width(8.dp))
                         Text(String.format("%.2f", finger.ratioToSaturn), style = Type.sans(13), color = Palette.inkMute)
                     }
@@ -162,8 +165,7 @@ fun PalmScreen(navController: NavController) {
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Text(
-                            palace.palace, style = Type.serif(17),
+                        Text(l(palace.palace), style = Type.serif(17),
                             color = if (palace.state == "full") Palette.gold else Palette.ink,
                             modifier = Modifier.width(74.dp)
                         )
@@ -176,22 +178,18 @@ fun PalmScreen(navController: NavController) {
                                     .background(if (palace.state == "full") Palette.gold else Palette.inkMute)
                             )
                         }
-                        Text(palace.state, style = Type.sans(12), color = Palette.inkMute, modifier = Modifier.width(44.dp))
+                        Text(l(palace.state), style = Type.sans(12), color = Palette.inkMute, modifier = Modifier.width(44.dp))
                     }
                 }
                 if (f.strongPalaces.isNotEmpty()) {
                     Text(
-                        "Standing out: " + f.strongPalaces.joinToString("、"),
+                        lf("Standing out: {0}", f.strongPalaces.joinToString(" · ") { l(it) }),
                         style = Type.serif(16), color = Palette.gold
                     )
                 }
             }
             Panel(title = t("common.method")) {
-                Text(
-                    "Proportions follow classical palmistry: the palm is square when its width reaches 0.86 of " +
-                        "its length, the fingers long at 0.78 of the palm, and each finger is measured against " +
-                        "the middle one. The mounts come from how far each stands out of the palm plane, which " +
-                        "the landmarker reports as depth.",
+                Text(l("Proportions follow classical palmistry: the palm is square when its width reaches 0.86 of its length, the fingers long at 0.78 of the palm, and each finger is measured against the middle one. The mounts come from how far each stands out of the palm plane, which the landmarker reports as depth."),
                     style = Type.serif(16), color = Palette.inkSoft
                 )
             }
@@ -205,7 +203,7 @@ private fun LineChoice(label: String, options: List<Pair<String, String>>, selec
         FieldLabel(label)
         FlowRowOf {
             options.forEach { (key, title) ->
-                Chip(title, null, selected == key) { onPick(key) }
+                Chip(l(title), null, selected == key) { onPick(key) }
             }
         }
     }
@@ -214,8 +212,8 @@ private fun LineChoice(label: String, options: List<Pair<String, String>>, selec
 @Composable
 fun Measure(label: String, value: String) {
     Row(Modifier.fillMaxWidth().padding(vertical = 3.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(label, style = Type.serif(16), color = Palette.inkSoft)
+        Text(l(label), style = Type.serif(16), color = Palette.inkSoft)
         Spacer(Modifier.weight(1f))
-        Text(value, style = Type.sans(15, FontWeight.SemiBold), color = Palette.ink)
+        Text(l(value), style = Type.sans(15, FontWeight.SemiBold), color = Palette.ink)
     }
 }

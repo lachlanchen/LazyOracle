@@ -63,6 +63,14 @@ export interface AlmanacDay {
 const GOOD_OFFICERS = new Set(['除', '危', '定', '执', '成', '开'])
 const BAD_OFFICERS = new Set(['建', '满', '平', '破', '收', '闭'])
 
+// lunar-typescript 1.8.6 omits four Chinese dictionary entries. Restore the
+// names at the same table positions as upstream, without changing any rules:
+// https://github.com/6tail/lunar-php-standalone/blob/master/Lunar.php (SHEN_SHA).
+const MISSING_SPIRIT_NAMES: Record<string, string> = {
+  'sn.sanSang': '三丧', 'sn.guiKu': '鬼哭', 'sn.daTui': '大退', 'sn.siLi': '四离',
+}
+const spiritName = (name: string) => MISSING_SPIRIT_NAMES[name] ?? name
+
 const HOUR_RANGES = ['23:00–01:00', '01:00–03:00', '03:00–05:00', '05:00–07:00', '07:00–09:00', '09:00–11:00', '11:00–13:00', '13:00–15:00', '15:00–17:00', '17:00–19:00', '19:00–21:00', '21:00–23:00', '23:00–00:00']
 
 export function almanacFor(date: Date): AlmanacDay {
@@ -100,8 +108,8 @@ export function almanacFor(date: Date): AlmanacDay {
     dayOfficer: officer,
     mansion: { name: lunar.getXiu(), animal: lunar.getAnimal(), direction: lunar.getZheng(), beast: lunar.getShou() },
     spirit: { name: lunar.getDayTianShen(), road, luck: lunar.getDayTianShenLuck() },
-    auspicious: lunar.getDayJiShen(),
-    inauspicious: lunar.getDayXiongSha(),
+    auspicious: lunar.getDayJiShen().map(spiritName),
+    inauspicious: lunar.getDayXiongSha().map(spiritName),
     pengzu: [lunar.getPengZuGan(), lunar.getPengZuZhi()],
     hours,
     standing,

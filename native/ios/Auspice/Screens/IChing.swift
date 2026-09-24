@@ -3,6 +3,7 @@ import SwiftUI
 struct IChingScreen: View {
     @State private var method = "coins"
     @State private var question = ""
+    @FocusState private var questionFocused: Bool
     @State private var cast: IChingCast?
     @State private var shown = 0
     @State private var error: String?
@@ -20,12 +21,15 @@ struct IChingScreen: View {
                 }
                 FieldLabel(t("tarot.question"))
                 TextField("", text: $question, axis: .vertical)
+                    .accessibilityIdentifier("iching.question")
+                    .focused($questionFocused)
                     .textFieldStyle(AuspiceFieldStyle())
                     .lineLimit(1...3)
                 Button(action: throwLines) {
                     Label(t("iching.title"), systemImage: "circle.hexagongrid")
                 }
                 .buttonStyle(PrimaryButtonStyle())
+                .accessibilityIdentifier("iching.compute")
             }
 
             if let error {
@@ -43,16 +47,10 @@ struct IChingScreen: View {
                                 .font(Typeface.sans(12, weight: .bold))
                                 .tracking(2)
                                 .foregroundStyle(Palette.gold)
-                            Text(cast.primary.name.zh)
-                                .font(Typeface.display(30))
-                                .foregroundStyle(Palette.ink)
-                            Text(cast.primary.name.en)
+                            Text(l(cast.primary.name.en))
                                 .font(Typeface.display(17))
                                 .foregroundStyle(Palette.inkSoft)
-                            Text(cast.primary.name.pinyin)
-                                .font(Typeface.sans(13))
-                                .foregroundStyle(Palette.inkMute)
-                            Text("\(cast.primary.upperTrigram.name.zh) over \(cast.primary.lowerTrigram.name.zh)")
+                            Text(lf("{0} over {1}", cast.primary.upperTrigram.name.zh, cast.primary.lowerTrigram.name.zh))
                                 .font(Typeface.serif(15))
                                 .foregroundStyle(Palette.inkMute)
                                 .padding(.top, 2)
@@ -62,27 +60,24 @@ struct IChingScreen: View {
                 }
 
                 if shown >= 6 {
+                    ExplainReading(result: cast).id(cast.seed)
                     Panel(title: t("iching.judgement")) {
-                        Text(cast.primary.judgement)
+                        Text(l(cast.primary.judgement))
                             .font(Typeface.serif(20))
                             .foregroundStyle(Palette.ink)
                             .fixedSize(horizontal: false, vertical: true)
-                        Text(cast.primary.sense.en)
+                        Text(l(cast.primary.sense.en))
                             .font(Typeface.serif(17))
                             .foregroundStyle(Palette.inkSoft)
-                            .fixedSize(horizontal: false, vertical: true)
-                        Text(cast.primary.sense.zh)
-                            .font(Typeface.serif(16))
-                            .foregroundStyle(Palette.inkMute)
                             .fixedSize(horizontal: false, vertical: true)
                     }
 
                     Panel(title: t("iching.whereToRead")) {
-                        Text(focusLine(cast))
+                        Text(l(focusLine(cast)))
                             .font(Typeface.serif(17))
                             .foregroundStyle(Palette.inkSoft)
                             .fixedSize(horizontal: false, vertical: true)
-                        Text("朱熹《易学启蒙》 decides this by the number of moving lines, not by preference.")
+                        Text(l("Zhu Xi’s method chooses the text by the number of changing lines."))
                             .font(Typeface.sans(13))
                             .foregroundStyle(Palette.inkMute)
                             .fixedSize(horizontal: false, vertical: true)
@@ -93,13 +88,10 @@ struct IChingScreen: View {
                             HStack(spacing: 20) {
                                 HexagramView(lines: resulting.lines.map { CastLine(value: $0, yang: $0 == 1, changing: false, coins: nil) }, shown: 6)
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text("\(resulting.number) · \(resulting.name.zh)")
+                                    Text("\(resulting.number) · \(l(resulting.name.en))")
                                         .font(Typeface.display(22))
                                         .foregroundStyle(Palette.ink)
-                                    Text(resulting.name.en)
-                                        .font(Typeface.display(16))
-                                        .foregroundStyle(Palette.inkSoft)
-                                    Text(resulting.sense.en)
+                                    Text(l(resulting.sense.en))
                                         .font(Typeface.serif(15))
                                         .foregroundStyle(Palette.inkMute)
                                         .fixedSize(horizontal: false, vertical: true)
@@ -110,9 +102,9 @@ struct IChingScreen: View {
                     }
 
                     Panel(title: t("iching.behind")) {
-                        relative("互卦 Nuclear", cast.nuclear)
-                        relative("错卦 Opposite", cast.opposite)
-                        relative("综卦 Inverse", cast.inverse)
+                        relative("Nuclear hexagram", cast.nuclear)
+                        relative("Opposite hexagram", cast.opposite)
+                        relative("Inverse hexagram", cast.inverse)
                     }
                 }
             }
@@ -121,12 +113,12 @@ struct IChingScreen: View {
 
     private func relative(_ label: String, _ hexagram: Hexagram) -> some View {
         HStack(spacing: 12) {
-            Text(label)
+            Text(l(label))
                 .font(Typeface.sans(12, weight: .bold))
                 .tracking(1.4)
                 .foregroundStyle(Palette.inkMute)
                 .frame(width: 132, alignment: .leading)
-            Text("\(hexagram.number) \(hexagram.name.zh) · \(hexagram.name.en)")
+            Text("\(hexagram.number) · \(l(hexagram.name.en))")
                 .font(Typeface.serif(16))
                 .foregroundStyle(Palette.inkSoft)
             Spacer(minLength: 0)
@@ -134,19 +126,10 @@ struct IChingScreen: View {
         .padding(.vertical, 3)
     }
 
-    private func focusLine(_ cast: IChingCast) -> String {
-        if let explain = cast.focus.explain?.en { return explain }
-        switch cast.focus.kind {
-        case "judgement": return "Nothing moves, so the judgement of the hexagram answers."
-        case "line": return "One line moves; read that line."
-        case "two-lines": return "Two lines move; read the upper of them."
-        case "both-judgements": return "Three lines move; read both judgements."
-        case "resulting-lines": return "Four lines move; read the still lines of the resulting hexagram."
-        default: return "Read the judgement of the resulting hexagram."
-        }
-    }
+    private func focusLine(_ cast: IChingCast) -> String { l(cast.focus.rule.en) }
 
     private func throwLines() {
+        questionFocused = false
         do {
             var input: [String: Any] = ["method": method]
             if !question.trimmingCharacters(in: .whitespaces).isEmpty { input["question"] = question }
@@ -161,7 +144,7 @@ struct IChingScreen: View {
                 }
             }
         } catch {
-            self.error = error.localizedDescription
+            self.error = l("This reading could not be computed. Please try again.")
         }
     }
 }

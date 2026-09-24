@@ -117,16 +117,16 @@ fun HomeScreen(
                                     style = Type.sans(11, FontWeight.Bold).copy(letterSpacing = 2.sp),
                                     color = Palette.gold
                                 )
-                                Text(day.lunar.text, style = Type.display(17), color = Palette.ink)
+                                Text(lunarDateText(day.lunar.text), style = Type.display(17), color = Palette.ink)
                                 Text(
-                                    "${day.lunar.dayGanZhi}日 · ${day.dayOfficer}日",
+                                    "${l(day.lunar.dayGanZhi)} · ${l(day.dayOfficer)}",
                                     style = Type.sans(13),
                                     color = Palette.inkMute
                                 )
                             }
                             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                                MiniTerms("宜", day.yi, Palette.gold)
-                                MiniTerms("忌", day.ji, Palette.rose)
+                                MiniTerms(t("common.suits"), day.yi, Palette.gold)
+                                MiniTerms(t("common.avoid"), day.ji, Palette.rose)
                             }
                         }
                     }
@@ -136,6 +136,13 @@ fun HomeScreen(
             items(Practice.entries) { practice ->
                 Tile(practice) { open(practice) }
             }
+            item(span = { GridItemSpan(2) }) {
+                Panel(modifier = Modifier.clickable { openChat("") }) {
+                    Text(l("Ask Tianji"), style = Type.display(23), color = Palette.gold)
+                    Text(l("Talk about today or explore a reading together."), style = Type.serif(16), color = Palette.inkSoft)
+                }
+            }
+
 
             item(span = { GridItemSpan(2) }) {
                 Text(
@@ -184,7 +191,7 @@ fun HomeScreen(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .clickable { openChat(draft.trim()) }
+                    .clickable { val opening = draft.trim(); draft = ""; openChat(opening) }
                     .padding(8.dp)
             )
         }
@@ -194,7 +201,7 @@ fun HomeScreen(
 @Composable
 private fun MiniTerms(mark: String, terms: List<String>, colour: Color) {
     Row(horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-        Text(mark, style = Type.display(15), color = colour)
+        Text(l(mark), style = Type.display(15), color = colour)
         Text(
             terms.take(3).joinToString(" · ") { glossed(it) } + if (terms.size > 3) " …" else "",
             style = Type.serif(15),
@@ -236,10 +243,10 @@ private fun Tile(practice: Practice, onClick: () -> Unit) {
                     .background(Palette.gold.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(practice.title.take(1).uppercase(), style = Type.display(18), color = Palette.gold)
+                Text(t("practice.${practice.route}").take(1).uppercase(), style = Type.display(18), color = Palette.gold)
             }
-            Text(practice.title, style = Type.display(19), color = Palette.ink, modifier = Modifier.padding(top = 2.dp))
-            Text(practice.blurb, style = Type.serif(15), color = Palette.inkSoft)
+            Text(t("practice.${practice.route}"), style = Type.display(19), color = Palette.ink, modifier = Modifier.padding(top = 2.dp))
+            Text(t("blurb.${practice.route}"), style = Type.serif(15), color = Palette.inkSoft)
         }
     }
 }

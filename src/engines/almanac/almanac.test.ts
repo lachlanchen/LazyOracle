@@ -4,6 +4,11 @@ import { ACTIVITIES, almanacFor, judgeActivity, luckyHours, STANDING_TEXT } from
 const day = almanacFor(new Date(2026, 8, 23)) // 23 September 2026
 
 describe('the almanac page', () => {
+  it('restores the missing upstream spirit names without exposing dictionary keys', () => {
+    const january = almanacFor(new Date(2026, 0, 3))
+    expect(january.inauspicious).toEqual(expect.arrayContaining(['三丧', '鬼哭', '大退']))
+    expect(january.inauspicious.join(' ')).not.toContain('sn.')
+  })
   it('reads the traditional tables for a date', () => {
     expect(day.date).toBe('2026-09-23')
     expect(day.lunar.dayGanZhi).toHaveLength(2)

@@ -3,6 +3,7 @@ import SwiftUI
 struct TarotScreen: View {
     @State private var spreadId = "three"
     @State private var question = ""
+    @FocusState private var questionFocused: Bool
     @State private var draw: TarotDraw?
     @State private var revealed: Set<String> = []
     @State private var dealing = false
@@ -25,8 +26,7 @@ struct TarotScreen: View {
                 FlowRow(spacing: 8) {
                     ForEach(spreads, id: \.id) { spread in
                         Chip(
-                            label: spread.label,
-                            detail: spread.chinese,
+                            label: l(spread.label),
                             active: spreadId == spread.id
                         ) {
                             spreadId = spread.id
@@ -37,12 +37,15 @@ struct TarotScreen: View {
                 }
                 FieldLabel(t("tarot.question"))
                 TextField("", text: $question, axis: .vertical)
+                    .accessibilityIdentifier("tarot.question")
+                    .focused($questionFocused)
                     .textFieldStyle(AuspiceFieldStyle())
                     .lineLimit(1...3)
                 Button(action: deal) {
                     Label(draw == nil ? t("tarot.draw") : t("tarot.drawAgain"), systemImage: "sparkles")
                 }
                 .buttonStyle(PrimaryButtonStyle())
+                .accessibilityIdentifier("tarot.compute")
                 .disabled(dealing)
             }
 
@@ -53,6 +56,7 @@ struct TarotScreen: View {
             }
 
             if let draw {
+                ExplainReading(result: draw).id(draw.seed)
                 Panel {
                     SpreadStage(draw: draw, revealed: revealed, tap: { card in
                         if revealed.contains(card.id) {
@@ -91,6 +95,7 @@ struct TarotScreen: View {
     }
 
     private func deal() {
+        questionFocused = false
         dealing = true
         revealed = []
         do {
@@ -110,7 +115,7 @@ struct TarotScreen: View {
                 dealing = false
             }
         } catch {
-            self.error = error.localizedDescription
+            self.error = l("This reading could not be computed. Please try again.")
             dealing = false
         }
     }
@@ -209,17 +214,12 @@ struct TarotCardView: View {
                     Image(systemName: elementSymbol)
                         .font(.system(size: size.width * 0.26))
                         .foregroundStyle(Color(hex: 0x8A6A22))
-                    Text(card.card.text.en.name)
+                    Text(l(card.card.text.en.name))
                         .font(Typeface.display(size.width * 0.115))
                         .foregroundStyle(Color(hex: 0x3A2A08))
                         .multilineTextAlignment(.center)
                         .minimumScaleFactor(0.6)
                         .lineLimit(2)
-                    Text(card.card.text.zh.name)
-                        .font(Typeface.serif(size.width * 0.11))
-                        .foregroundStyle(Color(hex: 0x6B4E16))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.6)
                 }
                 .padding(.horizontal, 5)
             )
@@ -256,13 +256,10 @@ private struct CardReading: View {
     var body: some View {
         Panel {
             HStack(alignment: .firstTextBaseline) {
-                Text(card.position.name.en)
+                Text(l(card.position.name.en))
                     .font(Typeface.display(15))
                     .tracking(1.6)
                     .foregroundStyle(Palette.gold)
-                Text(card.position.name.zh)
-                    .font(Typeface.serif(15))
-                    .foregroundStyle(Palette.inkMute)
                 Spacer()
                 if card.reversed {
                     Text(t("tarot.reversed"))
@@ -271,17 +268,17 @@ private struct CardReading: View {
                         .foregroundStyle(Palette.rose)
                 }
             }
-            Text("\(card.card.text.en.name) · \(card.card.text.zh.name)")
+            Text(l(card.card.text.en.name))
                 .font(Typeface.display(21))
                 .foregroundStyle(Palette.ink)
-            Text(card.position.question.en)
+            Text(l(card.position.question.en))
                 .font(Typeface.serif(16))
                 .italic()
                 .foregroundStyle(Palette.inkMute)
                 .fixedSize(horizontal: false, vertical: true)
             FlowRow(spacing: 6) {
                 ForEach(keywords, id: \.self) { word in
-                    Text(word)
+                    Text(l(word))
                         .font(Typeface.sans(13, weight: .semibold))
                         .foregroundStyle(Palette.inkSoft)
                         .padding(.horizontal, 10)
@@ -294,8 +291,7 @@ private struct CardReading: View {
 
     private var keywords: [String] {
         let english = card.reversed ? card.card.text.en.reversed : card.card.text.en.upright
-        let chinese = card.reversed ? card.card.text.zh.reversed : card.card.text.zh.upright
-        return english + chinese
+        return l(english.joined(separator: " · ")).components(separatedBy: " · ")
     }
 }
 

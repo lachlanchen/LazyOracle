@@ -76,9 +76,10 @@ object Conversations {
         revision++
     }
 
-    fun select(id: String) { currentId = id; revision++ }
+    fun select(id: String) { if (!streaming) { currentId = id; revision++ } }
 
     fun newConversation() {
+        if (streaming) return
         val session = Conversation()
         sessions.add(0, session)
         currentId = session.id
@@ -86,6 +87,7 @@ object Conversations {
     }
 
     fun delete(id: String) {
+        if (streaming) return
         sessions.removeAll { it.id == id }
         if (sessions.isEmpty()) sessions.add(Conversation())
         if (currentId == id) currentId = sessions.first().id
@@ -93,6 +95,7 @@ object Conversations {
     }
 
     fun clearCurrent() {
+        if (streaming) return
         current.apply {
             turns.clear()
             summary = null
@@ -118,7 +121,7 @@ object Conversations {
 
     /** The history, fitted to the budget, older turns folded into a summary. */
     suspend fun wire(): MutableList<JsonObject> {
-        val messages = mutableListOf(Relay.message("system", AgentTools.SYSTEM_PROMPT))
+        val messages = mutableListOf(Relay.message("system", AgentTools.SYSTEM_PROMPT + "\n" + readingLanguageInstruction()))
         val spoken = current.turns.filter { it.kind == "reader" || it.kind == "oracle" || it.facts != null }
         val kept = mutableListOf<Turn>()
         var characters = 0
@@ -168,7 +171,7 @@ object Conversations {
     /** One turn of the agent loop: ask, run whatever it asks for, ask again. */
     suspend fun send(
         asked: String,
-        stream: suspend (List<JsonObject>, JsonArray?, String, (String) -> Unit) -> Relay.Answer = Relay::stream,
+        stream: suspend (List<JsonObject>, JsonArray?, String, suspend (String) -> Unit) -> Relay.Answer = Relay::stream,
         runTool: suspend (String, JsonObject) -> AgentTools.Outcome = AgentTools::run
     ) {
         if (asked.isBlank() || streaming) return
@@ -183,7 +186,7 @@ object Conversations {
             val messages = wire()
             for (step in 0..AgentTools.MAX_STEPS) {
                 val finalAnswer = finishWithFacts || step == AgentTools.MAX_STEPS
-                if (finalAnswer) messages.add(Relay.message("system", "Answer the reader now using the computed facts already supplied. Do not request more tools. If a fact is missing, say so. Reply in the reader's language."))
+                if (finalAnswer) messages.add(Relay.message("system", "Answer the reader now using the computed facts already supplied. Do not request more tools. If a fact is missing, say so. Follow the selected response language."))
                 val holder = Turn(kind = "oracle", text = "")
                 var opened = false
                 val answer = try {
@@ -193,7 +196,7 @@ object Conversations {
                         revision++
                     }
                 } catch (error: Throwable) {
-                    append(Turn(kind = "note", text = error.message ?: "The reading failed.", ok = false))
+                    append(Turn(kind = "note", text = t("chat.quiet"), ok = false))
                     save()
                     return
                 }
@@ -214,7 +217,7 @@ object Conversations {
                         }
                         append(Turn(
                             kind = "note",
-                            text = "The reading service went quiet. Ask again and it will pick up where it left off.",
+                            text = t("chat.quiet"),
                             ok = false
                         ))
                         save()

@@ -1,15 +1,16 @@
 import SwiftUI
 
 struct FaceScreen: View {
+    @Environment(\.scenePhase) private var scenePhase
     @State private var camera = LandmarkSession(kind: .face)
     @State private var features: FaceFeatures?
     @State private var error: String?
     @State private var captured = false
 
-    private let courtNames = ["upper": "上停 Upper court", "middle": "中停 Middle court", "lower": "下停 Lower court"]
+    private let courtNames = ["upper": "Upper court", "middle": "Middle court", "lower": "Lower court"]
     private let elementNames = [
-        "wood": "木形 Wood", "fire": "火形 Fire", "earth": "土形 Earth",
-        "metal": "金形 Metal", "water": "水形 Water"
+        "wood": "Wood", "fire": "Fire", "earth": "Earth",
+        "metal": "Metal", "water": "Water"
     ]
 
     var body: some View {
@@ -60,11 +61,12 @@ struct FaceScreen: View {
             }
 
             if let features {
+                ExplainReading(result: features)
                 Panel(title: t("face.element")) {
-                    Text(elementNames[features.element] ?? features.element)
+                    Text(l(elementNames[features.element] ?? features.element))
                         .font(Typeface.display(28))
                         .foregroundStyle(Palette.gold)
-                    Text("Read from the height of the face against its width, and from how the jaw and forehead stand against the cheekbones.")
+                    Text(l("Read from the height of the face against its width, and from how the jaw and forehead stand against the cheekbones."))
                         .font(Typeface.serif(16))
                         .foregroundStyle(Palette.inkSoft)
                         .fixedSize(horizontal: false, vertical: true)
@@ -73,7 +75,7 @@ struct FaceScreen: View {
                 Panel(title: t("face.courts")) {
                     ForEach(features.courts) { court in
                         HStack(spacing: 10) {
-                            Text(courtNames[court.court] ?? court.court)
+                            Text(l(courtNames[court.court] ?? court.court))
                                 .font(Typeface.serif(16))
                                 .foregroundStyle(Palette.ink)
                                 .frame(width: 148, alignment: .leading)
@@ -93,29 +95,29 @@ struct FaceScreen: View {
                         }
                         .padding(.vertical, 4)
                     }
-                    Text("An even face gives each court a third. 上停 is judged for early life, 中停 for the middle years, 下停 for the later ones.")
+                    Text(l("Each court occupies one third of an evenly proportioned face. The upper court represents early life, the middle court the middle years, and the lower court later life."))
                         .font(Typeface.sans(13))
                         .foregroundStyle(Palette.inkMute)
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
                 Panel(title: t("face.proportion")) {
-                    measure("Eyes across the face", String(format: "%.2f", features.eyesAcross), ideal: "5.00")
-                    measure("Gap between the eyes", String(format: "%.2f", features.eyeGap), ideal: "1.00")
-                    measure("Height to width", String(format: "%.2f", features.heightRatio), ideal: nil)
-                    measure("Jaw to cheekbones", String(format: "%.2f", features.jawRatio), ideal: nil)
-                    measure("Forehead to cheekbones", String(format: "%.2f", features.foreheadRatio), ideal: nil)
-                    measure("Symmetry", String(format: "%.3f", features.symmetry), ideal: "1.000")
+                    measure(l("Eyes across the face"), String(format: "%.2f", features.eyesAcross), ideal: "5.00")
+                    measure(l("Gap between the eyes"), String(format: "%.2f", features.eyeGap), ideal: "1.00")
+                    measure(l("Height to width"), String(format: "%.2f", features.heightRatio), ideal: nil)
+                    measure(l("Jaw to cheekbones"), String(format: "%.2f", features.jawRatio), ideal: nil)
+                    measure(l("Forehead to cheekbones"), String(format: "%.2f", features.foreheadRatio), ideal: nil)
+                    measure(l("Symmetry"), String(format: "%.3f", features.symmetry), ideal: "1.000")
                 }
 
                 Panel(title: t("face.palaces")) {
                     ForEach(features.palaces) { palace in
                         HStack(spacing: 10) {
-                            Text(palace.palace)
+                            Text(l(palace.palace))
                                 .font(Typeface.serif(17))
                                 .foregroundStyle(palace.state == "generous" ? Palette.gold : Palette.ink)
                                 .frame(width: 68, alignment: .leading)
-                            Text(palace.state)
+                            Text(l(palace.state))
                                 .font(Typeface.sans(13, weight: .semibold))
                                 .foregroundStyle(Palette.inkSoft)
                             Spacer(minLength: 0)
@@ -126,7 +128,7 @@ struct FaceScreen: View {
                         .padding(.vertical, 3)
                     }
                     if !features.strongPalaces.isEmpty {
-                        Text("Standing out: " + features.strongPalaces.joined(separator: "、"))
+                        Text(lf("Standing out: {0}", features.strongPalaces.map(l).joined(separator: " · ")))
                             .font(Typeface.serif(16))
                             .foregroundStyle(Palette.gold)
                             .padding(.top, 4)
@@ -134,7 +136,7 @@ struct FaceScreen: View {
                 }
 
                 Panel(title: t("common.method")) {
-                    Text("三停五眼: the face is divided at the hairline, the brows, the base of the nose and the chin, and its width is counted in eye-widths. Eight of the twelve palaces are measured here; the rest ask for things a landmark mesh cannot see, and the app does not pretend otherwise.")
+                    Text(l("The three-court, five-eye method divides the face at the hairline, brows, base of the nose and chin. Width is measured in eye-widths. Eight facial regions can be measured from landmarks; the other four are not assessed."))
                         .font(Typeface.serif(16))
                         .foregroundStyle(Palette.inkSoft)
                         .fixedSize(horizontal: false, vertical: true)
@@ -143,18 +145,21 @@ struct FaceScreen: View {
         }
         .onAppear { camera.start() }
         .onDisappear { camera.stop() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { camera.start() } else { camera.stop() }
+        }
     }
 
     private func measure(_ label: String, _ value: String, ideal: String?) -> some View {
         HStack {
-            Text(label).font(Typeface.serif(16)).foregroundStyle(Palette.inkSoft)
+            Text(l(label)).font(Typeface.serif(16)).foregroundStyle(Palette.inkSoft)
             Spacer()
             if let ideal {
-                Text("ideal \(ideal)")
+                Text(lf("Reference: {0}", ideal))
                     .font(Typeface.sans(12))
                     .foregroundStyle(Palette.inkMute)
             }
-            Text(value)
+            Text(l(value))
                 .font(Typeface.sans(15, weight: .semibold))
                 .foregroundStyle(Palette.ink)
                 .frame(width: 58, alignment: .trailing)
@@ -164,7 +169,7 @@ struct FaceScreen: View {
 
     private func read() {
         let points = camera.landmarks
-        guard points.count >= 400 else { error = "No face is in view."; return }
+        guard points.count >= 400 else { error = l("No face is in view."); return }
         do {
             let measured = try Engines.shared.evaluate("face.features", ["landmarks": points], as: FaceFeatures.self)
             features = measured
@@ -172,7 +177,7 @@ struct FaceScreen: View {
             error = nil
             captured = true
         } catch {
-            self.error = error.localizedDescription
+            self.error = l("This reading could not be computed. Please try again.")
         }
     }
 }

@@ -2,21 +2,39 @@ import Foundation
 
 /// The app speaks English and Simplified Chinese, and so do the rules: almost
 /// every label the engines return carries both.
-struct Bilingual: Decodable, Hashable {
+struct Bilingual: Codable, Hashable {
     let en: String
     let zh: String
 }
 
 // MARK: - Tarot
 
-struct TarotCardText: Decodable {
+struct TarotCardText: Codable {
     let name: String
     let upright: [String]
     let reversed: [String]
 }
 
-struct TarotCard: Decodable {
-    struct Texts: Decodable {
+/// Number cards use JSON numbers; aces and court cards use strings.
+enum TarotRank: Codable {
+    case number(Int)
+    case named(String)
+    init(from decoder: Decoder) throws {
+        let value = try decoder.singleValueContainer()
+        if let number = try? value.decode(Int.self) { self = .number(number) }
+        else { self = .named(try value.decode(String.self)) }
+    }
+    func encode(to encoder: Encoder) throws {
+        var value = encoder.singleValueContainer()
+        switch self {
+        case .number(let rank): try value.encode(rank)
+        case .named(let rank): try value.encode(rank)
+        }
+    }
+}
+
+struct TarotCard: Codable {
+    struct Texts: Codable {
         let en: TarotCardText
         let zh: TarotCardText
     }
@@ -24,14 +42,14 @@ struct TarotCard: Decodable {
     let arcana: String
     let number: Int?
     let suit: String?
-    let rank: String?
+    let rank: TarotRank?
     let label: String
     let element: String
     let text: Texts
 }
 
-struct SpreadPosition: Decodable, Identifiable, Hashable {
-    struct Layout: Decodable, Hashable {
+struct SpreadPosition: Codable, Identifiable, Hashable {
+    struct Layout: Codable, Hashable {
         let x: Double
         let y: Double
         let rotate: Bool?
@@ -45,13 +63,13 @@ struct SpreadPosition: Decodable, Identifiable, Hashable {
     func hash(into hasher: inout Hasher) { hasher.combine(id) }
 }
 
-struct Spread: Decodable, Identifiable {
+struct Spread: Codable, Identifiable {
     let id: String
     let name: Bilingual
     let positions: [SpreadPosition]
 }
 
-struct DrawnCard: Decodable, Identifiable {
+struct DrawnCard: Codable, Identifiable {
     let position: SpreadPosition
     let card: TarotCard
     let orientation: String
@@ -59,7 +77,7 @@ struct DrawnCard: Decodable, Identifiable {
     var reversed: Bool { orientation == "reversed" }
 }
 
-struct TarotDraw: Decodable {
+struct TarotDraw: Codable {
     let spread: Spread
     let seed: Int
     let cards: [DrawnCard]
@@ -69,7 +87,7 @@ struct TarotDraw: Decodable {
 
 // MARK: - I Ching
 
-struct Trigram: Decodable {
+struct Trigram: Codable {
     let id: String
     let name: Bilingual
     let lines: [Int]
@@ -77,14 +95,14 @@ struct Trigram: Decodable {
     let direction: Bilingual
 }
 
-struct HexagramName: Decodable {
+struct HexagramName: Codable {
     let zh: String
     let pinyin: String
     let en: String
 }
 
-struct Hexagram: Decodable {
-    struct Keywords: Decodable {
+struct Hexagram: Codable {
+    struct Keywords: Codable {
         let zh: [String]
         let en: [String]
     }
@@ -100,7 +118,7 @@ struct Hexagram: Decodable {
     let upperTrigram: Trigram
 }
 
-struct CastLine: Decodable, Identifiable {
+struct CastLine: Codable, Identifiable {
     let value: Int
     let yang: Bool
     let changing: Bool
@@ -108,13 +126,14 @@ struct CastLine: Decodable, Identifiable {
     var id: Int { value &* 31 &+ (yang ? 1 : 0) }
 }
 
-struct ReadingFocus: Decodable {
+struct ReadingFocus: Codable {
     let kind: String
-    let explain: Bilingual?
-    let positions: [Int]?
+    let rule: Bilingual
+    let from: String
+    let positions: [Int]
 }
 
-struct IChingCast: Decodable {
+struct IChingCast: Codable {
     let method: String
     let seed: Int
     let question: String
@@ -131,13 +150,13 @@ struct IChingCast: Decodable {
 
 // MARK: - The books
 
-struct BookPage: Decodable {
+struct BookPage: Codable {
     let number: Int
     let en: String
     let zh: String
 }
 
-struct BookOpening: Decodable {
+struct BookOpening: Codable {
     let book: String
     let seed: Int
     let page: BookPage
@@ -147,8 +166,8 @@ struct BookOpening: Decodable {
 
 // MARK: - BaZi
 
-struct Pillar: Decodable {
-    struct Hidden: Decodable, Identifiable {
+struct Pillar: Codable {
+    struct Hidden: Codable, Identifiable {
         let stem: String
         let god: String
         var id: String { stem + god }
@@ -162,7 +181,7 @@ struct Pillar: Decodable {
     let element: String
 }
 
-struct LuckCycle: Decodable, Identifiable {
+struct LuckCycle: Codable, Identifiable {
     let ganzhi: String
     let startYear: Int
     let endYear: Int
@@ -170,28 +189,28 @@ struct LuckCycle: Decodable, Identifiable {
     var id: Int { startYear }
 }
 
-struct BaziChart: Decodable {
-    struct Pillars: Decodable {
+struct BaziChart: Codable {
+    struct Pillars: Codable {
         let year: Pillar
         let month: Pillar
         let day: Pillar
         let hour: Pillar
     }
-    struct DayMaster: Decodable {
+    struct DayMaster: Codable {
         let stem: String
         let element: String
         let yinYang: String
     }
-    struct Lunar: Decodable {
+    struct Lunar: Codable {
         let text: String
         let jieQiBefore: String
         let jieQiAfter: String
     }
-    struct LuckStart: Decodable {
+    struct LuckStart: Codable {
         let years: Int
         let months: Int
     }
-    struct CurrentYear: Decodable {
+    struct CurrentYear: Codable {
         let year: Int
         let ganzhi: String
         let god: String
@@ -210,7 +229,7 @@ struct BaziChart: Decodable {
 
 // MARK: - Astrology
 
-struct Placement: Decodable, Identifiable {
+struct Placement: Codable, Identifiable {
     let body: String
     let longitude: Double
     let sign: Int
@@ -220,7 +239,7 @@ struct Placement: Decodable, Identifiable {
     var id: String { body }
 }
 
-struct Aspect: Decodable, Identifiable {
+struct Aspect: Codable, Identifiable {
     let a: String
     let b: String
     let type: String
@@ -228,7 +247,7 @@ struct Aspect: Decodable, Identifiable {
     var id: String { a + b + type }
 }
 
-struct NatalChart: Decodable {
+struct NatalChart: Codable {
     let instant: String
     let latitude: Double
     let longitude: Double
@@ -240,7 +259,7 @@ struct NatalChart: Decodable {
     let moonPhase: Double
 }
 
-struct Transit: Decodable, Identifiable {
+struct Transit: Codable, Identifiable {
     let transiting: String
     let natal: String
     let type: String
@@ -248,7 +267,7 @@ struct Transit: Decodable, Identifiable {
     var id: String { transiting + natal + type }
 }
 
-struct TransitReport: Decodable {
+struct TransitReport: Codable {
     let positions: [Placement]
     let transits: [Transit]
 }
@@ -281,20 +300,20 @@ enum Zodiac {
 
 // MARK: - Feng shui
 
-struct SectorQuality: Decodable {
+struct SectorQuality: Codable {
     let id: String
     let name: Bilingual
     let auspicious: Bool
     let use: Bilingual
 }
 
-struct MansionSector: Decodable, Identifiable {
+struct MansionSector: Codable, Identifiable {
     let direction: String
     let quality: SectorQuality
     var id: String { direction }
 }
 
-struct EightMansions: Decodable {
+struct EightMansions: Codable {
     let year: Int
     let guaNumber: Int
     let gua: String
@@ -343,6 +362,7 @@ struct PalmFeatures: Codable {
     let fingers: [FingerTrait]
     let palaces: [PalaceReading]
     let strongPalaces: [String]
+    let lines: LineTraits
 }
 
 // MARK: - Face reading

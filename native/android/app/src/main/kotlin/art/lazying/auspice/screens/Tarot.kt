@@ -11,6 +11,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,7 +54,7 @@ fun TarotScreen(navController: NavController) {
             error = null
             delay(550)
             it.cards.firstOrNull()?.let { first -> revealed = revealed + first.position.id }
-        }.onFailure { error = it.message }
+        }.onFailure { error = l("This reading could not be computed. Please try again.") }
     }
 
     ScreenScaffold(
@@ -63,9 +65,9 @@ fun TarotScreen(navController: NavController) {
     ) {
         Panel {
             FlowRowOf {
-                Chip(t("tarot.draw"), "1", spreadId == "one") { spreadId = "one"; draw = null }
-                Chip(t("tarot.draw"), "3", spreadId == "three") { spreadId = "three"; draw = null }
-                Chip(t("tarot.draw"), "10", spreadId == "celtic") { spreadId = "celtic"; draw = null }
+                Chip(l("One card"), null, spreadId == "one") { spreadId = "one"; draw = null }
+                Chip(l("Past · Present · Future"), null, spreadId == "three") { spreadId = "three"; draw = null }
+                Chip(l("Celtic cross"), null, spreadId == "celtic") { spreadId = "celtic"; draw = null }
             }
             FieldLabel(t("tarot.question"))
             AuspiceField(question) { question = it }
@@ -75,6 +77,7 @@ fun TarotScreen(navController: NavController) {
         error?.let { Panel(title = t("common.notComputed")) { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
 
         draw?.let { result ->
+            ExplainReading(Json.encodeToString(result))
             Panel {
                 SpreadStage(result, revealed) { card ->
                     revealed = revealed + card.position.id
@@ -185,14 +188,12 @@ fun TarotCardView(card: DrawnCard, faceUp: Boolean, width: androidx.compose.ui.u
                 ) {
                     Text(card.card.label, style = Type.display((width.value * 0.14f).toInt(), FontWeight.Bold), color = Color(0xFF6B4E16))
                     Text(elementGlyph(card.card.element), style = Type.display((width.value * 0.24f).toInt()), color = Color(0xFF8A6A22))
-                    Text(
-                        card.card.text.en.name,
+                    Text(l(card.card.text.en.name),
                         style = Type.display((width.value * 0.115f).toInt()),
                         color = Color(0xFF3A2A08),
                         textAlign = TextAlign.Center,
                         maxLines = 2
                     )
-                    Text(card.card.text.zh.name, style = Type.serif((width.value * 0.11f).toInt()), color = Color(0xFF6B4E16), maxLines = 1)
                 }
             }
         }
@@ -211,13 +212,11 @@ private fun elementGlyph(element: String) = when (element) {
 private fun CardReading(card: DrawnCard) {
     Panel {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                card.position.name.en,
+            Text(l(card.position.name.en),
                 style = Type.display(15).copy(letterSpacing = 1.6.sp),
                 color = Palette.gold
             )
             Spacer(Modifier.width(8.dp))
-            Text(card.position.name.zh, style = Type.serif(15), color = Palette.inkMute)
             Spacer(Modifier.weight(1f))
             if (card.reversed) {
                 Text(
@@ -227,21 +226,19 @@ private fun CardReading(card: DrawnCard) {
                 )
             }
         }
-        Text("${card.card.text.en.name} · ${card.card.text.zh.name}", style = Type.display(21), color = Palette.ink)
-        Text(
-            card.position.question.en,
+        Text(l(card.card.text.en.name), style = Type.display(21), color = Palette.ink)
+        Text(l(card.position.question.en),
             style = Type.serif(16).copy(fontStyle = FontStyle.Italic),
             color = Palette.inkMute
         )
         FlowRowOf(spacing = 6) {
             val words = if (card.reversed) {
-                card.card.text.en.reversed + card.card.text.zh.reversed
+                l(card.card.text.en.reversed.joinToString(" · ")).split(" · ")
             } else {
-                card.card.text.en.upright + card.card.text.zh.upright
+                l(card.card.text.en.upright.joinToString(" · ")).split(" · ")
             }
             words.forEach { word ->
-                Text(
-                    word,
+                Text(l(word),
                     style = Type.sans(13, FontWeight.SemiBold),
                     color = Palette.inkSoft,
                     modifier = Modifier

@@ -206,6 +206,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 last_error = f"{name} has no model for {wanted}"
                 continue
             body = dict(upstream_body, model=model)
+            if name == "deepseek":
+                # The apps keep facts and visible conversation, not private
+                # reasoning traces. Thinking mode can exhaust the answer
+                # budget before any text and rejects replayed tool history.
+                # Both tiers still use their selected model for narration.
+                body["thinking"] = {"type": "disabled"}
             req = urllib.request.Request(url, data=json.dumps(body).encode(), method="POST", headers={"Content-Type": "application/json", "Authorization": f"Bearer {token}", "Accept": "text/event-stream"})
             try:
                 with urllib.request.urlopen(req, timeout=TIMEOUT) as upstream:

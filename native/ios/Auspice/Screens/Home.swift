@@ -6,6 +6,7 @@ struct HomeScreen: View {
     @State private var today: AlmanacDay?
     @State private var asking = false
     @State private var draft = ""
+    @State private var chatOpening = ""
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -15,6 +16,24 @@ struct HomeScreen: View {
                     header
                     todayStrip
                     grid
+                    Button { chatOpening = ""; asking = true } label: {
+                        Panel {
+                            HStack(spacing: 14) {
+                                Image(systemName: "bubble.left.and.bubble.right.fill")
+                                    .font(.system(size: 25)).foregroundStyle(Palette.gold)
+                                VStack(alignment: .leading, spacing: 5) {
+                                    Text(l("Ask Tianji")).font(Typeface.display(23)).foregroundStyle(Palette.ink)
+                                    Text(l("Talk about today or explore a reading together."))
+                                        .font(Typeface.serif(16)).foregroundStyle(Palette.inkSoft)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
+                                Spacer(minLength: 0)
+                                Image(systemName: "chevron.right").foregroundStyle(Palette.gold)
+                            }
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("home.chat")
                     Text(t("home.privacy"))
                         .font(Typeface.sans(12))
                         .foregroundStyle(Palette.inkMute)
@@ -35,7 +54,7 @@ struct HomeScreen: View {
         .toolbarBackground(.hidden, for: .navigationBar)
         .onAppear(perform: loadToday)
         .navigationDestination(isPresented: $asking) {
-            ChatScreen(opening: draft)
+            ChatScreen(opening: chatOpening)
         }
     }
 
@@ -88,17 +107,17 @@ struct HomeScreen: View {
                                 .font(Typeface.sans(11, weight: .bold))
                                 .tracking(2)
                                 .foregroundStyle(Palette.gold)
-                            Text(today.lunar.text)
+                            Text(lunarDateText(today.lunar.text))
                                 .font(Typeface.display(17))
                                 .foregroundStyle(Palette.ink)
-                            Text("\(today.lunar.dayGanZhi)日 · \(today.dayOfficer)日")
+                            Text("\(l(today.lunar.dayGanZhi)) · \(l(today.dayOfficer))")
                                 .font(Typeface.sans(13))
                                 .foregroundStyle(Palette.inkMute)
                         }
                         Spacer(minLength: 8)
                         VStack(alignment: .leading, spacing: 5) {
-                            miniTerms("宜", today.yi, Palette.gold)
-                            miniTerms("忌", today.ji, Palette.rose)
+                            miniTerms(t("common.suits"), today.yi, Palette.gold)
+                            miniTerms(t("common.avoid"), today.ji, Palette.rose)
                         }
                         .frame(maxWidth: 150, alignment: .leading)
                     }
@@ -110,7 +129,7 @@ struct HomeScreen: View {
 
     private func miniTerms(_ mark: String, _ terms: [String], _ colour: Color) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 7) {
-            Text(mark)
+            Text(l(mark))
                 .font(Typeface.display(15))
                 .foregroundStyle(colour)
             Text(terms.prefix(3).map(glossed).joined(separator: " · ") + (terms.count > 3 ? " …" : ""))
@@ -126,6 +145,7 @@ struct HomeScreen: View {
                 Button { open(practice) } label: {
                     tile(practice)
                 }
+                .accessibilityIdentifier("practice.\(practice.rawValue)")
                 .buttonStyle(TileButtonStyle())
             }
         }
@@ -181,16 +201,18 @@ struct HomeScreen: View {
             Image(systemName: "sparkles")
                 .foregroundStyle(Palette.gold)
             TextField(t("home.ask"), text: $draft)
+                .accessibilityIdentifier("home.question")
                 .font(Typeface.sans(16))
                 .foregroundStyle(Palette.ink)
                 .submitLabel(.send)
-                .onSubmit { asking = true }
-            Button { asking = true } label: {
+                .onSubmit { openConversation() }
+            Button { openConversation() } label: {
                 Image(systemName: "arrow.up.circle.fill")
                     .font(.system(size: 28))
                     .foregroundStyle(Palette.gold)
             }
-            .accessibilityLabel("Ask")
+            .accessibilityLabel(l("Ask Tianji"))
+            .accessibilityIdentifier("home.send")
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
@@ -198,6 +220,12 @@ struct HomeScreen: View {
         .overlay(Capsule().strokeBorder(Palette.goldLine, lineWidth: 1))
         .padding(.horizontal, 18)
         .padding(.bottom, 10)
+    }
+
+    private func openConversation() {
+        chatOpening = draft.trimmingCharacters(in: .whitespacesAndNewlines)
+        draft = ""
+        asking = true
     }
 
     private func loadToday() {

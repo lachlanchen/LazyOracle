@@ -81,6 +81,7 @@ fun AuspiceApp() {
         )
     ) {
         val navController = rememberNavController()
+        androidx.compose.runtime.CompositionLocalProvider(androidx.compose.ui.platform.LocalLayoutDirection provides Localisation.layoutDirection) {
         Box(Modifier.fillMaxSize()) {
             Sky()
             // The conversation can send the reader to a screen — the camera,
@@ -96,7 +97,7 @@ fun AuspiceApp() {
                     HomeScreen(
                         ready = loaded,
                         open = { navController.navigate(it.route) },
-                        openChat = { navController.navigate("chat?opening=$it") },
+                        openChat = { navController.navigate("chat?opening=${android.net.Uri.encode(it)}") },
                         openSettings = { navController.navigate("settings") }
                     )
                 }
@@ -115,5 +116,6 @@ fun AuspiceApp() {
                 }
             }
         }
+    }
     }
 }

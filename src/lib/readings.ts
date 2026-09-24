@@ -8,6 +8,8 @@ export interface ReadingRequest {
   /** The deterministic reading used when no model is available. */
   offline: string
   signal: AbortSignal
+  /** Explicitly requested backend explanation of the displayed result. */
+  forceCloud?: boolean
 }
 
 export interface ReadingUpdate {
@@ -18,7 +20,7 @@ export interface ReadingUpdate {
 
 /** Streams a cloud reading, with the deterministic composition as fallback. */
 export function generateReading(request: ReadingRequest, onUpdate: (update: ReadingUpdate) => void): void {
-  const settings = loadModelSettings()
+  const settings = { ...loadModelSettings(), ...(request.forceCloud ? { endpointEnabled: true } : {}) }
   const finishOffline = () => onUpdate({ source: 'offline', text: request.offline, done: true })
 
   const stream = (source: 'model', run: (onToken: (t: string) => void) => Promise<string>) => {

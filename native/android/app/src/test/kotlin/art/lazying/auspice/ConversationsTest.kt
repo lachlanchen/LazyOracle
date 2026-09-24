@@ -24,6 +24,29 @@ class ConversationsTest {
         assertEquals("A batch belongs to one assistant message", 2, assistant["tool_calls"]!!.jsonArray.size)
     }
 
+    @Test fun continuesExistingHistoryAndProtectsBusyConversation() = runBlocking {
+        Conversations.send("First question", stream = { _, _, _, _ -> Relay.Answer("First answer", emptyList()) })
+        val originalId = Conversations.current.id
+        Conversations.send("Follow-up from home", stream = { messages, _, _, delta ->
+            assertTrue(messages.any { it["content"]?.jsonPrimitive?.content == "First question" })
+            assertTrue(messages.any { it["content"]?.jsonPrimitive?.content == "Follow-up from home" })
+            Conversations.newConversation()
+            Conversations.delete(originalId)
+            Conversations.clearCurrent()
+            assertEquals(originalId, Conversations.current.id)
+            assertEquals(3, Conversations.current.turns.size)
+            Conversations.send("Duplicate", stream = { _, _, _, _ -> error("Busy send must not start") })
+            delta("Clear follow-up")
+            Relay.Answer("Clear follow-up", emptyList())
+        })
+        assertEquals(4, Conversations.current.turns.size)
+        assertEquals("Clear follow-up", Conversations.current.turns.last().text)
+        Conversations.newConversation()
+        assertNotEquals(originalId, Conversations.current.id)
+        assertTrue(Conversations.current.turns.isEmpty())
+        assertEquals(4, Conversations.sessions.first { it.id == originalId }.turns.size)
+    }
+
     @Test fun retainsResultsAndAnswersTheReportedQuestion() = runBlocking {
         var requests = 0
         val computed = mutableListOf<String>()

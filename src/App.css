@@ -645,3 +645,6 @@ select {
 /* The chat screen owns the bottom of the window, so the page itself does not
    need the room the ask bar normally reserves. */
 .app:has(.chat-screen) { padding-bottom: 0; }
+
+.reading-explain { display: grid; gap: 0.8rem; margin-top: 1rem; }
+.reading-explain textarea { width: 100%; box-sizing: border-box; }

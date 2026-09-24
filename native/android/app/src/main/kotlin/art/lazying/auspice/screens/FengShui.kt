@@ -15,6 +15,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -86,7 +88,7 @@ fun FengShuiScreen(navController: NavController) {
                 put("day", JsonPrimitive(profile.day))
                 put("gender", JsonPrimitive(profile.gender))
             })
-        }.onSuccess { mansions = it; error = null }.onFailure { error = it.message }
+        }.onSuccess { mansions = it; error = null }.onFailure { error = l("This reading could not be computed. Please try again.") }
     }
 
     LaunchedEffect(heading?.roundToInt()) {
@@ -112,6 +114,7 @@ fun FengShuiScreen(navController: NavController) {
         error?.let { Panel(title = t("common.notComputed")) { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
 
         mansions?.let { m ->
+            ExplainReading(Json.encodeToString(m))
             Panel {
                 BaguaRose(m, heading)
                 val sector = facing?.let { name -> m.sectors.firstOrNull { it.direction == name } }
@@ -126,12 +129,11 @@ fun FengShuiScreen(navController: NavController) {
                             style = Type.display(18), color = Palette.ink
                         )
                         Text(
-                            "${sector.quality.name.zh} ${sector.quality.name.en}",
+                            l(sector.quality.name.en),
                             style = Type.serif(17),
                             color = if (sector.quality.auspicious) Palette.gold else Palette.rose
                         )
-                        Text(
-                            sector.quality.use.en,
+                        Text(l(sector.quality.use.en),
                             style = Type.serif(15), color = Palette.inkSoft, textAlign = TextAlign.Center
                         )
                     }
@@ -146,14 +148,14 @@ fun FengShuiScreen(navController: NavController) {
 
             Panel(title = t("fengshui.yourGua")) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(m.gua, style = Type.display(40), color = Palette.gold)
+                    Text(l(m.gua), style = Type.display(40), color = Palette.gold)
                     Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
                         Text(
-                            "${m.guaNumber} · ${if (m.group == "east") "East group 东四命" else "West group 西四命"}",
+                            "${m.guaNumber} · ${if (m.group == "east") l("East group") else l("West group")}",
                             style = Type.display(18), color = Palette.ink
                         )
                         Text(
-                            "Counted from the BaZi year ${m.year}, which begins at 立春 rather than on 1 January.",
+                            lf("Based on the BaZi year {0}, which starts at the Beginning of Spring solar term.", m.year.toString()),
                             style = Type.serif(15), color = Palette.inkMute
                         )
                     }
@@ -170,19 +172,17 @@ fun FengShuiScreen(navController: NavController) {
                         Modifier.fillMaxWidth().padding(vertical = 6.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Text(
-                            sector.direction,
+                        Text(l(sector.direction),
                             style = Type.display(18),
                             color = if (sector.quality.auspicious) Palette.gold else Palette.rose,
                             modifier = Modifier.width(36.dp)
                         )
                         Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
                             Text(
-                                "${sector.quality.name.zh} · ${sector.quality.name.en}",
+                                l(sector.quality.name.en),
                                 style = Type.serif(17), color = Palette.ink
                             )
-                            Text(sector.quality.use.en, style = Type.serif(15), color = Palette.inkSoft)
-                            Text(sector.quality.use.zh, style = Type.serif(14), color = Palette.inkMute)
+                            Text(l(sector.quality.use.en), style = Type.serif(15), color = Palette.inkSoft)
                         }
                     }
                     if (index < m.sectors.lastIndex) HorizontalDivider(color = Palette.line)
@@ -264,19 +264,19 @@ private fun BaguaRose(mansions: EightMansions, heading: Float?) {
                 val radius = (outer + inner) / 2
                 val x = centre.x + (cos(angle) * radius).toFloat()
                 val y = centre.y + (sin(angle) * radius).toFloat()
-                canvas.nativeCanvas.drawText(direction, x, y, paint)
+                canvas.nativeCanvas.drawText(l(direction), x, y, paint)
                 val sector = mansions.sectors.firstOrNull { it.direction == direction }
                 if (sector != null) {
                     paint.textSize = extent * 0.045f
                     paint.color = android.graphics.Color.argb(184, 244, 239, 228)
-                    canvas.nativeCanvas.drawText(sector.quality.name.zh, x, y + extent * 0.055f, paint)
+                    canvas.nativeCanvas.drawText(l(sector.quality.name.en), x, y + extent * 0.055f, paint)
                     paint.textSize = extent * 0.055f
                     paint.color = android.graphics.Color.rgb(244, 239, 228)
                 }
             }
             paint.color = android.graphics.Color.rgb(217, 180, 90)
             paint.textSize = extent * 0.12f
-            canvas.nativeCanvas.drawText(mansions.gua, centre.x, centre.y + paint.textSize / 3, paint)
+            canvas.nativeCanvas.drawText(l(mansions.gua), centre.x, centre.y + paint.textSize / 3, paint)
         }
 
         if (heading != null) {

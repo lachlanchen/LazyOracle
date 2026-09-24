@@ -115,7 +115,7 @@ struct BirthForm: View {
                     VStack(alignment: .leading, spacing: 14) {
                         Panel(title: t("birth.details")) {
                             DatePicker(
-                                "Date and time",
+                                l("Date and time"),
                                 selection: Binding(
                                     get: { date(from: draft) },
                                     set: { apply($0) }
@@ -134,6 +134,7 @@ struct BirthForm: View {
                         Panel(title: t("birth.place")) {
                             FieldLabel(t("birth.place"))
                             TextField("", text: $draft.place)
+                                .accessibilityIdentifier("birth.place")
                                 .textFieldStyle(AuspiceFieldStyle())
                             HStack(spacing: 10) {
                                 numberField(t("birth.latitude"), value: $draft.latitude)
@@ -166,6 +167,7 @@ struct BirthForm: View {
                             dismiss()
                         }
                         .buttonStyle(PrimaryButtonStyle())
+                        .accessibilityIdentifier("birth.save")
                     }
                     .padding(18)
                     .frame(maxWidth: 560)

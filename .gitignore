@@ -26,3 +26,8 @@ native/android/build/
 native/android/app/build/
 native/android/local.properties
 native/android/app/src/main/assets/*.task
+
+# Generated from i18n/app/content.json
+native/android/app/src/main/assets/auspice-content.json
+
+__pycache__/

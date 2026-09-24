@@ -34,6 +34,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import art.lazying.auspice.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import androidx.compose.runtime.saveable.rememberSaveable
 
 private const val VISIBLE_TURNS = 30
 
@@ -49,8 +51,13 @@ fun ChatScreen(navController: NavController, opening: String) {
     val dragged by listState.interactionSource.collectIsDraggedAsState()
     val atBottom by remember { derivedStateOf { !listState.canScrollForward } }
 
+    var openingHandled by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        if (opening.isNotBlank() && Conversations.current.turns.isEmpty()) {
+        if (opening.isNotBlank() && !openingHandled) {
+            draft = opening
+            while (Conversations.streaming) delay(100)
+            openingHandled = true
+            draft = ""
             Conversations.send(opening)
         }
     }
@@ -88,19 +95,19 @@ fun ChatScreen(navController: NavController, opening: String) {
                     .clickable { navController.popBackStack() }.padding(10.dp)
             )
             Text(
-                Conversations.current.title,
+                if (Conversations.current.title == "New conversation") t("chat.newConversation") else Conversations.current.title,
                 style = Type.display(16), color = Palette.ink, maxLines = 1,
                 modifier = Modifier.weight(1f).padding(horizontal = 8.dp)
             )
             Icon(
                 Icons.Default.History, "All conversations", tint = Palette.inkSoft,
                 modifier = Modifier.size(44.dp).clip(CircleShape)
-                    .clickable { showingSessions = true }.padding(10.dp)
+                    .clickable(enabled = !Conversations.streaming) { showingSessions = true }.padding(10.dp)
             )
             Icon(
                 Icons.Default.Add, "New conversation", tint = Palette.gold,
                 modifier = Modifier.size(44.dp).clip(CircleShape)
-                    .clickable { Conversations.newConversation() }.padding(10.dp)
+                    .clickable(enabled = !Conversations.streaming) { Conversations.newConversation() }.padding(10.dp)
             )
         }
 
@@ -133,7 +140,7 @@ fun ChatScreen(navController: NavController, opening: String) {
                                 "What does my day master need?",
                                 "Cast a hexagram for me"
                             ).forEach { suggestion ->
-                                Chip(suggestion, null, false) { followLatest = true; scope.launch { Conversations.send(suggestion) } }
+                                Chip(l(suggestion), null, false) { followLatest = true; scope.launch { Conversations.send(l(suggestion)) } }
                             }
                         }
                     }
@@ -194,15 +201,18 @@ fun ChatScreen(navController: NavController, opening: String) {
                         Modifier
                             .clip(CircleShape)
                             .border(1.dp, Palette.goldLine, CircleShape)
-                            .clickable { Conversations.clearCurrent() }
+                            .background(Palette.goldSoft)
+                            .clickable(enabled = !Conversations.streaming) { Conversations.newConversation(); draft = ""; followLatest = true }
                             .heightIn(min = 44.dp)
                             .padding(horizontal = 16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(t("common.clear"), style = Type.sans(14, FontWeight.Bold), color = Palette.gold)
+                        Icon(Icons.Default.Add, contentDescription = null, tint = Palette.gold, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text(t("chat.newConversation"), style = Type.sans(13, FontWeight.Bold), color = Palette.gold)
                     }
                 }
-                Box(Modifier.weight(3f)) {
+                Box(Modifier.weight(1f)) {
                     PrimaryButton(t("common.send"), enabled = !Conversations.streaming && draft.isNotBlank()) {
                         val text = draft
                         draft = ""
@@ -232,7 +242,7 @@ private fun Bubble(turn: Turn) {
         }
         "oracle" -> Text(turn.text, style = Type.serif(18), color = Palette.ink)
         "tool" -> Text(
-            turn.text,
+            l(turn.text),
             style = Type.sans(12, FontWeight.SemiBold),
             color = if (turn.ok) Palette.gold else Palette.rose,
             modifier = Modifier
@@ -271,15 +281,14 @@ private fun SessionList(onDismiss: () -> Unit) {
                     ) {
                         Column(Modifier.weight(1f)) {
                             Text(
-                                session.title,
+                                if (session.title == "New conversation") t("chat.newConversation") else session.title,
                                 style = Type.serif(17),
                                 color = if (session.id == Conversations.currentId) Palette.gold else Palette.ink,
                                 maxLines = 1
                             )
                             Text("${session.turns.size} ${t("chat.messages")}", style = Type.sans(12), color = Palette.inkMute)
                         }
-                        Text(
-                            "Delete",
+                        Text(l("Delete"),
                             style = Type.sans(12, FontWeight.Bold).copy(letterSpacing = 1.sp),
                             color = Palette.rose,
                             modifier = Modifier.clickable { Conversations.delete(session.id) }.padding(8.dp)
@@ -318,10 +327,10 @@ fun SettingsScreen(navController: NavController) {
                 style = Type.serif(16), color = Palette.inkSoft
             )
             FlowRowOf {
-                Chip("Tianji Fast", "天机快速版", Conversations.tier == "tianji-fast") {
+                Chip(l("Tianji Fast"), null, Conversations.tier == "tianji-fast") {
                     Conversations.tier = "tianji-fast"
                 }
-                Chip("Tianji Pro", "天机专业版", Conversations.tier == "tianji-pro") {
+                Chip(l("Tianji Pro"), null, Conversations.tier == "tianji-pro") {
                     Conversations.tier = "tianji-pro"
                 }
             }
@@ -329,8 +338,8 @@ fun SettingsScreen(navController: NavController) {
 
         Panel(title = t("settings.rules")) {
             Text(
-                if (Engines.ready) "Loaded, contract version ${Engines.EXPECTED_VERSION}"
-                else Engines.startupError ?: "Loading…",
+                if (Engines.ready) lf("{0} engines · rules version {1}", "14", Engines.EXPECTED_VERSION.toString())
+                else l("Loading…"),
                 style = Type.serif(16), color = if (Engines.ready) Palette.inkSoft else Palette.rose
             )
             Text(

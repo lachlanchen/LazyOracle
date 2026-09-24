@@ -2,228 +2,237 @@ import AVFoundation
 import SwiftUI
 import MediaPipeTasksVision
 
-/// The camera, and MediaPipe's landmarkers, behind one small object.
-///
-/// The web app runs the same two models through MediaPipe's WebAssembly build.
-/// Here they run natively, which is what makes the overlay track the hand while
-/// it moves instead of measuring one still photograph. The landmark numbering
-/// is identical — 21 points for a hand, 478 for a face — so the palm and face
-/// engines receive exactly what they already expect.
-@Observable
-final class LandmarkSession: NSObject {
-    enum Kind {
-        case hand, face
-
+/// UI state never owns a running MediaPipe graph. The worker serializes model
+/// creation, inference and teardown on one background queue.
+@MainActor @Observable
+final class LandmarkSession {
+    enum Kind { case hand, face
         var modelName: String { self == .hand ? "hand_landmarker" : "face_landmarker" }
     }
-
-    /// Landmarks as the engines want them: x, y and z dictionaries.
     private(set) var landmarks: [[String: Double]] = []
-    /// The same points, normalised, for drawing the overlay.
     private(set) var overlay: [CGPoint] = []
     private(set) var detecting = false
-    var message: String?
-
-    let kind: Kind
-    let session = AVCaptureSession()
-
-    /// Which camera is running. The front one reads your own hand or face;
-    /// the back one reads the person sitting opposite, which is how a reading
-    /// is actually given.
+    private(set) var messageKey: String?
+    var message: String? { messageKey.map(t) }
     private(set) var position: AVCaptureDevice.Position = .front
     private(set) var canFlip = false
+    private var generation = 0
+    private var wanted = false
+    private let worker: LandmarkWorker
+    var session: AVCaptureSession { worker.session }
 
-    /// The capture queue's own copy, so it never reads observable state from
-    /// off the main thread.
-    private var activePosition: AVCaptureDevice.Position = .front
-
-    private let queue = DispatchQueue(label: "art.lazying.auspice.camera")
-    private var handLandmarker: HandLandmarker?
-    private var faceLandmarker: FaceLandmarker?
-    private var lastTimestamp = 0
-
-    init(kind: Kind) {
-        self.kind = kind
-        super.init()
-    }
+    init(kind: Kind) { worker = LandmarkWorker(kind: kind) }
+    deinit { worker.stop() }
 
     func start() {
-        queue.async { [weak self] in
-            guard let self else { return }
-            if !self.session.isRunning {
-                self.configure()
+        guard !wanted else { return }
+        wanted = true
+        generation += 1
+        let token = generation
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .authorized: begin(token)
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .video) { [weak self] allowed in
+                Task { @MainActor in
+                    guard let self, self.wanted, self.generation == token else { return }
+                    if allowed { self.begin(token) }
+                    else { self.messageKey = "camera.denied" }
+                }
             }
-            if !self.session.isRunning { self.session.startRunning() }
+        default: messageKey = "camera.denied"
+        }
+    }
+
+    private func begin(_ token: Int) {
+        messageKey = nil
+        worker.start { [weak self] update in
+            Task { @MainActor in
+                guard let self, self.wanted, self.generation == token else { return }
+                self.landmarks = update.points
+                self.overlay = update.points.map { CGPoint(x: $0["x"]!, y: $0["y"]!) }
+                self.detecting = !update.points.isEmpty
+                self.position = update.position
+                self.canFlip = update.canFlip
+                self.messageKey = update.messageKey
+            }
         }
     }
 
     func stop() {
-        queue.async { [weak self] in
-            guard let self, self.session.isRunning else { return }
-            self.session.stopRunning()
+        wanted = false
+        generation += 1 // Ignore a frame/permission reply queued before leaving.
+        detecting = false
+        landmarks = []
+        overlay = []
+        worker.stop()
+    }
+
+    func flip() { worker.flip() }
+}
+
+/// Video mode returns each result before the next frame/stop can execute.
+/// Live-stream mode allowed graph callbacks to race deallocation (build 8).
+/// Holding the worker strongly until stop finishes also keeps its destructor
+/// and MediaPipe's logging shutdown off SwiftUI's main thread.
+final class LandmarkWorker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
+    struct Update {
+        var points: [[String: Double]] = []
+        var position: AVCaptureDevice.Position
+        var canFlip: Bool
+        var messageKey: String?
+    }
+    let session = AVCaptureSession()
+    private let kind: LandmarkSession.Kind
+    private let queue = DispatchQueue(label: "art.lazying.auspice.camera", qos: .userInitiated)
+    private var handLandmarker: HandLandmarker?
+    private var faceLandmarker: FaceLandmarker?
+    private var output: AVCaptureVideoDataOutput?
+    private var position: AVCaptureDevice.Position = .front
+    private var canFlip = false
+    private var running = false
+    private var lastTimestamp = -1
+    private var deliver: ((Update) -> Void)?
+
+    init(kind: LandmarkSession.Kind) { self.kind = kind; super.init() }
+
+    func start(deliver: @escaping (Update) -> Void) {
+        queue.async { [self] in
+            self.deliver = deliver
+            guard !running else { return }
+            do {
+                try makeLandmarker()
+                try configure()
+                running = true
+                lastTimestamp = -1
+                session.startRunning()
+                publish([])
+            } catch {
+                teardown()
+                deliver(Update(position: position, canFlip: false, messageKey: "camera.unavailable"))
+            }
         }
     }
 
-    private func configure() {
-        do {
-            try makeLandmarker()
-        } catch {
-            Task { @MainActor in self.message = "The landmark model would not load: \(error.localizedDescription)" }
-            return
-        }
+    func stop() {
+        queue.async { [self] in teardown(); deliver = nil }
+    }
 
-        let hasBack = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) != nil
-        let hasFront = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) != nil
-        Task { @MainActor in self.canFlip = hasBack && hasFront }
-
+    private func teardown() {
+        dispatchPrecondition(condition: .onQueue(queue))
+        running = false
+        output?.setSampleBufferDelegate(nil, queue: nil)
+        if session.isRunning { session.stopRunning() }
         session.beginConfiguration()
-        session.sessionPreset = .high
-        guard let device = camera(at: activePosition) ?? camera(at: .back) ?? camera(at: .front),
-              let input = try? AVCaptureDeviceInput(device: device),
-              session.canAddInput(input) else {
-            session.commitConfiguration()
-            Task { @MainActor in self.message = "No camera is available on this device." }
-            return
-        }
-        activePosition = device.position
-        let settled = device.position
-        Task { @MainActor in self.position = settled }
-        session.addInput(input)
-
-        let output = AVCaptureVideoDataOutput()
-        output.alwaysDiscardsLateVideoFrames = true
-        output.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA]
-        output.setSampleBufferDelegate(self, queue: queue)
-        if session.canAddOutput(output) { session.addOutput(output) }
-        applyGeometry(to: output)
+        session.inputs.forEach { session.removeInput($0) }
+        session.outputs.forEach { session.removeOutput($0) }
         session.commitConfiguration()
+        output = nil
+        // No inference or callback can still be running on this serial queue.
+        handLandmarker = nil
+        faceLandmarker = nil
     }
 
-    private func camera(at position: AVCaptureDevice.Position) -> AVCaptureDevice? {
+    private func camera(_ position: AVCaptureDevice.Position) -> AVCaptureDevice? {
         AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: position)
     }
 
-    /// Only the front camera is mirrored; a hand held up to the back camera
-    /// must not be flipped, or left and right swap and the palm engine reads
-    /// the wrong one.
-    private func applyGeometry(to output: AVCaptureOutput) {
+    private func configure() throws {
+        canFlip = camera(.front) != nil && camera(.back) != nil
+        guard let device = camera(position) ?? camera(.back) ?? camera(.front) else { throw CameraFailure.unavailable }
+        let input = try AVCaptureDeviceInput(device: device)
+        let output = AVCaptureVideoDataOutput()
+        output.alwaysDiscardsLateVideoFrames = true
+        output.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA]
+        session.beginConfiguration()
+        defer { session.commitConfiguration() }
+        // Landmarkers resize input themselves; HD frames only waste memory on
+        // smaller phones. Capture/detection is bounded to ten updates a second.
+        if session.canSetSessionPreset(.vga640x480) { session.sessionPreset = .vga640x480 }
+        guard session.canAddInput(input) else { throw CameraFailure.unavailable }
+        session.addInput(input)
+        guard session.canAddOutput(output) else { throw CameraFailure.unavailable }
+        session.addOutput(output)
+        self.output = output
+        position = device.position
+        applyGeometry(output)
+        output.setSampleBufferDelegate(self, queue: queue)
+    }
+
+    private func applyGeometry(_ output: AVCaptureOutput) {
         guard let connection = output.connection(with: .video) else { return }
         if connection.isVideoMirroringSupported {
             connection.automaticallyAdjustsVideoMirroring = false
-            connection.isVideoMirrored = (activePosition == .front)
+            connection.isVideoMirrored = position == .front
         }
-        if #available(iOS 17.0, *) {
-            connection.videoRotationAngle = 90
-        }
+        if connection.isVideoRotationAngleSupported(90) { connection.videoRotationAngle = 90 }
     }
 
-    /// Turn the camera round. The landmarker keeps running; only the input
-    /// changes, so there is no pause and no reload of the model.
     func flip() {
-        queue.async { [weak self] in
-            guard let self else { return }
-            let wanted: AVCaptureDevice.Position = (self.activePosition == .front) ? .back : .front
-            guard let device = self.camera(at: wanted), let input = try? AVCaptureDeviceInput(device: device) else { return }
-            self.session.beginConfiguration()
-            self.session.inputs.forEach { self.session.removeInput($0) }
-            if self.session.canAddInput(input) {
-                self.session.addInput(input)
-                self.activePosition = wanted
-                Task { @MainActor in self.position = wanted }
-            } else if let previous = self.camera(at: self.activePosition),
-                      let restore = try? AVCaptureDeviceInput(device: previous) {
-                self.session.addInput(restore)
-            }
-            self.session.outputs.forEach { self.applyGeometry(to: $0) }
-            self.session.commitConfiguration()
-            self.clear()
+        queue.async { [self] in
+            guard running, canFlip else { return }
+            let wanted: AVCaptureDevice.Position = position == .front ? .back : .front
+            guard let device = camera(wanted), let input = try? AVCaptureDeviceInput(device: device) else { return }
+            let previous = session.inputs
+            session.beginConfiguration()
+            previous.forEach { session.removeInput($0) }
+            if session.canAddInput(input) { session.addInput(input); position = wanted }
+            else { previous.filter { session.canAddInput($0) }.forEach { session.addInput($0) } }
+            session.outputs.forEach(applyGeometry)
+            session.commitConfiguration()
+            publish([])
         }
     }
 
     private func makeLandmarker() throws {
-        guard let path = Bundle.main.path(forResource: kind.modelName, ofType: "task") else {
-            throw NSError(domain: "Auspice", code: 1, userInfo: [NSLocalizedDescriptionKey: "model missing from the app"])
-        }
+        guard let path = Bundle.main.path(forResource: kind.modelName, ofType: "task") else { throw CameraFailure.unavailable }
         switch kind {
         case .hand:
             let options = HandLandmarkerOptions()
             options.baseOptions.modelAssetPath = path
-            options.runningMode = .liveStream
+            options.runningMode = .video
             options.numHands = 1
-            options.minHandDetectionConfidence = 0.5
-            options.handLandmarkerLiveStreamDelegate = self
             handLandmarker = try HandLandmarker(options: options)
         case .face:
             let options = FaceLandmarkerOptions()
             options.baseOptions.modelAssetPath = path
-            options.runningMode = .liveStream
+            options.runningMode = .video
             options.numFaces = 1
-            options.faceLandmarkerLiveStreamDelegate = self
             faceLandmarker = try FaceLandmarker(options: options)
         }
     }
 
-    private func publish(_ points: [NormalizedLandmark]) {
-        let engineInput = points.map { point in
-            ["x": Double(point.x), "y": Double(point.y), "z": Double(point.z)]
-        }
-        let drawn = points.map { CGPoint(x: Double($0.x), y: Double($0.y)) }
-        Task { @MainActor in
-            self.landmarks = engineInput
-            self.overlay = drawn
-            self.detecting = !points.isEmpty
-        }
+    private func publish(_ points: [NormalizedLandmark], messageKey: String? = nil) {
+        let finite = points.allSatisfy { $0.x.isFinite && $0.y.isFinite && $0.z.isFinite }
+        deliver?(Update(points: finite ? points.map { ["x": Double($0.x), "y": Double($0.y), "z": Double($0.z)] } : [],
+                        position: position, canFlip: canFlip, messageKey: messageKey))
     }
 
-    private func clear() {
-        Task { @MainActor in
-            self.overlay = []
-            self.detecting = false
+    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        processFrame(sampleBuffer)
+    }
+
+    private func processFrame(_ sampleBuffer: CMSampleBuffer) {
+        guard running else { return }
+        let seconds = CMTimeGetSeconds(CMSampleBufferGetPresentationTimeStamp(sampleBuffer))
+        guard seconds.isFinite else { return }
+        let stamp = Int(seconds * 1000)
+        guard lastTimestamp < 0 || stamp - lastTimestamp >= 100 else { return }
+        lastTimestamp = stamp
+        autoreleasepool {
+            do {
+                let image = try MPImage(sampleBuffer: sampleBuffer)
+                switch kind {
+                case .hand:
+                    let result = try handLandmarker?.detect(videoFrame: image, timestampInMilliseconds: stamp)
+                    publish(result?.landmarks.first ?? [])
+                case .face:
+                    let result = try faceLandmarker?.detect(videoFrame: image, timestampInMilliseconds: stamp)
+                    publish(result?.faceLandmarks.first ?? [])
+                }
+            } catch { publish([], messageKey: "camera.retry") }
         }
     }
-}
-
-extension LandmarkSession: AVCaptureVideoDataOutputSampleBufferDelegate {
-    func captureOutput(
-        _ output: AVCaptureOutput,
-        didOutput sampleBuffer: CMSampleBuffer,
-        from connection: AVCaptureConnection
-    ) {
-        guard let image = try? MPImage(sampleBuffer: sampleBuffer) else { return }
-        // MediaPipe's live-stream mode insists on timestamps that only ever
-        // increase; a repeated millisecond throws rather than being ignored.
-        let stamp = Int(CMTimeGetSeconds(CMSampleBufferGetPresentationTimeStamp(sampleBuffer)) * 1000)
-        let timestamp = max(stamp, lastTimestamp + 1)
-        lastTimestamp = timestamp
-        switch kind {
-        case .hand: try? handLandmarker?.detectAsync(image: image, timestampInMilliseconds: timestamp)
-        case .face: try? faceLandmarker?.detectAsync(image: image, timestampInMilliseconds: timestamp)
-        }
-    }
-}
-
-extension LandmarkSession: HandLandmarkerLiveStreamDelegate {
-    func handLandmarker(
-        _ handLandmarker: HandLandmarker,
-        didFinishDetection result: HandLandmarkerResult?,
-        timestampInMilliseconds: Int,
-        error: Error?
-    ) {
-        guard let hand = result?.landmarks.first, hand.count >= 21 else { clear(); return }
-        publish(hand)
-    }
-}
-
-extension LandmarkSession: FaceLandmarkerLiveStreamDelegate {
-    func faceLandmarker(
-        _ faceLandmarker: FaceLandmarker,
-        didFinishDetection result: FaceLandmarkerResult?,
-        timestampInMilliseconds: Int,
-        error: Error?
-    ) {
-        guard let face = result?.faceLandmarks.first, face.count >= 400 else { clear(); return }
-        publish(face)
-    }
+    private enum CameraFailure: Error { case unavailable }
 }
 
 /// The live preview, with the landmarks drawn over it.
@@ -302,7 +311,7 @@ struct CameraFlipButton: View {
                 .overlay(Capsule().strokeBorder(Palette.goldLine, lineWidth: 1))
             }
             .padding(10)
-            .accessibilityLabel(session.position == .front ? "Switch to the back camera" : "Switch to the front camera")
+            .accessibilityLabel(l(session.position == .front ? "Switch to the back camera" : "Switch to the front camera"))
         }
     }
 }

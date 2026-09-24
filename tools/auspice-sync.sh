@@ -8,6 +8,7 @@
 set -euo pipefail
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO"
+python3 tools/auspice-build-strings.py
 node tools/build-engine-bundle.mjs
 mkdir -p native/ios/Auspice/Resources
 cp native/shared/lazyoracle-engines.js native/ios/Auspice/Resources/

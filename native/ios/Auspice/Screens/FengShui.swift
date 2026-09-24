@@ -65,6 +65,7 @@ struct FengShuiScreen: View {
             }
 
             if let mansions {
+                ExplainReading(result: mansions)
                 Panel {
                     BaguaRose(mansions: mansions, heading: compass.heading)
                         .aspectRatio(1, contentMode: .fit)
@@ -74,14 +75,14 @@ struct FengShuiScreen: View {
 
                 Panel(title: t("fengshui.yourGua")) {
                     HStack(alignment: .firstTextBaseline, spacing: 12) {
-                        Text(mansions.gua)
+                        Text(l(mansions.gua))
                             .font(Typeface.display(40))
                             .foregroundStyle(Palette.gold)
                         VStack(alignment: .leading, spacing: 3) {
-                            Text("\(mansions.guaNumber) · \(mansions.group == "east" ? "East group 东四命" : "West group 西四命")")
+                            Text("\(mansions.guaNumber) · \(mansions.group == "east" ? l("East group") : l("West group"))")
                                 .font(Typeface.display(18))
                                 .foregroundStyle(Palette.ink)
-                            Text("Counted from the BaZi year \(mansions.year), which begins at 立春 rather than on 1 January.")
+                            Text(lf("Based on the BaZi year {0}, which starts at the Beginning of Spring solar term.", String(mansions.year)))
                                 .font(Typeface.serif(15))
                                 .foregroundStyle(Palette.inkMute)
                                 .fixedSize(horizontal: false, vertical: true)
@@ -121,24 +122,24 @@ struct FengShuiScreen: View {
 
     @ViewBuilder private var compassLine: some View {
         if !compass.available {
-            Text("This device has no compass, so the sectors are shown without a facing.")
+            Text(l("This device has no compass, so the sectors are shown without a facing."))
                 .font(Typeface.sans(13))
                 .foregroundStyle(Palette.inkMute)
                 .frame(maxWidth: .infinity)
         } else if compass.denied {
-            Text("The compass needs location permission. The sectors below are still yours.")
+            Text(l("The compass needs location permission. The sectors below are still yours."))
                 .font(Typeface.sans(13))
                 .foregroundStyle(Palette.inkMute)
                 .frame(maxWidth: .infinity)
         } else if let heading = compass.heading, let facing, let quality = mansions?.sectors.first(where: { $0.direction == facing })?.quality {
             VStack(spacing: 4) {
-                Text("\(t("fengshui.facing")) \(facing) · \(Int(heading))°")
+                Text("\(t("fengshui.facing")) \(l(facing)) · \(Int(heading))°")
                     .font(Typeface.display(18))
                     .foregroundStyle(Palette.ink)
-                Text("\(quality.name.zh) \(quality.name.en)")
+                Text(l(quality.name.en))
                     .font(Typeface.serif(17))
                     .foregroundStyle(quality.auspicious ? Palette.gold : Palette.rose)
-                Text(quality.use.en)
+                Text(l(quality.use.en))
                     .font(Typeface.serif(15))
                     .foregroundStyle(Palette.inkSoft)
                     .multilineTextAlignment(.center)
@@ -166,21 +167,17 @@ struct FengShuiScreen: View {
 
     private func sectorRow(_ sector: MansionSector) -> some View {
         HStack(alignment: .top, spacing: 12) {
-            Text(sector.direction)
+            Text(l(sector.direction))
                 .font(Typeface.display(18))
                 .foregroundStyle(sector.quality.auspicious ? Palette.gold : Palette.rose)
                 .frame(width: 34, alignment: .leading)
             VStack(alignment: .leading, spacing: 3) {
-                Text("\(sector.quality.name.zh) · \(sector.quality.name.en)")
+                Text(l(sector.quality.name.en))
                     .font(Typeface.serif(17))
                     .foregroundStyle(Palette.ink)
-                Text(sector.quality.use.en)
+                Text(l(sector.quality.use.en))
                     .font(Typeface.serif(15))
                     .foregroundStyle(Palette.inkSoft)
-                    .fixedSize(horizontal: false, vertical: true)
-                Text(sector.quality.use.zh)
-                    .font(Typeface.serif(14))
-                    .foregroundStyle(Palette.inkMute)
                     .fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 0)
@@ -199,7 +196,7 @@ struct FengShuiScreen: View {
             ], as: EightMansions.self)
             error = nil
         } catch {
-            self.error = error.localizedDescription
+            self.error = l("This reading could not be computed. Please try again.")
         }
     }
 }
@@ -256,7 +253,7 @@ struct BaguaRose: View {
                             .font(Typeface.display(size * 0.055))
                             .foregroundStyle(Palette.ink)
                         if let sector = mansions.sectors.first(where: { $0.direction == direction }) {
-                            Text(sector.quality.name.zh)
+                            Text(l(sector.quality.name.en))
                                 .font(Typeface.serif(size * 0.045))
                                 .foregroundStyle(Palette.inkSoft)
                         }
@@ -267,7 +264,7 @@ struct BaguaRose: View {
                     )
                 }
 
-                Text(mansions.gua)
+                Text(l(mansions.gua))
                     .font(Typeface.display(size * 0.12))
                     .foregroundStyle(Palette.gold)
                     .position(centre)

@@ -13,9 +13,6 @@ import java.util.Locale
  * The app follows the phone unless the reader chooses otherwise in Settings,
  * and a choice takes effect at once rather than on the next launch.
  *
- * What is *not* translated: the traditions' own vocabulary. 宜 stays 宜 in
- * every language, as do 忌, 日主, 甲子 and 生气, because they are the subject of
- * the reading rather than part of the interface.
  */
 object Localisation {
     private const val FILE = "auspice"
@@ -28,6 +25,7 @@ object Localisation {
 
     fun load(appContext: Context) {
         context = appContext.applicationContext
+        ReadingCatalogue.load(appContext)
         chosen = context?.getSharedPreferences(FILE, Context.MODE_PRIVATE)?.getString(KEY, null)
     }
 
@@ -69,16 +67,48 @@ fun t(key: String): String =
         ?: Catalogue.table[key]?.get("en")
         ?: key
 
-/**
- * A 通书 term with its explanation beside it.
- *
- * The term itself is never replaced — 纳采 stays 纳采 — because that is what a
- * reader would look up. Outside Chinese it is followed by a short gloss, so the
- * almanac can be used without reading Chinese.
- */
-fun glossed(term: String): String {
-    val code = Localisation.code
-    if (code.startsWith("zh")) return term
-    val gloss = Catalogue.glossary[term]?.get(code) ?: return term
-    return if (gloss == term) term else "$term · $gloss"
+/** Presentation translations never alter engine identifiers or facts. */
+object ReadingCatalogue {
+    var values: Map<String, Map<String, String>> = emptyMap()
+        private set
+    fun load(context: Context) {
+        values = context.assets.open("auspice-content.json").bufferedReader().use {
+            kotlinx.serialization.json.Json.decodeFromString(it.readText())
+        }
+    }
 }
+fun l(source: String): String {
+    ReadingCatalogue.values[source]?.get(Localisation.code)?.let { return it }
+    Catalogue.glossary[source]?.get(Localisation.code)?.let { return it }
+    for (separator in listOf(" · ", "、", " / ")) {
+        if (source.contains(separator)) return source.split(separator).joinToString(" · ") { l(it) }
+    }
+    return source
+}
+fun lf(template: String, vararg values: String): String {
+    var result = l(template)
+    values.forEachIndexed { i, value -> result = result.replace("{$i}", l(value)) }
+    return result
+}
+fun glossed(term: String): String = l(term)
+fun lunarDateText(source: String): String {
+    if (Localisation.code.startsWith("zh")) return if (Localisation.code == "zh-Hant") source.replace("闰", "閏") else source
+    val digits = "〇一二三四五六七八九".withIndex().associate { it.value to it.index.toString() } + ('零' to "0")
+    fun number(text: String): String {
+        if (text == "正") return "1"
+        if (text == "冬") return "11"
+        if (text == "腊") return "12"
+        val cleaned = text.replace("初", "").replace("廿", "二十").replace("卅", "三十")
+        if (cleaned.contains("十")) {
+            val parts = cleaned.split("十")
+            return (((parts[0].firstOrNull()?.let { digits[it]?.toInt() } ?: 1) * 10) + (parts.last().firstOrNull()?.let { digits[it]?.toInt() } ?: 0)).toString()
+        }
+        return cleaned.map { digits[it] ?: it.toString() }.joinToString("")
+    }
+    val parts = source.split('年', '月', '日').filter { it.isNotEmpty() }
+    if (parts.size != 3) return l(source)
+    val date = parts.joinToString("-") { number(it.replace("闰", "")) }
+    return lf(if (parts[1].contains("闰")) "Lunar date: {0} (leap month)" else "Lunar date: {0}", date)
+}
+
+fun readingLanguageInstruction(): String = "Write mainly in the selected app language: ${Localisation.code}. Use clear everyday language and the selected Chinese script. An occasional conventional term from another language is allowed when useful, but do not alternate languages or duplicate paragraphs in translation. Explain unfamiliar terms once. Honor an explicit request for a different response language."

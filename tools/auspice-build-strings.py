@@ -1,23 +1,21 @@
 """Generate the interface strings for both native apps from one catalogue.
 
-The catalogue is `i18n/app/strings.json`; everything the reader sees as
-interface chrome lives there, in eleven languages. The traditions' own terms —
-宜, 忌, 日主, 甲子, 生气 — deliberately stay in Chinese characters in every
-language, because they are the subject rather than the interface, and a reader
-looking 宜 up in a book will not find "suitable".
+The interface catalogue is `i18n/app/strings.json`; computed reading text is
+translated for display using `i18n/app/content.json`. Both contain all eleven
+languages. Engine identifiers and the original facts remain unchanged.
 
     python3 tools/auspice-build-strings.py
 """
 import json
 import pathlib
+import re
 
 REPO = pathlib.Path(__file__).resolve().parent.parent
 CATALOGUE = json.loads((REPO / "i18n/app/strings.json").read_text())
 LANGS = CATALOGUE["languages"]
 STRINGS = CATALOGUE["strings"]
 
-# The 通书's own vocabulary, glossed rather than replaced: the term itself is
-# always shown, with a short explanation beside it outside Chinese.
+# Fallback vocabulary for the almanac.
 GLOSSARY = json.loads((REPO / "i18n/app/almanac-terms.json").read_text())["terms"]
 
 NAMES = {
@@ -105,3 +103,16 @@ if missing:
 (REPO / "native/ios/Auspice/Catalogue.swift").write_text(build_swift())
 (REPO / "native/android/app/src/main/kotlin/art/lazying/auspice/Catalogue.kt").write_text(build_kotlin())
 print(f"{len(STRINGS)} keys × {len(LANGS)} languages written into both apps")
+
+CONTENT = json.loads((REPO / "i18n/app/content.json").read_text())
+for source, translations in CONTENT.items():
+    assert set(translations) == set(LANGS), f"Missing language: {source}"
+    placeholders = sorted(re.findall(r"\{\d+\}", source))
+    for code, translated in translations.items():
+        assert translated.strip(), f"Empty translation: {source}:{code}"
+        assert sorted(re.findall(r"\{\d+\}", translated)) == placeholders, f"Changed placeholders: {source}:{code}"
+for relative in ["native/ios/Auspice/Resources", "native/android/app/src/main/assets"]:
+    destination = REPO / relative / "auspice-content.json"
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(json.dumps(CONTENT, ensure_ascii=False, separators=(",", ":")) + "\n")
+print(f"{len(CONTENT)} reading phrases × {len(LANGS)} languages bundled into both apps")

@@ -23,6 +23,7 @@ struct AstrologyScreen: View {
             }
 
             if let chart {
+                ExplainReading(result: chart)
                 Panel {
                     ChartWheel(chart: chart, appeared: wheelIn)
                         .aspectRatio(1, contentMode: .fit)
@@ -59,7 +60,7 @@ struct AstrologyScreen: View {
                                 Text(Zodiac.bodySymbols[aspect.b] ?? aspect.b)
                                     .font(Typeface.display(19))
                                     .foregroundStyle(Palette.ink)
-                                Text("\(aspect.a) \(aspect.type) \(aspect.b)")
+                                Text("\(l(aspect.a)) · \(l(aspect.type)) · \(l(aspect.b))")
                                     .font(Typeface.serif(15))
                                     .foregroundStyle(Palette.inkSoft)
                                 Spacer(minLength: 0)
@@ -79,7 +80,7 @@ struct AstrologyScreen: View {
                                 Text("\(Zodiac.bodySymbols[transit.transiting] ?? "") \(aspectGlyph(transit.type)) \(Zodiac.bodySymbols[transit.natal] ?? "")")
                                     .font(Typeface.display(18))
                                     .foregroundStyle(aspectColour(transit.type))
-                                Text("transiting \(transit.transiting) \(transit.type) natal \(transit.natal)")
+                                Text(lf("Transiting {0} · {1} · natal {2}", transit.transiting, transit.type, transit.natal))
                                     .font(Typeface.serif(15))
                                     .foregroundStyle(Palette.inkSoft)
                                 Spacer(minLength: 0)
@@ -93,7 +94,7 @@ struct AstrologyScreen: View {
                 }
 
                 Panel(title: t("common.method")) {
-                    Text("Positions come from the astronomy engine for the exact instant of birth in UTC, with whole-sign houses counted from the ascendant. The moon stands at \(Int((chart.moonPhase * 100).rounded()))% of its cycle.")
+                    Text(lf("Positions are calculated at the birth instant in UTC, using whole-sign houses from the ascendant. Lunar cycle: {0}%.", String(Int((chart.moonPhase * 100).rounded()))))
                         .font(Typeface.serif(16))
                         .foregroundStyle(Palette.inkSoft)
                         .fixedSize(horizontal: false, vertical: true)
@@ -124,7 +125,7 @@ struct AstrologyScreen: View {
                 .font(Typeface.display(21))
                 .foregroundStyle(Palette.gold)
                 .frame(width: 26)
-            Text(placement.body)
+            Text(l(placement.body))
                 .font(Typeface.sans(15, weight: .semibold))
                 .foregroundStyle(Palette.ink)
                 .frame(width: 78, alignment: .leading)
@@ -147,7 +148,7 @@ struct AstrologyScreen: View {
         let within = longitude - Double(sign) * 30
         let degrees = Int(within)
         let minutes = Int((within - Double(degrees)) * 60)
-        return String(format: "%d°%02d′ %@ %@", degrees, minutes, Zodiac.signs[sign].symbol, Zodiac.signs[sign].zh)
+        return String(format: "%d°%02d′ %@ %@", degrees, minutes, Zodiac.signs[sign].symbol, l(Zodiac.signs[sign].en))
     }
 
     private func aspectGlyph(_ type: String) -> String {
@@ -176,7 +177,7 @@ struct AstrologyScreen: View {
             report = try? Engines.shared.evaluate("astrology.transits", ["birth": input], as: TransitReport.self)
             error = nil
         } catch {
-            self.error = error.localizedDescription
+            self.error = l("This reading could not be computed. Please try again.")
         }
     }
 }

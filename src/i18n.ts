@@ -12,7 +12,7 @@ export interface UICopy {
   home: { eyebrow: string; title: string; privacy: string }
   nav: { home: string; settings: string; back: string }
   common: { question: string; questionPlaceholder: string; editProfile: string; approximateHour: string; loading: string }
-  reading: { title: string; thinking: string; offlineNote: string; share: string; copied: string }
+  reading: { title: string; thinking: string; offlineNote: string; share: string; copied: string; explain: string; followup: string; explainPrompt: string }
   profile: {
     title: string
     body: string
@@ -105,7 +105,7 @@ const copies: Record<ReadingLanguage, UICopy> = {
     home: { eyebrow: 'Choose a practice', title: 'What would you like to ask?', privacy: 'Charts are calculated on this device. Tianji Cloud receives your question, conversation context and reading facts; photos stay here.' },
     nav: { home: 'Home', settings: 'Settings', back: 'Back' },
     common: { question: 'Your question', questionPlaceholder: 'Hold a question in mind, or leave this empty for a general reading', editProfile: 'Edit birth details', approximateHour: 'Birth hour unknown: the hour pillar is approximate.', loading: 'Loading…' },
-    reading: { title: 'Reading', thinking: 'Reading…', offlineNote: 'Composed on this device from the computed facts. Tianji Cloud needs an internet connection and can be enabled in Settings.', share: 'Copy reading', copied: 'Copied' },
+    reading: { title: 'Reading', thinking: 'Reading…', offlineNote: 'Composed on this device from the computed facts. Tianji Cloud needs an internet connection and can be enabled in Settings.', share: 'Copy reading', copied: 'Copied', explain: 'Explain this reading clearly', followup: 'Ask about this result (optional)', explainPrompt: 'Explain this exact reading in everyday language. Start with the answer to my question, then explain the most relevant facts and one practical next step. Briefly define unfamiliar terms. Do not draw or calculate another result.' },
     profile: {
       title: 'Birth details',
       body: 'Saved on this device for BaZi, astrology and feng shui. Details included in a cloud reading or chat are sent with that request.',
@@ -218,7 +218,7 @@ const copies: Record<ReadingLanguage, UICopy> = {
     home: { eyebrow: '选择一种方式', title: '你想问什么？', privacy: '牌与盘都在本机推算。天机云端接收问题、相关对话与推算结果，照片留在本机。' },
     nav: { home: '首页', settings: '设置', back: '返回' },
     common: { question: '你的问题', questionPlaceholder: '心中默念一个问题，或留空做一次整体解读', editProfile: '修改出生资料', approximateHour: '出生时辰未知：时柱仅供参考。', loading: '加载中……' },
-    reading: { title: '解读', thinking: '正在解读……', offlineNote: '本解读由推算结果在本机组合而成。天机云端需要网络连接，可在设置中开启。', share: '复制解读', copied: '已复制' },
+    reading: { title: '解读', thinking: '正在解读……', offlineNote: '本解读由推算结果在本机组合而成。天机云端需要网络连接，可在设置中开启。', share: '复制解读', copied: '已复制', explain: '请天机用白话解读', followup: '想进一步问什么？（选填）', explainPrompt: '请用通俗易懂的白话解读眼前这个结果。先直接回应所问之事，再说明最相关的依据和一个可以实际采取的下一步。术语用一句话解释，不要重新抽牌或起卦。' },
     profile: {
       title: '出生资料',
       body: '保存在本机，用于八字、星盘与风水。云端解读或对话中包含的出生资料会随请求发送。',

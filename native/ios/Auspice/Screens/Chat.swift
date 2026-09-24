@@ -77,6 +77,7 @@ final class ChatStore {
     }
 
     func newSession() {
+        guard !streaming else { return }
         let session = ChatSession()
         sessions.insert(session, at: 0)
         currentId = session.id
@@ -84,6 +85,7 @@ final class ChatStore {
     }
 
     func delete(_ id: UUID) {
+        guard !streaming else { return }
         sessions.removeAll { $0.id == id }
         if sessions.isEmpty { sessions = [ChatSession()] }
         if currentId == id { currentId = sessions[0].id }
@@ -105,6 +107,7 @@ final class ChatStore {
     }
 
     func clearCurrent() {
+        guard !streaming else { return }
         var session = current
         session.turns = []
         session.summary = nil
@@ -133,14 +136,17 @@ final class ChatStore {
 
     // MARK: The conversation itself
 
-    func send(_ text: String) {
+    @discardableResult
+    func send(_ text: String) -> Bool {
         let asked = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !asked.isEmpty, !streaming else { return }
+        guard !asked.isEmpty, !streaming else { return false }
+        streaming = true
         var session = current
         session.turns.append(Turn(kind: .reader, text: asked))
         current = session
         save()
         Task { await run() }
+        return true
     }
 
     @MainActor
@@ -162,7 +168,7 @@ final class ChatStore {
         for step in 0...AgentTools.maxSteps {
             let finalAnswer = finishWithFacts || step == AgentTools.maxSteps
             if finalAnswer {
-                wire.append(Relay.Message(role: "system", content: "Answer the reader now using the computed facts already supplied. Do not request more tools. If a fact is missing, say so. Reply in the reader's language."))
+                wire.append(Relay.Message(role: "system", content: "Answer the reader now using the computed facts already supplied. Do not request more tools. If a fact is missing, say so. Follow the selected response language."))
             }
             do {
                 var holder = Turn(kind: .oracle, text: "")
@@ -248,9 +254,9 @@ final class ChatStore {
                 }
                 save()
             } catch {
-                self.error = error.localizedDescription
+                self.error = t("chat.quiet")
                 var session = current
-                session.turns.append(Turn(kind: .note, text: error.localizedDescription, ok: false))
+                session.turns.append(Turn(kind: .note, text: t("chat.quiet"), ok: false))
                 current = session
                 save()
                 return
@@ -262,7 +268,7 @@ final class ChatStore {
     /// summary the model wrote for itself.
     @MainActor
     private func messagesForModel() async -> [Relay.Message] {
-        var messages = [Relay.Message(role: "system", content: Self.systemPrompt)]
+        var messages = [Relay.Message(role: "system", content: Self.systemPrompt + "\n" + readingLanguageInstruction())]
         var session = current
 
         let spoken = session.turns.filter { $0.kind == .reader || $0.kind == .oracle || $0.facts != nil }
@@ -312,9 +318,11 @@ final class ChatStore {
     static let systemPrompt = """
     You are the reader in Auspice (宜时). You do not invent readings: every card, hexagram, pillar, chart and almanac page comes from a tool that runs a deterministic engine on this device. Call the tool, then read what it returns. If a tool disagrees with what you were about to say, the tool is right.
 
-    Reply in the language and script the reader writes in, including Traditional Chinese, and stay in it for the whole answer. 讀者用繁體中文提問（例如「今天適合做什麼」），整個回答就用繁體中文；工具資料的簡體字不決定回答字體。 Keep each tradition's own terms in Chinese characters (宜, 忌, 日主, 卦, 生气), and gloss a term the first time you use it when you are writing in English.
+    For greetings and questions about what the app can do, answer briefly without tools or claims about the reader’s personal details. Historical engine results are dated context, not current state. Fetch fresh birth details or calendar facts before presenting them as current.
 
-    Write as a reader speaking to someone across a table, not as a report. No headings, no bullet lists, no bold labels such as "What was computed". Two to four short paragraphs. Open with the answer, give the one or two facts it rests on, and end with something the person can actually do. Name the source in passing — "today's 通书 page lists 立券 among its 宜" — rather than announcing a method section.
+    Follow the selected response language supplied with the conversation. Stay mainly in that language; for Chinese, use the selected script throughout the answer. An occasional useful traditional term is fine; explain unfamiliar terms briefly. Avoid frequent language switching and duplicate bilingual paragraphs. Use everyday wording and answer the question directly before explaining the relevant facts.
+
+    Write as a reader speaking to someone across a table, not as a report. No headings, no bullet lists, no bold labels such as "What was computed". Two to four short paragraphs. Open with the answer, give the one or two facts it rests on, and end with something the person can actually do. Name the source in passing — "the almanac lists signing agreements as suitable today" — rather than announcing a method section.
 
     Method, so the reading is grounded rather than decorative:
     - BaZi follows 子平法. Pillars come from the solar terms, not the lunar month, and the hour pillar from true solar time. Judge the day master's strength first, then name the favourable element.
@@ -348,6 +356,7 @@ struct ChatScreen: View {
     @State private var followLatest = true
     @State private var awayFromBottom = false
     @FocusState private var composerFocused: Bool
+    @State private var openingHandled = false
 
     /// Only the tail is rendered; the rest is reachable but not laid out, so a
     /// long conversation stays as quick to open as a short one.
@@ -364,31 +373,39 @@ struct ChatScreen: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
-                Text(store.current.title)
+                Text(store.current.title == "New conversation" ? t("chat.newConversation") : store.current.title)
                     .font(Typeface.display(16))
                     .foregroundStyle(Palette.ink)
                     .lineLimit(1)
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
-                    Button { store.newSession() } label: { Label(t("chat.newConversation"), systemImage: "square.and.pencil") }
-                    Button { showingSessions = true } label: { Label(t("chat.allConversations"), systemImage: "clock.arrow.circlepath") }
+                    Button { store.newSession() } label: { Label(t("chat.newConversation"), systemImage: "square.and.pencil") }.disabled(store.streaming)
+                    Button { showingSessions = true } label: { Label(t("chat.allConversations"), systemImage: "clock.arrow.circlepath") }.disabled(store.streaming)
                     Divider()
-                    Picker("Model", selection: $store.tier) {
-                        Text("Tianji Fast 天机快速版").tag("tianji-fast")
-                        Text("Tianji Pro 天机专业版").tag("tianji-pro")
+                    Picker(l("Model"), selection: $store.tier) {
+                        Text(l("Tianji Fast")).tag("tianji-fast")
+                        Text(l("Tianji Pro")).tag("tianji-pro")
                     }
                 } label: {
                     Image(systemName: "ellipsis.circle").foregroundStyle(Palette.inkSoft)
                 }
             }
         }
+        .toolbarBackground(Palette.night, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .sheet(isPresented: $showingSessions) { SessionList(store: store) }
-        .onAppear {
-            if !opening.trimmingCharacters(in: .whitespaces).isEmpty, store.current.turns.isEmpty {
-                store.send(opening)
-            }
-        }
+        .onAppear { deliverOpening() }
+        .onChange(of: store.streaming) { _, busy in if !busy { deliverOpening() } }
+    }
+
+    private func deliverOpening() {
+        guard !openingHandled, !opening.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        // The existing conversation is deliberately preserved. A home question
+        // is an explicit send intent, even when that conversation has history.
+        if store.streaming { draft = opening; return }
+        openingHandled = true
+        if store.send(opening) { draft = ""; followLatest = true }
     }
 
     private var log: some View {
@@ -479,7 +496,7 @@ struct ChatScreen: View {
                     "What does my day master need?",
                     "Cast a hexagram for me"
                 ], id: \.self) { suggestion in
-                    Chip(label: suggestion, active: false) { followLatest = true; store.send(suggestion) }
+                    Chip(label: l(suggestion), active: false) { followLatest = true; store.send(l(suggestion)) }
                 }
             }
         }
@@ -516,7 +533,7 @@ struct ChatScreen: View {
             HStack(spacing: 7) {
                 Image(systemName: turn.ok ? "function" : "exclamationmark.triangle")
                     .font(.system(size: 11))
-                Text(turn.text).font(Typeface.sans(12, weight: .semibold))
+                Text(l(turn.text)).font(Typeface.sans(12, weight: .semibold))
             }
             .foregroundStyle(turn.ok ? Palette.gold : Palette.rose)
             .padding(.horizontal, 10)
@@ -530,11 +547,11 @@ struct ChatScreen: View {
         }
     }
 
-    /// Pinned to the bottom: the field, then one row with Clear on the left
-    /// quarter and Send filling the rest.
+    /// Pinned composer with two equally legible actions.
     private var composer: some View {
         VStack(spacing: 8) {
             TextField(t("chat.ask"), text: $draft, axis: .vertical)
+                .accessibilityIdentifier("chat.question")
                 .font(Typeface.serif(18))
                 .foregroundStyle(Palette.ink)
                 .focused($composerFocused)
@@ -546,10 +563,29 @@ struct ChatScreen: View {
                     RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Palette.line, lineWidth: 1)
                 )
             HStack(spacing: 10) {
-                Button(t("common.clear")) { store.clearCurrent() }
-                    .buttonStyle(GhostButtonStyle())
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .layoutPriority(0)
+                Button {
+                    store.newSession()
+                    draft = ""
+                    followLatest = true
+                } label: {
+                    HStack(spacing: 7) {
+                        Image(systemName: "square.and.pencil")
+                        Text(t("chat.newConversation")).lineLimit(2).minimumScaleFactor(0.8)
+                    }
+                        .font(Typeface.sans(13, weight: .semibold))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 10)
+                        .frame(maxWidth: .infinity, minHeight: 52)
+                        .foregroundStyle(Palette.gold)
+                        .background(RoundedRectangle(cornerRadius: 14).fill(Palette.goldSoft))
+                        .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Palette.goldLine))
+                }
+                .buttonStyle(.plain)
+                .disabled(store.streaming)
+                .opacity(store.streaming ? 0.45 : 1)
+                .accessibilityLabel(t("chat.newConversation"))
+                .accessibilityIdentifier("chat.new")
+                .frame(maxWidth: .infinity)
                 Button {
                     let text = draft
                     draft = ""
@@ -559,9 +595,9 @@ struct ChatScreen: View {
                     Label(t("common.send"), systemImage: "arrow.up")
                 }
                 .buttonStyle(PrimaryButtonStyle())
+                .accessibilityIdentifier("chat.send")
                 .disabled(store.streaming || draft.trimmingCharacters(in: .whitespaces).isEmpty)
                 .frame(maxWidth: .infinity)
-                .layoutPriority(1)
             }
         }
         .padding(.horizontal, 16)
@@ -586,7 +622,7 @@ private struct SessionList: View {
                         dismiss()
                     } label: {
                         VStack(alignment: .leading, spacing: 3) {
-                            Text(session.title)
+                            Text(session.title == "New conversation" ? t("chat.newConversation") : session.title)
                                 .font(Typeface.serif(17))
                                 .foregroundStyle(session.id == store.currentId ? Palette.gold : Palette.ink)
                                 .lineLimit(1)
@@ -644,13 +680,9 @@ struct SettingsScreen: View {
             }
 
             Panel(title: t("settings.rules")) {
-                Text("\(Engines.shared.available().count) engines, contract version \(Engines.expectedVersion)")
+                Text(lf("{0} engines · rules version {1}", String(Engines.shared.available().count), String(Engines.expectedVersion)))
                     .font(Typeface.serif(16))
                     .foregroundStyle(Palette.inkSoft)
-                Text(Engines.shared.available().joined(separator: " · "))
-                    .font(Typeface.sans(12))
-                    .foregroundStyle(Palette.inkMute)
-                    .fixedSize(horizontal: false, vertical: true)
                 Text(t("settings.rulesNote"))
                     .font(Typeface.sans(13))
                     .foregroundStyle(Palette.inkMute)

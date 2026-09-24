@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -44,7 +46,7 @@ fun IChingScreen(navController: NavController) {
                 delay(280)
                 shown = step + 1
             }
-        }.onFailure { error = it.message }
+        }.onFailure { error = l("This reading could not be computed. Please try again.") }
     }
 
     ScreenScaffold(
@@ -75,11 +77,9 @@ fun IChingScreen(navController: NavController) {
                             style = Type.sans(12, FontWeight.Bold).copy(letterSpacing = 2.sp),
                             color = Palette.gold
                         )
-                        Text(result.primary.name.zh, style = Type.display(30), color = Palette.ink)
-                        Text(result.primary.name.en, style = Type.display(17), color = Palette.inkSoft)
-                        Text(result.primary.name.pinyin, style = Type.sans(13), color = Palette.inkMute)
+                        Text(l(result.primary.name.en), style = Type.display(17), color = Palette.inkSoft)
                         Text(
-                            "${result.primary.upperTrigram.name.zh} over ${result.primary.lowerTrigram.name.zh}",
+                            lf("{0} over {1}", result.primary.upperTrigram.name.zh, result.primary.lowerTrigram.name.zh),
                             style = Type.serif(15), color = Palette.inkMute
                         )
                     }
@@ -87,15 +87,15 @@ fun IChingScreen(navController: NavController) {
             }
 
             if (shown >= 6) {
+            ExplainReading(Json.encodeToString(result))
                 Panel(title = t("iching.judgement")) {
-                    Text(result.primary.judgement, style = Type.serif(20), color = Palette.ink)
-                    Text(result.primary.sense.en, style = Type.serif(17), color = Palette.inkSoft)
-                    Text(result.primary.sense.zh, style = Type.serif(16), color = Palette.inkMute)
+                    Text(l(result.primary.judgement), style = Type.serif(20), color = Palette.ink)
+                    Text(l(result.primary.sense.en), style = Type.serif(17), color = Palette.inkSoft)
                 }
                 Panel(title = t("iching.whereToRead")) {
                     Text(focusLine(result), style = Type.serif(17), color = Palette.inkSoft)
                     Text(
-                        "朱熹《易学启蒙》 decides this by the number of moving lines, not by preference.",
+                        l("Zhu Xi’s method chooses the text by the number of changing lines."),
                         style = Type.sans(13), color = Palette.inkMute
                     )
                 }
@@ -107,17 +107,16 @@ fun IChingScreen(navController: NavController) {
                                 6
                             )
                             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Text("${resulting.number} · ${resulting.name.zh}", style = Type.display(22), color = Palette.ink)
-                                Text(resulting.name.en, style = Type.display(16), color = Palette.inkSoft)
-                                Text(resulting.sense.en, style = Type.serif(15), color = Palette.inkMute)
+                                Text("${resulting.number} · ${l(resulting.name.en)}", style = Type.display(22), color = Palette.ink)
+                                Text(l(resulting.sense.en), style = Type.serif(15), color = Palette.inkMute)
                             }
                         }
                     }
                 }
                 Panel(title = t("iching.behind")) {
-                    Relative("互卦 Nuclear", result.nuclear)
-                    Relative("错卦 Opposite", result.opposite)
-                    Relative("综卦 Inverse", result.inverse)
+                    Relative(l("Nuclear hexagram"), result.nuclear)
+                    Relative(l("Opposite hexagram"), result.opposite)
+                    Relative(l("Inverse hexagram"), result.inverse)
                 }
             }
         }
@@ -127,13 +126,12 @@ fun IChingScreen(navController: NavController) {
 @Composable
 private fun Relative(label: String, hexagram: Hexagram) {
     Row(Modifier.fillMaxWidth().padding(vertical = 3.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(
-            label,
+        Text(l(label),
             style = Type.sans(12, FontWeight.Bold).copy(letterSpacing = 1.4.sp),
             color = Palette.inkMute,
             modifier = Modifier.width(134.dp)
         )
-        Text("${hexagram.number} ${hexagram.name.zh} · ${hexagram.name.en}", style = Type.serif(16), color = Palette.inkSoft)
+        Text("${hexagram.number} · ${l(hexagram.name.en)}", style = Type.serif(16), color = Palette.inkSoft)
     }
 }
 
@@ -171,14 +169,4 @@ fun HexagramView(lines: List<CastLine>, shown: Int) {
     }
 }
 
-private fun focusLine(cast: IChingCast): String {
-    cast.focus.explain?.en?.takeIf { it.isNotBlank() }?.let { return it }
-    return when (cast.focus.kind) {
-        "judgement" -> "Nothing moves, so the judgement of the hexagram answers."
-        "line" -> "One line moves; read that line."
-        "two-lines" -> "Two lines move; read the upper of them."
-        "both-judgements" -> "Three lines move; read both judgements."
-        "resulting-lines" -> "Four lines move; read the still lines of the resulting hexagram."
-        else -> "Read the judgement of the resulting hexagram."
-    }
-}
+private fun focusLine(cast: IChingCast): String = l(cast.focus.rule.en)

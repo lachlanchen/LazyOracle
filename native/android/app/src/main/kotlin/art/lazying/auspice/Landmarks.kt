@@ -100,7 +100,7 @@ class LandmarkSession(private val hands: Boolean) {
                             if (hand == null || hand.size < 21) clear()
                             else publish(hand.map { listOf(it.x().toDouble(), it.y().toDouble(), it.z().toDouble()) })
                         }
-                        .setErrorListener { message = it.message }
+                        .setErrorListener { message = t("camera.retry") }
                         .build()
                 )
             } else {
@@ -115,12 +115,12 @@ class LandmarkSession(private val hands: Boolean) {
                             if (face == null || face.size < 400) clear()
                             else publish(face.map { listOf(it.x().toDouble(), it.y().toDouble(), it.z().toDouble()) })
                         }
-                        .setErrorListener { message = it.message }
+                        .setErrorListener { message = t("camera.retry") }
                         .build()
                 )
             }
         } catch (error: Throwable) {
-            message = "The landmark model would not load: ${error.message}"
+            message = t("camera.retry")
             return
         }
 
@@ -146,7 +146,7 @@ class LandmarkSession(private val hands: Boolean) {
             runCatching {
                 provider.unbindAll()
                 provider.bindToLifecycle(owner, lens, preview, analysis)
-            }.onFailure { message = "The camera would not open: ${it.message}" }
+            }.onFailure { message = t("camera.unavailable") }
         }, ContextCompat.getMainExecutor(context))
     }
 

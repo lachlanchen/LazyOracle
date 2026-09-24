@@ -5,6 +5,8 @@ struct AuspiceApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
+                .environment(\.locale, Locale(identifier: Localisation.shared.code))
+                .environment(\.layoutDirection, Localisation.shared.layoutDirection)
                 .preferredColorScheme(.dark)
                 .tint(Palette.gold)
         }

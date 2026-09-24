@@ -1,9 +1,9 @@
 # Native LazyOracle as the main product — 2026-09-24
 
 The owner now chooses LazyOracle as the main app with the shared native
-SwiftUI/Compose implementation, including live hand/face camera views. Auspice
-remains an alternate identity built from the same source, with its previous
-test builds retained; this rollout publishes only native LazyOracle. There is one native UI,
+SwiftUI/Compose implementation, including live hand/face camera views. The owner subsequently requested the reverse migration for Auspice: it now
+carries the classic React/Capacitor interface built from the maintained PWA.
+This lasting swap preserves both app IDs and previous signed builds. There is one native UI,
 not an in-app classic/native switch. This supersedes the earlier product split.
 
 - Keep the existing bundle/application IDs, store records and signing accounts.
@@ -21,10 +21,10 @@ not an in-app classic/native switch. This supersedes the earlier product split.
   transient camera sessions, images and loading flags out of persistence.
 - Pin the contextual Ask Tianji composer at the screen bottom. Place its
   explanations and replies below the deterministic analysis.
-- Keep Android, iOS and the PWA aligned. Deprecate only the classic mobile
-  wrappers; the PWA remains supported.
+- Keep Android, iOS and the PWA aligned. Deprecate the old LazyOracle classic
+  wrapper; ship the maintained classic interface as Auspice.
 - Validate upgrade/migration, both brand builds, native UI restoration, camera
-  lifecycle and live chat. Publish to test tracks and submit LazyOracle beta
+  lifecycle and live chat. Publish to test tracks and submit both apps for beta
   review when needed. Preserve the pending formal production submissions.
 
 Store identity references:

@@ -13,9 +13,9 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>LazyOracle</string>
+        <string>$(APP_DISPLAY_NAME)</string>
 	<key>NSCameraUsageDescription</key>
-	<string>LazyOracle photographs your palm to find the hand outline on this device. Photos are never uploaded or stored.</string>
+	<string>The app photographs your palm to find the hand outline on this device. Photos are never uploaded or stored.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Choose a photo of your palm; it is analysed on this device only.</string>
 	<key>NSMotionUsageDescription</key>

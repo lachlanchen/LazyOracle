@@ -1,8 +1,9 @@
 # Native LazyOracle
 
 LazyOracle is the main app: SwiftUI on iOS and Jetpack Compose on Android,
-with native face/palm capture. Both compile the same source as the optional
-Auspice identity. Branding, bundle ID, signing and build number are configuration.
+with native face/palm capture. Auspice now carries the classic interface from
+the PWA source under `ios/` and `android/`. The old native Auspice configuration
+is retained for rollback only; do not publish it over the classic release.
 The interface is native; a hidden local WebView runs once to import the classic
 app's local data. The original storage is retained for rollback.
 
@@ -91,7 +92,12 @@ for older devices. The classic rollback is tagged
 `rollback/lazyoracle-classic-2026-09-24`; classic mobile source remains under
 `ios/` and `android/`. Re-publishing a rollback requires a higher build number.
 Use the committed `LazyOracle` / `LazyOracleValidation` schemes on iOS and the
-`lazyoracle` flavor on Android. `Auspice` / `auspice` compile the alternate name.
+`lazyoracle` flavor on Android. `Auspice` / `auspice` are retained native rollback configurations.
+
+Classic Auspice: `npm run android:classic` builds the signed `auspice` flavor;
+`npm run ios:classic` synchronizes the web assets and `AuspiceClassic` scheme to
+the existing Mac project. `CLASSIC_IDENTITY=lazyoracle` selects the deprecated
+classic identity for reproduction only; publishing requires a new build number.
 
 `tools/native-ios-project.rb` reproduces the identity configurations if the
 Xcode project is regenerated. `tools/auspice-build-strings.py` builds native

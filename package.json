@@ -15,8 +15,8 @@
     "cap:sync": "npm run build && npx cap sync",
     "android": "bash tools/auspice-android-build.sh",
     "ios": "bash tools/auspice-sync.sh",
-    "android:classic": "npm run cap:sync && npx cap open android",
-    "ios:classic": "npm run cap:sync && npx cap open ios"
+    "android:classic": "bash tools/android-release-build.sh",
+    "ios:classic": "bash tools/classic-ios-sync.sh"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.1",

@@ -340,5 +340,10 @@ export function rememberLanguage(language: ReadingLanguage): void {
 }
 
 export function uiCopy(language: ReadingLanguage): UICopy {
-  return copies[language]
+  if (import.meta.env.VITE_APP_IDENTITY !== 'auspice') return copies[language]
+  const copy = copies[language]
+  return { ...copy, appName: 'Auspice', settings: { ...copy.settings,
+    about: copy.settings.about.replaceAll('LazyOracle', 'Auspice'),
+    disclaimer: copy.settings.disclaimer.replaceAll('LazyOracle', 'Auspice'),
+  } }
 }

@@ -36,6 +36,18 @@ android {
             }
         }
     }
+    flavorDimensions "identity"
+    productFlavors {
+        lazyoracle {
+            dimension "identity"
+        }
+        auspice {
+            dimension "identity"
+            applicationId "art.lazying.auspice"
+            versionCode 7
+            versionName "0.1.0"
+        }
+    }
     buildTypes {
         release {
             if (releaseSigningReady) {

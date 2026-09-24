@@ -10,11 +10,15 @@ These supersede the earlier product split below.
   SwiftUI/Compose implementation previously shipped as Auspice, with native
   live face and palm views. Keep LazyOracle's existing store identities,
   signing, name and icon. There is one native interface, with no classic switch.
-- Retain Auspice as an alternate build identity and its previous test builds as
-  backup. No new Auspice release is required for this migration.
-- Deprecate the classic Capacitor mobile wrappers; retain their reproducible
-  source and previous signed builds. The PWA remains supported and receives
-  corresponding fixes alongside Android and iOS.
+- The owner subsequently requested a lasting swap: Auspice carries the classic
+  React/Capacitor interface, while LazyOracle remains the main native app. Keep
+  both existing store identities and old signed builds for rollback.
+- Maintain the classic Auspice wrapper from the supported PWA source, sharing
+  engines and relay fixes with native LazyOracle. The old LazyOracle mobile
+  wrapper is deprecated; its source and previous signed builds remain.
+- Import prior native Auspice profiles and conversations into its classic UI
+  locally, retaining the original native storage. Publish Auspice test updates
+  too, submit beta review as needed, and monitor the existing formal reviews.
 - Restore each practice's inputs, exact deterministic result and follow-up
   conversation across navigation and relaunch. Explicit new readings remain.
 - Pin the contextual Ask Tianji composer to the bottom of each practice.

@@ -41,7 +41,7 @@ The current testing builds use two reading sources:
 
 Cards, charts, hexagrams and measurements are computed on the device. Photos for palmistry and face reading are measured in memory and never stored, uploaded or matched against anything. Birth profiles are saved in local storage. There is no account, no analytics and no advertising identifier. With Tianji Cloud switched on, requests carry your question, relevant conversation history or its summary, and structured reading facts (which may include birth details) through our relay to the model provider. Turning it off stops cloud reading requests. The full policy is at [oracle.lazying.art/privacy.html](https://oracle.lazying.art/privacy.html).
 
-LazyOracle now uses the native SwiftUI and Compose implementation developed as Auspice / 宜时, with eleven interface languages and live hand/face landmarks. The PWA shares its deterministic engines and receives corresponding fixes. Classic Capacitor builds remain available for rollback. See [the native migration plan](docs/plans/native-main-2026-09-24.md).
+LazyOracle now uses the native SwiftUI and Compose implementation developed as Auspice / 宜时, with eleven interface languages and live hand/face landmarks. The PWA shares its deterministic engines and receives corresponding fixes. Auspice carries the classic React/Capacitor interface from that PWA source. The old signed builds remain available for rollback. See [the native migration plan](docs/plans/native-main-2026-09-24.md).
 
 ## Platforms
 

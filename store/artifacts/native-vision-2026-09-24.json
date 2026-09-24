@@ -1,0 +1,79 @@
+{
+  "date": "2026-09-24",
+  "identity": "art.lazying.lazyoracle",
+  "scope": "Native face/palm measurement consistency; classic/PWA camera path unchanged",
+  "ios": {
+    "version": "1.0.0",
+    "build": 17,
+    "source_commit": "19e3258e461aac54cf826db6cfef7251870ac907",
+    "build_id": "626d53b5-47cd-45c1-9a24-561ca20b6dd1",
+    "ipa_sha256": "dfe653dc1ee8bc2ca3fe0a935be94d84992d88839a4f60e33918b91465f0abe7",
+    "bytes": 28300717,
+    "internal": "IN_BETA_TESTING",
+    "external": "IN_BETA_TESTING",
+    "public_link": "https://testflight.apple.com/join/JZJM3PFb"
+  },
+  "android": {
+    "version": "1.0.0",
+    "build": 16,
+    "source_commit": "5098eccbbe848491e960cc53ee89015acc594c43",
+    "aab_sha256": "b1b766c6539967220d891c4e4161aa0bb5a908a2081fdb256c98a4bf2fcb3556",
+    "bytes": 43552883,
+    "internal": "Available to internal testers",
+    "test_link": "https://play.google.com/apps/internaltest/4701677916092886102",
+    "unpublished_build": 15,
+    "note": "Build15 upload superseded before distribution after x86_64 model-library failure was found."
+  },
+  "validation": {
+    "shared_tests": 129,
+    "android_unit_tests": 9,
+    "native_ios_camera_ui_languages": [
+      "en",
+      "zh-Hans"
+    ],
+    "ios_real_model_cycles": 24,
+    "ios_real_model_frames": 288,
+    "ios_real_model_input": "Small pixel translations, rotations and scale perturbations of fixed neutral face/open-palm fixtures",
+    "repeatability": {
+      "face": {
+        "bursts": 12,
+        "accepted": 12,
+        "types": [
+          "mixed"
+        ],
+        "ratioRange": [
+          1.11,
+          1.12
+        ]
+      },
+      "hand": {
+        "bursts": 12,
+        "accepted": 12,
+        "types": [
+          "water"
+        ],
+        "ratioRange": [
+          0.77,
+          0.78
+        ]
+      }
+    },
+    "android_unsupported_abi_navigation_visits": 6,
+    "android_arm_translated_preview_flip_resume_visits": 4,
+    "android_test_crashes_after_fix": 0,
+    "physical_iPhone_SE3": "pending",
+    "physical_android_camera": "not tested in this update"
+  },
+  "rollback": {
+    "previous_native_ios": 16,
+    "previous_native_android": 14,
+    "classic_and_native_swap_baselines": "See native-main-2026-09-24.json; existing signed artifacts retained"
+  },
+  "formal_review": {
+    "apple_build": 12,
+    "apple_state": "WAITING_FOR_REVIEW",
+    "play_build": 11,
+    "play_state": "Changes in review",
+    "modified": false
+  }
+}

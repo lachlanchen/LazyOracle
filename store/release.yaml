@@ -2,8 +2,8 @@ verified_date: 2026-09-24
 app: LazyOracle
 version: 1.0.0
 price_usd: 0.99
-source_commit: 95dec20989fbfcf4e5837bd9ae43e0ded6cee5a9
-evidence: store/artifacts/native-main-2026-09-24.json
+source_commit: 5098eccbbe848491e960cc53ee89015acc594c43
+evidence: store/artifacts/native-vision-2026-09-24.json
 web:
   domain: oracle.lazying.art
   host: sshem-admin (Aliyun)
@@ -16,14 +16,14 @@ web:
     checks passed
 android:
   package: art.lazying.lazyoracle
-  versionCode: 14
+  versionCode: 16
   versionName: 1.0.0
   artifact: native/android/app/build/outputs/bundle/lazyoracleRelease/app-lazyoracle-release.aab
-  bundle_sha256: b5249989ccd7b9c44b1e740633db671f40447c945e010018fe72db98970c30fc
+  bundle_sha256: b1b766c6539967220d891c4e4161aa0bb5a908a2081fdb256c98a4bf2fcb3556
   play_app_id: '4975413590951100628'
-  internal_testing: build 14 available to internal testers; verified in Play Console
+  internal_testing: build 16 available to internal testers; verified in Play Console
   internal_testing_link: https://play.google.com/apps/internaltest/4701677916092886102
-  previous_internal: classic build 13 retained for rollback
+  previous_internal: native build 14 and classic build 13 retained for rollback
   production: build 11 in Changes in review; freshly verified in Play Console and
     untouched
   keystore: ~/.config/lazyoracle/android/upload-keystore.jks
@@ -34,14 +34,16 @@ ios:
   app_id: '6814663937'
   profile: LazyOracle App Store 1
   marketing_version: 1.0.0
-  build: 16
-  ipa_sha256: 4c06de7699d6b049cfeb99d2e3f9c2db2d173f3a70c80d0938754b2d1d0f3199
-  delivery: 9b07de87-6583-46d5-957a-2952e1692079
-  testflight: build 16 IN_BETA_TESTING in internal and public beta groups; verified
+  build: 17
+  ipa_sha256: dfe653dc1ee8bc2ca3fe0a935be94d84992d88839a4f60e33918b91465f0abe7
+  delivery: 626d53b5-47cd-45c1-9a24-561ca20b6dd1
+  testflight: build 17 IN_BETA_TESTING in internal and public beta groups; verified
     by API
   public_beta: https://testflight.apple.com/join/JZJM3PFb
   app_store: 1.0.0 with build 12 WAITING_FOR_REVIEW; verified by API and untouched
   implementation: native SwiftUI
+  source_commit: 19e3258
+  previous_internal: native build 16 and classic build 15 retained for rollback
 auspice:
   package: art.lazying.auspice
   site: https://auspice.lazying.art
@@ -75,4 +77,7 @@ open_issues:
   supported devices excluded.
 - Classic Auspice/PWA interface supports English and Simplified Chinese; native LazyOracle
   supports eleven interface languages.
+- Native measurement v2 ships first on LazyOracle iOS17/Android16. Classic Auspice/PWA
+  retain their existing camera capture path. Physical repeatability testing remains
+  pending.
 backend_commit: 57d1117

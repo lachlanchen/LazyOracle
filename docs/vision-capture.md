@@ -47,7 +47,10 @@ person never reuses a previous person's classification as a prior.
   builds succeed. An Intel emulator exposed an unavailable MediaPipe JNI
   library; detector initialisation now catches linkage failures and keeps the
   app usable with a camera-unavailable state. Android16 supersedes the
-  unpublished Android15 upload.
+  unpublished Android15 upload. Six fallback navigation/resume visits passed.
+  The ARM64 model path also passed four face/palm preview, lens-switch and
+  resume visits on the emulator with ARM translation, without crashes.
+  This is not a substitute for physical-device camera testing.
 - The production iOS worker and JavaScriptCore/Codable bridge pass 24
   create/infer/stop cycles (288 frames) with small real pixel translations,
   rotations and scale changes. Twelve face bursts retain one candidate set,

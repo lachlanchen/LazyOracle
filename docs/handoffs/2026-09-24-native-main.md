@@ -9,14 +9,16 @@ remain native and web, rather than two separate copies of business logic.
 
 ## Native LazyOracle release
 
-Source `95dec20989fbfcf4e5837bd9ae43e0ded6cee5a9`.
+Native measurement update: iOS source `19e3258`, Android source `5098ecc`.
+The earlier native-main release and deployed PWA use `95dec209`.
 
-- iOS **1.0.0 (16)**: Apple validation passed; internal and public TestFlight
+- iOS **1.0.0 (17)**: Apple validation passed; internal and public TestFlight
   `IN_BETA_TESTING`. Public link: https://testflight.apple.com/join/JZJM3PFb.
-- Android **1.0.0 (14)**: signed bundle published and verified **Available to
+- Android **1.0.0 (16)**: signed bundle published and verified **Available to
   internal testers** at https://play.google.com/apps/internaltest/4701677916092886102.
 - The PWA fixes are deployed to `oracle.lazying.art` and `oracle-fast.lazying.art`.
-- Receipt: [native-main-2026-09-24.json](../../store/artifacts/native-main-2026-09-24.json).
+- Current receipt: [native-vision-2026-09-24.json](../../store/artifacts/native-vision-2026-09-24.json).
+- Earlier receipt and rollback: [native-main-2026-09-24.json](../../store/artifacts/native-main-2026-09-24.json).
 
 Each practice retains its inputs, exact deterministic result, follow-up
 conversation and draft across navigation/relaunch. Explicit new readings remain.
@@ -36,6 +38,23 @@ visible new conversation action and latest-message navigation. The reported
 intermittent Chinese direction-question hang was not reproduced as a specific
 root cause; the bounded recovery behavior prevents an endless loading state.
 
+## Face/palm consistency update
+
+The owner clarified that the measurements and face/hand type were changing.
+Native LazyOracle now combines eight steady frames, corrects image aspect
+ratio and roll, checks framing/pose/freshness and reports mixed categories
+near traditional cutoffs. Editing manual palm-line answers preserves the
+measured geometry. Unanswered lines remain unknown; skeletal joints are no
+longer used as evidence of palm skin/mount fullness. The shared implementation
+and validation are documented in [vision-capture.md](../vision-capture.md).
+Classic Auspice/PWA retain their existing camera capture path in this native-first
+update. No identity matching, saved photos or previous-person priors are used.
+
+Android15 was uploaded but never distributed: final emulator validation exposed
+an unavailable x86_64 MediaPipe library. Android16 handles that failure safely.
+The ARM64 library path passed actual preview, camera-switch and resume checks
+on an emulator with ARM translation. Physical camera tests remain pending.
+
 ## Language
 
 Shared relay commit `57d1117` distinguishes the reader's own words from English
@@ -48,15 +67,19 @@ currently offers English and Simplified Chinese.
 
 ## Validation and limits
 
-- 118 web tests, lint, type checks and production build at native release.
-- Six Android conversation tests and six Swift chat harness cases.
-- Five native iOS UI tests: eleven-language navigation, home chat, explanations,
+- 129 shared tests, lint, type checks and production web build for the vision update.
+- Nine Android unit tests: six conversation and three capture-buffer tests.
+  The earlier six Swift chat harness cases remain recorded.
+- Current native iOS fresh-frame/unknown-line UI checks pass in English and
+  Simplified Chinese. Earlier five native iOS UI tests: eleven-language navigation, home chat, explanations,
   pinned composer with keyboard/relaunch, blank/Chinese tarot questions.
 - PWA real face/hand inference and 27 fixed-composer layouts at three phone sizes.
 - Actual classic-to-native in-place upgrade on iOS and Android: profile, language,
   conversations, exact engine facts and original storage retained.
 - Earlier unchanged engine coverage: all 78 tarot cards, 300 draws, 100 casts;
-  24 real MediaPipe simulator lifecycle cycles, 144 frames.
+  24 current real MediaPipe simulator lifecycle cycles, 288 perturbed frames.
+- Six Android fallback navigation/resume visits plus four ARM model
+  preview/front-back/resume visits pass without crashes after the fix.
 - Physical iPhone SE 3 camera/orientation/background/memory testing is still
   pending. Simulator/browser checks do not establish physical-device stability.
 
@@ -73,8 +96,9 @@ Do not overwrite previous signed packages or private migration backups.
 
 LazyOracle's separate formal Apple build12 remains `WAITING_FOR_REVIEW`, and
 Play production11 remains in **Changes in review**, verified after native16/14
-publication. Auspice has no formal release submitted. Test releases do not replace
-these production submissions. Apple accepted LazyOracle16 for public beta testing.
+publication, and again after the vision update. Auspice has no formal release submitted. Test releases do not replace
+these production submissions. Apple accepted LazyOracle17 for public beta testing. Native iOS16/Android14
+remain available as the immediately previous signed rollback packages.
 
 The reverse Auspice swap is implemented in `d746040`, using the maintained PWA
 source and a read-only native archive import. Classic iOS **0.1.0 (12)** is `VALID` and `IN_BETA_TESTING` in the existing

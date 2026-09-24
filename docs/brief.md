@@ -34,8 +34,10 @@ These supersede the earlier product split below.
 
 ## Native-main checkpoint — 2026-09-24
 
-LazyOracle native iOS16 is in internal and public TestFlight; Android14 is
-available to internal testers. PWA fixes are live on both hosts. The classic
+LazyOracle native iOS17 is in internal and public TestFlight; Android16 is
+available to internal testers. This native update stabilizes face/palm
+measurements with a checked multi-frame capture; see [the method and tests](vision-capture.md).
+Earlier PWA fixes remain live on both hosts. The classic
 Auspice swap is available to internal testers as iOS12/Android7, preserving its native data and
 both app IDs. See [the current handoff](handoffs/2026-09-24-native-main.md).
 Shared relay language selection stays conversational. Earlier release details

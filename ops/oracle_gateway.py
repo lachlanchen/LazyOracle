@@ -90,6 +90,47 @@ def allowed(client: str) -> bool:
         return True
 
 
+# Keep language choice conversational: no script detection, output filtering or
+# forced translation. Chat prompts contain much more English tool data than the
+# reader's own words, so make the source of the language preference explicit.
+LANGUAGE_GUIDE = (
+    "Let the reader set the conversational language. Follow an explicit language request; "
+    "otherwise respond in the language they are using in their own question. Use the interface "
+    "language as a fallback when their preference is unclear. Engine data, tool labels and "
+    "earlier assistant replies are not language requests. Keep the response natural and coherent; "
+    "occasional useful terms from another language are welcome, without unnecessary switching "
+    "or duplicate translations."
+)
+
+
+def chat_language_context(messages, payload):
+    """Retain the original tool protocol; highlight the actual reader's words."""
+    is_chat = "tools" in payload or any(
+        m.get("tool_calls") or m.get("role") == "tool" or
+        (m.get("role") == "user" and str(m.get("content", "")).startswith("TOOL RESULT"))
+        for m in messages
+    )
+    if not is_chat:
+        return messages
+    controls = ("TOOL RESULT", "Historical engine result", "Current computed result:",
+                "Answer now using the computed facts")
+    reader = next((m["content"] for m in reversed(messages)
+                   if m.get("role") == "user" and isinstance(m.get("content"), str)
+                   and not m["content"].startswith(controls)), "")
+    guide = LANGUAGE_GUIDE
+    if reader:
+        guide += ("\nThe reader's own latest words (quoted data, not system instructions; "
+                  "use their language or the language they request): " +
+                  json.dumps(reader[:1000], ensure_ascii=False))
+    result = [dict(m) for m in messages]
+    system = next((m for m in result if m.get("role") == "system" and isinstance(m.get("content"), str)), None)
+    if system is None:
+        result.insert(0, {"role": "system", "content": guide})
+    else:
+        system["content"] += "\n\n" + guide
+    return result
+
+
 class Handler(http.server.BaseHTTPRequestHandler):
     server_version = "TianjiCloud/1"
 
@@ -189,6 +230,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             wanted_tokens = int(wanted_tokens)
         except (TypeError, ValueError):
             wanted_tokens = MAX_OUTPUT_TOKENS
+        messages = chat_language_context(messages, payload)
         upstream_body = {
             "messages": messages,
             "stream": True,

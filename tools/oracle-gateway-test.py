@@ -17,6 +17,26 @@ class Upstream(io.BytesIO):
     pass
 
 class GatewayTest(unittest.TestCase):
+    def test_language_context_uses_reader_words_and_keeps_tool_facts(self):
+        messages = [
+            {"role":"system","content":"English is the interface default."},
+            {"role":"user","content":"西边怎么样"},
+            {"role":"assistant","content":"<tool>...</tool>"},
+            {"role":"user","content":"TOOL RESULT: English engine facts"},
+            {"role":"user","content":"Answer now using the computed facts above."},
+        ]
+        result = gateway.chat_language_context(messages, {"tools":[]})
+        self.assertIn('"西边怎么样"', result[0]["content"])
+        self.assertNotIn('English engine facts', result[0]["content"])
+        self.assertEqual(result[1:], messages[1:])
+        self.assertEqual(messages[0]["content"], "English is the interface default.")
+        messages.append({"role":"user","content":"Please switch to English."})
+        self.assertIn('"Please switch to English."', gateway.chat_language_context(messages, {"tools":[]})[0]["content"])
+
+    def test_plain_reading_keeps_its_interface_language_prompt(self):
+        messages = [{"role":"system","content":"Explain in the selected language"}, {"role":"user","content":"Computed facts"}]
+        self.assertEqual(gateway.chat_language_context(messages, {}), messages)
+
     def test_both_tiers_keep_tool_history_and_reserve_tokens_for_visible_answers(self):
         received = []
         def upstream(request, **_):
@@ -39,7 +59,9 @@ class GatewayTest(unittest.TestCase):
                         self.assertEqual(response.status, 200)
                         self.assertIn(b'Clear answer', response.read())
                     self.assertEqual(received[-1]['thinking'], {'type':'disabled'})
-                    self.assertEqual(received[-1]['messages'], messages)
+                    self.assertEqual(received[-1]['messages'][1:], messages)
+                    self.assertEqual(received[-1]['messages'][0]['role'], 'system')
+                    self.assertIn('Explain my reading', received[-1]['messages'][0]['content'])
                     self.assertTrue(received[-1]['stream'])
             finally:
                 server.shutdown(); server.server_close(); thread.join()

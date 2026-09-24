@@ -20,3 +20,9 @@ scheme.add_build_target(target)
 scheme.add_test_target(target)
 scheme.set_launch_target(app)
 scheme.save_as(project.path, 'AuspiceValidation', true)
+
+# Keep the product-only release scheme explicit once shared schemes exist.
+release_scheme = Xcodeproj::XCScheme.new
+release_scheme.add_build_target(app)
+release_scheme.set_launch_target(app)
+release_scheme.save_as(project.path, 'Auspice', true)

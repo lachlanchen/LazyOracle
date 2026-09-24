@@ -14,7 +14,7 @@ beforeEach(() => {
   })
 })
 const facts = JSON.stringify({ seed: 42, primary: { number: 11 }, resulting: { number: 12 }, changingPositions: [2] })
-const props = { copy: uiCopy('en'), readingKey: 'iching-42-en', system: 'Write in English.', user: facts, offline: 'offline', header: 'I Ching' }
+const props = { copy: uiCopy('en'), readingKey: 'iching-42-en', system: 'Write in English.\nStructure: quote every detail.\nLength: 400 words.', user: facts, offline: 'offline', header: 'I Ching' }
 
 it('explains the displayed result through the backend without changing its seed or facts', () => {
   render(<ReadingPanel {...props} />)
@@ -23,6 +23,8 @@ it('explains the displayed result through the backend without changing its seed 
   const request = vi.mocked(generateReading).mock.calls.at(-1)![0]
   expect(request.forceCloud).toBe(true)
   expect(request.system).toContain("two or three short paragraphs")
+  expect(request.system).not.toContain("Structure:")
+  expect(request.system).not.toContain("Length:")
   expect(request.user.startsWith(facts)).toBe(true)
   expect(request.user).toContain('What should I do next?')
   expect(request.user).toContain('The original explanation.')

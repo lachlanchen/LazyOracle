@@ -12,7 +12,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "check": "npm run lint && npm run test && npm run build",
-    "cap:sync": "npm run build && npx cap sync",
+    "cap:sync": "bash tools/classic-cap-sync.sh",
     "android": "bash tools/auspice-android-build.sh",
     "ios": "bash tools/auspice-sync.sh",
     "android:classic": "bash tools/android-release-build.sh",

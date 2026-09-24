@@ -1,6 +1,8 @@
 import UIKit
 import Capacitor
 
+/// Retained for UIKit scene sessions created by classic builds 10–11. New
+/// sessions use ClassicApplication, while these existing sessions remain valid.
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
 

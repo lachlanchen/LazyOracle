@@ -2,18 +2,15 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- The app uses only standard HTTPS, so it is exempt from export
-	     regulations. Declaring it here means every build is released to
-	     TestFlight immediately instead of waiting for the question to be
-	     answered by hand, which held builds 2, 3 and 6 back. -->
+	<!-- Standard HTTPS only; exempt from export compliance review. -->
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
-  <key>CAPACITOR_DEBUG</key>
+	<key>CAPACITOR_DEBUG</key>
 	<string>$(CAPACITOR_DEBUG)</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>$(APP_DISPLAY_NAME)</string>
+	<string>$(APP_DISPLAY_NAME)</string>
 	<key>NSCameraUsageDescription</key>
 	<string>The app photographs your palm to find the hand outline on this device. Photos are never uploaded or stored.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
@@ -39,26 +36,10 @@
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
-    <false/>
-    <key>UISceneConfigurations</key>
-    <dict>
-      <key>UIWindowSceneSessionRoleApplication</key>
-      <array>
-        <dict>
-            <key>UISceneConfigurationName</key>
-            <string>Default Configuration</string>
-            <key>UISceneDelegateClassName</key>
-            <string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
-            <key>UISceneStoryboardFile</key>
-            <string>Main</string>
-        </dict>
-      </array>
-    </dict>
+		<false/>
 	</dict>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
-	<key>UIMainStoryboardFile</key>
-	<string>Main</string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>armv7</string>

@@ -1,0 +1,601 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0DFA8FBA27FBE054C25B0159 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 41F627FAE9787A693EA83AD7 /* Cocoa.framework */; };
+		2171487490964357785BCC51 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AD24E3EE68626C572A16BECA /* Assets.xcassets */; };
+		28BF4E314A44721E3B5D7B4B /* LegacyImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631A310282DBCDECA9E69827 /* LegacyImport.swift */; };
+		2CC3328FEACD9847B5B79DB8 /* MacVision.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D03C8D7C263CB38CCA93994 /* MacVision.swift */; };
+		2FEAD961CC668B5EB1D37E3F /* LandmarkSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9357B0AD9751AEFAEB46F824 /* LandmarkSession.swift */; };
+		34605C4D439BC5B7AE284746 /* Answers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F5B3D138FE91E40B12DC694 /* Answers.swift */; };
+		34E8C4E2059C660ED4C01DFA /* Almanac.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3647DC1D879FCF6FF0521609 /* Almanac.swift */; };
+		3781F7D90AB9DA67F4BE4380 /* lazyoracle-engines.js in Resources */ = {isa = PBXBuildFile; fileRef = 161D178106D89B9651376445 /* lazyoracle-engines.js */; };
+		4BA3D84474A707743D4D9158 /* FengShui.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F41F8E1A922975A94B37AB5 /* FengShui.swift */; };
+		59FE327E8FA8873C24F5ACB7 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30A5AD808CA43A6252974457 /* Models.swift */; };
+		5E87067388ABB99B0BD1F663 /* DesktopUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCB0F99E2532AB44C2B10058 /* DesktopUITests.swift */; };
+		6371300E6079A44E2E9277AE /* IChing.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCA476EF8F8D90677D5F7F21 /* IChing.swift */; };
+		65D48727F4A37C3523A6FE0E /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B109D176E401E76EAFF8618B /* Theme.swift */; };
+		6714A103E7943DCE737E27D9 /* Chat.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9A93CE73A74A38EF6FA53D3 /* Chat.swift */; };
+		67D40B0D8ADEC1B73E7A3881 /* ExplainReading.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD3C3FA5C6A8B29F29B37135 /* ExplainReading.swift */; };
+		6CD625A97EAD5F7B42B99C73 /* MacCamera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E3BDD990EF9A17F9331D61 /* MacCamera.swift */; };
+		74476B85B91DBB9EC3DAE40A /* ReadingPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1528D8B0240A79A9DE83F70B /* ReadingPrompt.swift */; };
+		7BE824D0416D15E63719FB21 /* auspice-content.json in Resources */ = {isa = PBXBuildFile; fileRef = B629B16F860392CB7A55475F /* auspice-content.json */; };
+		820D681EB10F27BE23701BE4 /* Palm.swift in Sources */ = {isa = PBXBuildFile; fileRef = C61D1D60A27584DA89729057 /* Palm.swift */; };
+		8981A46F26808F20555170DE /* VisionCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 286967D874038C9445102FC4 /* VisionCapture.swift */; };
+		8A0B7598D6709C519F44151F /* AuspiceApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF8293536EA74A4DADB640BC /* AuspiceApp.swift */; };
+		909F742B598A5648DB6CF098 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 41F627FAE9787A693EA83AD7 /* Cocoa.framework */; };
+		9C767569B8B4BC452B26E3B1 /* Engines.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72B87CE2C3CDCCAE6FA497D5 /* Engines.swift */; };
+		9D2AD69CF8CA5533C7A06103 /* Platform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B1ECDD7F059B84ADA10F9DC /* Platform.swift */; };
+		9E443A38737BBB093D5C03F1 /* Face.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7434029BE913915CFC2A4FA /* Face.swift */; };
+		B005D7318AB8B74C21C14409 /* Sky.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BE9F9E63A131174C15D288 /* Sky.swift */; };
+		B174C9434671FD8C0098ED2D /* Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 610FAFD49C77AF681A5B29E0 /* Profile.swift */; };
+		B9B279CF9610A6ACE33AD88D /* Bazi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61F16261A3615A545629A52A /* Bazi.swift */; };
+		BCE7D755D97767452FB0699A /* Astrology.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF47A0DD0F9C9C80B5ADD935 /* Astrology.swift */; };
+		C1277F70E5B79EB5F12FBB3F /* FlowRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AAFF174D9BED9AA3E4783BF /* FlowRow.swift */; };
+		C5C394A23ADA9E417E8061C8 /* DesktopRoot.swift in Sources */ = {isa = PBXBuildFile; fileRef = F535A43EE38E3B99AC9C08C9 /* DesktopRoot.swift */; };
+		CDB2AC0106B21595FC48243D /* Relay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BDE56F0A3519E583320BCDB /* Relay.swift */; };
+		CEB7DFD4EEB83A1794615382 /* Vision in Resources */ = {isa = PBXBuildFile; fileRef = F2662C093FCC4E2A8164230D /* Vision */; };
+		E23A193FD2B0BEF1D16194CF /* Tarot.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEA065266DA9E356FE909946 /* Tarot.swift */; };
+		E65E53BB386BC63E6024238C /* Catalogue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54A2FA566F0288E3F748AF23 /* Catalogue.swift */; };
+		ECDB148500C2B24957F4517D /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DD42C512EAA900C98B0B1CA /* Router.swift */; };
+		F8E839281D9C83284951142A /* Localisation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE8AAE84173E74B40BEDA87C /* Localisation.swift */; };
+		FDF47401C850D17D805C4479 /* Home.swift in Sources */ = {isa = PBXBuildFile; fileRef = 012B0873F17CC32927DF646D /* Home.swift */; };
+		FFE1B1B02E80BE5BABDBC27C /* PracticeState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D66ACF18DB7669B36593D312 /* PracticeState.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		F528FA97CBAFDDEC36417B6B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4D6FAED311353647411B3C20 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D405996AE9E22F094C443301;
+			remoteInfo = LazyOracle;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		012B0873F17CC32927DF646D /* Home.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Home.swift; path = Screens/Home.swift; sourceTree = "<group>"; };
+		0DD42C512EAA900C98B0B1CA /* Router.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
+		1528D8B0240A79A9DE83F70B /* ReadingPrompt.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReadingPrompt.swift; sourceTree = "<group>"; };
+		161D178106D89B9651376445 /* lazyoracle-engines.js */ = {isa = PBXFileReference; includeInIndex = 1; path = "lazyoracle-engines.js"; sourceTree = "<group>"; };
+		1AAFF174D9BED9AA3E4783BF /* FlowRow.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FlowRow.swift; sourceTree = "<group>"; };
+		286967D874038C9445102FC4 /* VisionCapture.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VisionCapture.swift; sourceTree = "<group>"; };
+		2BDE56F0A3519E583320BCDB /* Relay.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Relay.swift; sourceTree = "<group>"; };
+		30A5AD808CA43A6252974457 /* Models.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		3647DC1D879FCF6FF0521609 /* Almanac.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Almanac.swift; path = Screens/Almanac.swift; sourceTree = "<group>"; };
+		41F627FAE9787A693EA83AD7 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.0.sdk/System/Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
+		4B1ECDD7F059B84ADA10F9DC /* Platform.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Platform.swift; sourceTree = "<group>"; };
+		54A2FA566F0288E3F748AF23 /* Catalogue.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Catalogue.swift; sourceTree = "<group>"; };
+		610FAFD49C77AF681A5B29E0 /* Profile.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Profile.swift; sourceTree = "<group>"; };
+		61F16261A3615A545629A52A /* Bazi.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Bazi.swift; path = Screens/Bazi.swift; sourceTree = "<group>"; };
+		631A310282DBCDECA9E69827 /* LegacyImport.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LegacyImport.swift; sourceTree = "<group>"; };
+		6F5B3D138FE91E40B12DC694 /* Answers.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Answers.swift; path = Screens/Answers.swift; sourceTree = "<group>"; };
+		70E3BDD990EF9A17F9331D61 /* MacCamera.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MacCamera.swift; sourceTree = "<group>"; };
+		72B87CE2C3CDCCAE6FA497D5 /* Engines.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Engines.swift; sourceTree = "<group>"; };
+		8F41F8E1A922975A94B37AB5 /* FengShui.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FengShui.swift; path = Screens/FengShui.swift; sourceTree = "<group>"; };
+		9357B0AD9751AEFAEB46F824 /* LandmarkSession.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LandmarkSession.swift; sourceTree = "<group>"; };
+		9D03C8D7C263CB38CCA93994 /* MacVision.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MacVision.swift; sourceTree = "<group>"; };
+		A80A697BD665C68F45F7B151 /* DesktopUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DesktopUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		AD24E3EE68626C572A16BECA /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		AE8AAE84173E74B40BEDA87C /* Localisation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Localisation.swift; sourceTree = "<group>"; };
+		B109D176E401E76EAFF8618B /* Theme.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		B629B16F860392CB7A55475F /* auspice-content.json */ = {isa = PBXFileReference; includeInIndex = 1; path = "auspice-content.json"; sourceTree = "<group>"; };
+		B7434029BE913915CFC2A4FA /* Face.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Face.swift; path = Screens/Face.swift; sourceTree = "<group>"; };
+		BCA476EF8F8D90677D5F7F21 /* IChing.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = IChing.swift; path = Screens/IChing.swift; sourceTree = "<group>"; };
+		C61D1D60A27584DA89729057 /* Palm.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Palm.swift; path = Screens/Palm.swift; sourceTree = "<group>"; };
+		C9BE9F9E63A131174C15D288 /* Sky.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Sky.swift; sourceTree = "<group>"; };
+		CD3C3FA5C6A8B29F29B37135 /* ExplainReading.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExplainReading.swift; sourceTree = "<group>"; };
+		CF8293536EA74A4DADB640BC /* AuspiceApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuspiceApp.swift; sourceTree = "<group>"; };
+		D66ACF18DB7669B36593D312 /* PracticeState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PracticeState.swift; sourceTree = "<group>"; };
+		DCB0F99E2532AB44C2B10058 /* DesktopUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DesktopUITests.swift; sourceTree = "<group>"; };
+		EEA065266DA9E356FE909946 /* Tarot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Tarot.swift; path = Screens/Tarot.swift; sourceTree = "<group>"; };
+		F2662C093FCC4E2A8164230D /* Vision */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder; path = Vision; sourceTree = "<group>"; };
+		F2A49FAF10FC322D7716D33F /* LazyOracle.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LazyOracle.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F535A43EE38E3B99AC9C08C9 /* DesktopRoot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DesktopRoot.swift; sourceTree = "<group>"; };
+		F9A93CE73A74A38EF6FA53D3 /* Chat.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Chat.swift; path = Screens/Chat.swift; sourceTree = "<group>"; };
+		FF47A0DD0F9C9C80B5ADD935 /* Astrology.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Astrology.swift; path = Screens/Astrology.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8AD5E03C427F10879A5FBE2B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0DFA8FBA27FBE054C25B0159 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F282DCF3B0A4763DC800F310 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				909F742B598A5648DB6CF098 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		335F747C9457FCBCEC738862 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				DCB0F99E2532AB44C2B10058 /* DesktopUITests.swift */,
+			);
+			name = Tests;
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		543BDD22E1C838F0D66C3476 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				161D178106D89B9651376445 /* lazyoracle-engines.js */,
+				B629B16F860392CB7A55475F /* auspice-content.json */,
+				F2662C093FCC4E2A8164230D /* Vision */,
+			);
+			name = Resources;
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		A8D3BD175CF74BE401C75B7A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				C384430D8D1C3F3E16899EEB /* OS X */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		B7864620F0146215B2D3F9E1 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F2A49FAF10FC322D7716D33F /* LazyOracle.app */,
+				A80A697BD665C68F45F7B151 /* DesktopUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C384430D8D1C3F3E16899EEB /* OS X */ = {
+			isa = PBXGroup;
+			children = (
+				41F627FAE9787A693EA83AD7 /* Cocoa.framework */,
+			);
+			name = "OS X";
+			sourceTree = "<group>";
+		};
+		C4CA718DE82CBD65E1C71002 /* Desktop */ = {
+			isa = PBXGroup;
+			children = (
+				F535A43EE38E3B99AC9C08C9 /* DesktopRoot.swift */,
+				70E3BDD990EF9A17F9331D61 /* MacCamera.swift */,
+				9D03C8D7C263CB38CCA93994 /* MacVision.swift */,
+				AD24E3EE68626C572A16BECA /* Assets.xcassets */,
+			);
+			name = Desktop;
+			path = .;
+			sourceTree = "<group>";
+		};
+		CCC6F38A75DD2D773B9240E4 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				CF8293536EA74A4DADB640BC /* AuspiceApp.swift */,
+				54A2FA566F0288E3F748AF23 /* Catalogue.swift */,
+				72B87CE2C3CDCCAE6FA497D5 /* Engines.swift */,
+				CD3C3FA5C6A8B29F29B37135 /* ExplainReading.swift */,
+				1AAFF174D9BED9AA3E4783BF /* FlowRow.swift */,
+				9357B0AD9751AEFAEB46F824 /* LandmarkSession.swift */,
+				631A310282DBCDECA9E69827 /* LegacyImport.swift */,
+				AE8AAE84173E74B40BEDA87C /* Localisation.swift */,
+				30A5AD808CA43A6252974457 /* Models.swift */,
+				4B1ECDD7F059B84ADA10F9DC /* Platform.swift */,
+				D66ACF18DB7669B36593D312 /* PracticeState.swift */,
+				610FAFD49C77AF681A5B29E0 /* Profile.swift */,
+				1528D8B0240A79A9DE83F70B /* ReadingPrompt.swift */,
+				2BDE56F0A3519E583320BCDB /* Relay.swift */,
+				0DD42C512EAA900C98B0B1CA /* Router.swift */,
+				3647DC1D879FCF6FF0521609 /* Almanac.swift */,
+				6F5B3D138FE91E40B12DC694 /* Answers.swift */,
+				FF47A0DD0F9C9C80B5ADD935 /* Astrology.swift */,
+				61F16261A3615A545629A52A /* Bazi.swift */,
+				F9A93CE73A74A38EF6FA53D3 /* Chat.swift */,
+				B7434029BE913915CFC2A4FA /* Face.swift */,
+				8F41F8E1A922975A94B37AB5 /* FengShui.swift */,
+				012B0873F17CC32927DF646D /* Home.swift */,
+				BCA476EF8F8D90677D5F7F21 /* IChing.swift */,
+				C61D1D60A27584DA89729057 /* Palm.swift */,
+				EEA065266DA9E356FE909946 /* Tarot.swift */,
+				C9BE9F9E63A131174C15D288 /* Sky.swift */,
+				B109D176E401E76EAFF8618B /* Theme.swift */,
+				286967D874038C9445102FC4 /* VisionCapture.swift */,
+			);
+			name = Shared;
+			path = ../ios/Auspice;
+			sourceTree = "<group>";
+		};
+		E08225C79C661E3DFE683E80 = {
+			isa = PBXGroup;
+			children = (
+				B7864620F0146215B2D3F9E1 /* Products */,
+				A8D3BD175CF74BE401C75B7A /* Frameworks */,
+				CCC6F38A75DD2D773B9240E4 /* Shared */,
+				C4CA718DE82CBD65E1C71002 /* Desktop */,
+				543BDD22E1C838F0D66C3476 /* Resources */,
+				335F747C9457FCBCEC738862 /* Tests */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		45DDC82F214C19F2EB23AF5F /* DesktopUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 50832117D4FD0667C8D8430E /* Build configuration list for PBXNativeTarget "DesktopUITests" */;
+			buildPhases = (
+				31B299ED40614AB0691DB6A9 /* Sources */,
+				F282DCF3B0A4763DC800F310 /* Frameworks */,
+				8DF534A76978DF7C898DC277 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				818B2EBF08C8E878EC98EB1A /* PBXTargetDependency */,
+			);
+			name = DesktopUITests;
+			productName = DesktopUITests;
+			productReference = A80A697BD665C68F45F7B151 /* DesktopUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		D405996AE9E22F094C443301 /* LazyOracle */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3F51DE9BED72C4DCD9091268 /* Build configuration list for PBXNativeTarget "LazyOracle" */;
+			buildPhases = (
+				C7D2669240BC4DB6ED47E2BE /* Sources */,
+				8AD5E03C427F10879A5FBE2B /* Frameworks */,
+				A38E6CEB20A35D90C9816E4E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LazyOracle;
+			productName = LazyOracle;
+			productReference = F2A49FAF10FC322D7716D33F /* LazyOracle.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		4D6FAED311353647411B3C20 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+			};
+			buildConfigurationList = EE607C94E3A5DEBA6B54DCB3 /* Build configuration list for PBXProject "LazyOracle" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = E08225C79C661E3DFE683E80;
+			minimizedProjectReferenceProxies = 0;
+			preferredProjectObjectVersion = 100;
+			productRefGroup = B7864620F0146215B2D3F9E1 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D405996AE9E22F094C443301 /* LazyOracle */,
+				45DDC82F214C19F2EB23AF5F /* DesktopUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		8DF534A76978DF7C898DC277 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A38E6CEB20A35D90C9816E4E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3781F7D90AB9DA67F4BE4380 /* lazyoracle-engines.js in Resources */,
+				7BE824D0416D15E63719FB21 /* auspice-content.json in Resources */,
+				CEB7DFD4EEB83A1794615382 /* Vision in Resources */,
+				2171487490964357785BCC51 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		31B299ED40614AB0691DB6A9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5E87067388ABB99B0BD1F663 /* DesktopUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C7D2669240BC4DB6ED47E2BE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8A0B7598D6709C519F44151F /* AuspiceApp.swift in Sources */,
+				E65E53BB386BC63E6024238C /* Catalogue.swift in Sources */,
+				9C767569B8B4BC452B26E3B1 /* Engines.swift in Sources */,
+				67D40B0D8ADEC1B73E7A3881 /* ExplainReading.swift in Sources */,
+				C1277F70E5B79EB5F12FBB3F /* FlowRow.swift in Sources */,
+				2FEAD961CC668B5EB1D37E3F /* LandmarkSession.swift in Sources */,
+				28BF4E314A44721E3B5D7B4B /* LegacyImport.swift in Sources */,
+				F8E839281D9C83284951142A /* Localisation.swift in Sources */,
+				59FE327E8FA8873C24F5ACB7 /* Models.swift in Sources */,
+				9D2AD69CF8CA5533C7A06103 /* Platform.swift in Sources */,
+				FFE1B1B02E80BE5BABDBC27C /* PracticeState.swift in Sources */,
+				B174C9434671FD8C0098ED2D /* Profile.swift in Sources */,
+				74476B85B91DBB9EC3DAE40A /* ReadingPrompt.swift in Sources */,
+				CDB2AC0106B21595FC48243D /* Relay.swift in Sources */,
+				ECDB148500C2B24957F4517D /* Router.swift in Sources */,
+				34E8C4E2059C660ED4C01DFA /* Almanac.swift in Sources */,
+				34605C4D439BC5B7AE284746 /* Answers.swift in Sources */,
+				BCE7D755D97767452FB0699A /* Astrology.swift in Sources */,
+				B9B279CF9610A6ACE33AD88D /* Bazi.swift in Sources */,
+				6714A103E7943DCE737E27D9 /* Chat.swift in Sources */,
+				9E443A38737BBB093D5C03F1 /* Face.swift in Sources */,
+				4BA3D84474A707743D4D9158 /* FengShui.swift in Sources */,
+				FDF47401C850D17D805C4479 /* Home.swift in Sources */,
+				6371300E6079A44E2E9277AE /* IChing.swift in Sources */,
+				820D681EB10F27BE23701BE4 /* Palm.swift in Sources */,
+				E23A193FD2B0BEF1D16194CF /* Tarot.swift in Sources */,
+				B005D7318AB8B74C21C14409 /* Sky.swift in Sources */,
+				65D48727F4A37C3523A6FE0E /* Theme.swift in Sources */,
+				8981A46F26808F20555170DE /* VisionCapture.swift in Sources */,
+				C5C394A23ADA9E417E8061C8 /* DesktopRoot.swift in Sources */,
+				6CD625A97EAD5F7B42B99C73 /* MacCamera.swift in Sources */,
+				2CC3328FEACD9847B5B79DB8 /* MacVision.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		818B2EBF08C8E878EC98EB1A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = LazyOracle;
+			target = D405996AE9E22F094C443301 /* LazyOracle */;
+			targetProxy = F528FA97CBAFDDEC36417B6B /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		18127E230E209C022A273634 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = LazyOracle.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = art.lazying.lazyoracle;
+				PRODUCT_NAME = LazyOracle;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		26627FBCC6487BA3E8F278E1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		27AE9EE1C5B22E0CF0112C43 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		6241C01658F4F2E89527FE55 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = art.lazying.lazyoracle.macuitests;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = LazyOracle;
+			};
+			name = Debug;
+		};
+		886ED1E4247378E5FB2BA85C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = art.lazying.lazyoracle.macuitests;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = LazyOracle;
+			};
+			name = Release;
+		};
+		9E5E3140505892045F515E93 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = LazyOracle.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = art.lazying.lazyoracle;
+				PRODUCT_NAME = LazyOracle;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		3F51DE9BED72C4DCD9091268 /* Build configuration list for PBXNativeTarget "LazyOracle" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				18127E230E209C022A273634 /* Release */,
+				9E5E3140505892045F515E93 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		50832117D4FD0667C8D8430E /* Build configuration list for PBXNativeTarget "DesktopUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				886ED1E4247378E5FB2BA85C /* Release */,
+				6241C01658F4F2E89527FE55 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EE607C94E3A5DEBA6B54DCB3 /* Build configuration list for PBXProject "LazyOracle" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				26627FBCC6487BA3E8F278E1 /* Debug */,
+				27AE9EE1C5B22E0CF0112C43 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 4D6FAED311353647411B3C20 /* Project object */;
+}

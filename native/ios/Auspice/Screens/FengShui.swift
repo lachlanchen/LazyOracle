@@ -2,6 +2,7 @@ import SwiftUI
 import CoreLocation
 
 /// The device compass, for "which sector am I facing".
+#if os(iOS)
 @Observable
 final class Compass: NSObject, CLLocationManagerDelegate {
     var heading: Double?
@@ -41,6 +42,16 @@ final class Compass: NSObject, CLLocationManagerDelegate {
         }
     }
 }
+
+#else
+@Observable final class Compass {
+    var heading: Double? = nil
+    let available = false
+    let denied = false
+    func start() {}
+    func stop() {}
+}
+#endif
 
 struct FengShuiScreen: View {
     @State private var store = ProfileStore.shared

@@ -47,11 +47,11 @@ struct HomeScreen: View {
                 .frame(maxWidth: 560)
                 .frame(maxWidth: .infinity)
             }
-            .scrollDismissesKeyboard(.interactively)
+            .oracleScrollKeyboard()
             askBar
         }
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(.hidden, for: .navigationBar)
+        .oracleInlineTitle()
+        .oracleNavigationBar()
         .onAppear(perform: loadToday)
         .navigationDestination(isPresented: $asking) {
             ChatScreen(opening: chatOpening)
@@ -216,7 +216,8 @@ struct HomeScreen: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
-        .background(.ultraThinMaterial, in: Capsule())
+        .oracleComposerBackground()
+        .clipShape(Capsule())
         .overlay(Capsule().strokeBorder(Palette.goldLine, lineWidth: 1))
         .padding(.horizontal, 18)
         .padding(.bottom, 10)

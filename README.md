@@ -50,6 +50,7 @@ LazyOracle now uses the native SwiftUI and Compose implementation developed as A
 | Web/PWA | React 19, TypeScript, Vite, Workbox | Chromium flows for every practice, offline precache, the Safari code path exercised with `tools/safari-path-test.py` |
 | Android | Jetpack Compose, CameraX | Signed bundle, conversation regressions, emulator UI and upgrade checks |
 | iOS | SwiftUI, AVFoundation | Native UI, camera lifecycle, conversation and upgrade checks; TestFlight distribution |
+| macOS 14+ | Shared SwiftUI screens, AppKit/AVFoundation preview | Intel/Apple Silicon development package; Intel UI, chat, persistence and offline landmark checks. [Mac build and limits](docs/macos.md) |
 
 ## Build and test
 

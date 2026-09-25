@@ -44,6 +44,16 @@ both app IDs. See [the current handoff](handoffs/2026-09-24-native-main.md).
 Shared relay language selection stays conversational. Earlier release details
 below are historical checkpoints, not the current product split.
 
+## macOS extension — 2026-09-25
+
+The owner requested a Mac app using the 3040 and 7050 through LazyTunnel and
+the existing KVM Mac for testing. The desktop target shares the native iOS
+SwiftUI implementation and rules, with Mac navigation and an AVFoundation
+camera adapter. It requires macOS 14+, so the 3040's macOS 12 host validates
+the shared engines only. See [macOS implementation and validation](macos.md).
+This is a local development package; no Mac App Store release is submitted.
+The iOS/Android test releases and formal reviews above remain unchanged.
+
 ## Earlier owner decisions — 2026-09-23
 
 These supersede older local-model and native-migration plans below. The full

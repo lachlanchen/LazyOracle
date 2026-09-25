@@ -173,16 +173,17 @@ struct BirthForm: View {
                     .frame(maxWidth: 560)
                     .frame(maxWidth: .infinity)
                 }
-                .scrollDismissesKeyboard(.interactively)
+                .oracleScrollKeyboard()
             }
             .navigationTitle(t("birth.details"))
-            .navigationBarTitleDisplayMode(.inline)
+            .oracleInlineTitle()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(t("common.cancel")) { dismiss() }.foregroundStyle(Palette.inkSoft)
                 }
             }
         }
+        .oracleSheetSize()
         .onAppear { draft = profile }
     }
 
@@ -190,7 +191,7 @@ struct BirthForm: View {
         VStack(alignment: .leading, spacing: 7) {
             FieldLabel(label)
             TextField("", value: value, format: .number)
-                .keyboardType(.numbersAndPunctuation)
+                .oracleNumberKeyboard()
                 .textFieldStyle(AuspiceFieldStyle())
         }
     }

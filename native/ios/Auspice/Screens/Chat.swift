@@ -419,7 +419,7 @@ struct ChatScreen: View {
                 composer
             }
         }
-        .navigationBarTitleDisplayMode(.inline)
+        .oracleInlineTitle()
         .toolbar {
             ToolbarItem(placement: .principal) {
                 Text(store.current.title == "New conversation" ? t("chat.newConversation") : store.current.title)
@@ -427,7 +427,7 @@ struct ChatScreen: View {
                     .foregroundStyle(Palette.ink)
                     .lineLimit(1)
             }
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .oracleTrailing) {
                 Menu {
                     Button { store.newSession() } label: { Label(t("chat.newConversation"), systemImage: "square.and.pencil") }.disabled(store.streaming)
                     Button { showingSessions = true } label: { Label(t("chat.allConversations"), systemImage: "clock.arrow.circlepath") }.disabled(store.streaming)
@@ -441,9 +441,8 @@ struct ChatScreen: View {
                 }
             }
         }
-        .toolbarBackground(Palette.night, for: .navigationBar)
-        .toolbarBackground(.visible, for: .navigationBar)
-        .sheet(isPresented: $showingSessions) { SessionList(store: store) }
+        .oracleNavigationBar(hidden: false)
+        .sheet(isPresented: $showingSessions) { SessionList(store: store).oracleSheetSize() }
         .onAppear { deliverOpening() }
         .onChange(of: store.streaming) { _, busy in if !busy { deliverOpening() } }
     }
@@ -496,7 +495,7 @@ struct ChatScreen: View {
             }
             .coordinateSpace(name: "chat-log")
             .defaultScrollAnchor(.bottom)
-            .scrollDismissesKeyboard(.interactively)
+            .oracleScrollKeyboard()
             .simultaneousGesture(DragGesture().onChanged { _ in followLatest = false })
             .onPreferenceChange(ChatBottomPosition.self) { bottom in
                 awayFromBottom = bottom > viewport.size.height + 48
@@ -573,6 +572,7 @@ struct ChatScreen: View {
             }
         case .oracle:
             Text(turn.text)
+                .accessibilityIdentifier("chat.answer")
                 .font(Typeface.serif(18))
                 .foregroundStyle(Palette.ink)
                 .fixedSize(horizontal: false, vertical: true)
@@ -651,6 +651,7 @@ struct ChatScreen: View {
                 }
                 .buttonStyle(PrimaryButtonStyle())
                 .accessibilityIdentifier("chat.send")
+                .keyboardShortcut(.return, modifiers: .command)
                 .disabled(!store.streaming && draft.trimmingCharacters(in: .whitespaces).isEmpty)
                 .frame(maxWidth: .infinity)
             }
@@ -660,7 +661,7 @@ struct ChatScreen: View {
         .padding(.bottom, 6)
         .frame(maxWidth: 560)
         .frame(maxWidth: .infinity)
-        .background(.ultraThinMaterial)
+        .oracleComposerBackground()
     }
 }
 
@@ -695,7 +696,7 @@ private struct SessionList: View {
             .scrollContentBackground(.hidden)
             .background(Palette.night)
             .navigationTitle(t("chat.allConversations"))
-            .navigationBarTitleDisplayMode(.inline)
+            .oracleInlineTitle()
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button(t("chat.newConversation")) { store.newSession(); dismiss() }.foregroundStyle(Palette.gold)

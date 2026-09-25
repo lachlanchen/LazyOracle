@@ -175,6 +175,7 @@ struct FieldLabel: View {
 struct AuspiceFieldStyle: TextFieldStyle {
     func _body(configuration: TextField<Self._Label>) -> some View {
         configuration
+            .textFieldStyle(.plain)
             .font(Typeface.serif(18))
             .foregroundStyle(Palette.ink)
             .padding(.horizontal, 14)

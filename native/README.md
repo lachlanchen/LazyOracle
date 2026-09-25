@@ -1,6 +1,6 @@
 # Native LazyOracle
 
-LazyOracle is the main app: SwiftUI on iOS and Jetpack Compose on Android,
+LazyOracle is the main app: shared SwiftUI on iOS/macOS and Jetpack Compose on Android,
 with native face/palm capture. Auspice now carries the classic interface from
 the PWA source under `ios/` and `android/`. The old native Auspice configuration
 is retained for rollback only; do not publish it over the classic release.
@@ -11,6 +11,7 @@ app's local data. The original storage is retained for rollback.
 native/
   shared/    the payload both apps carry (generated, not tracked)
   ios/       the SwiftUI app, and the Xcode project
+  macos/     desktop target referencing the same SwiftUI screens
   android/   the Compose app, and its Gradle build
 ```
 
@@ -25,7 +26,7 @@ LazyOracle.evaluateJson('{"engine":"almanac.day","input":{"date":"2026-09-23"}}'
 // {"ok":true,"version":1,"engine":"almanac.day","data":{ ... }}
 ```
 
-iOS loads it into **JavaScriptCore**; Android into **androidx.javascriptengine**,
+iOS and macOS load it into **JavaScriptCore**; Android into **androidx.javascriptengine**,
 a sandbox in its own process. Both call one function with JSON in and JSON out.
 
 Writing the four pillars or the almanac a second time in Swift and a third in
@@ -40,6 +41,11 @@ node tools/build-engine-bundle.mjs
 ```
 
 ## Building
+
+**macOS 14+** — `bash tools/macos-sync.sh`, then run
+`bash tools/macos-build.sh` in `~/Projects/LazyOracleDesktop` on the Mac host.
+The universal development package and camera adapter are documented in
+[the macOS guide](../docs/macos.md).
 
 **iOS** — the project is hand-written and needs no generator. MediaPipe's
 frameworks live outside the tree (they are 1.2 GB) and are fetched once on the

@@ -3,6 +3,25 @@ import SwiftUI
 @main
 struct AuspiceApp: App {
     var body: some Scene {
+        #if os(macOS)
+        Window("LazyOracle", id: "main") {
+            DesktopRoot()
+                .environment(\.locale, Locale(identifier: Localisation.shared.code))
+                .environment(\.layoutDirection, Localisation.shared.layoutDirection)
+                .preferredColorScheme(.dark)
+                .tint(Palette.gold)
+        }
+        .defaultSize(width: 1040, height: 800)
+        .commands {
+            CommandGroup(replacing: .newItem) {
+                Button(t("chat.newConversation")) {
+                    NotificationCenter.default.post(name: .desktopNewChat, object: nil)
+                }
+                .keyboardShortcut("n")
+                .disabled(ChatStore.shared.streaming)
+            }
+        }
+        #else
         WindowGroup {
             RootView()
                 .environment(\.locale, Locale(identifier: Localisation.shared.code))
@@ -10,6 +29,7 @@ struct AuspiceApp: App {
                 .preferredColorScheme(.dark)
                 .tint(Palette.gold)
         }
+        #endif
     }
 }
 
@@ -118,13 +138,13 @@ struct ScreenScaffold<Content: View>: View {
                 .frame(maxWidth: 560)
                 .frame(maxWidth: .infinity)
             }
-            .scrollDismissesKeyboard(.interactively)
+            .oracleScrollKeyboard()
         }
         .overlayPreferenceValue(ReadingComposerPreference.self) { composer in
             VStack { Spacer(minLength: 0); composer }
         }
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(.hidden, for: .navigationBar)
+        .oracleInlineTitle()
+        .oracleNavigationBar()
         .environment(\.layoutDirection, Localisation.shared.layoutDirection)
     }
 }

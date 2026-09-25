@@ -31,3 +31,7 @@ native/android/app/src/main/assets/*.task
 native/android/app/src/main/assets/auspice-content.json
 
 __pycache__/
+
+# macOS resources are assembled from the shared engines and pinned npm package.
+native/macos/Resources/
+native/macos/build/

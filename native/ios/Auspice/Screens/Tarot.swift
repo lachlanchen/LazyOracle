@@ -309,6 +309,7 @@ private struct CardDetail: View {
             }
             .padding(18)
         }
+        .oracleSheetSize()
         .presentationBackground(Palette.night)
         .overlay(alignment: .topTrailing) {
             Button { dismiss() } label: {

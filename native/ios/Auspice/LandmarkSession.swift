@@ -1,6 +1,8 @@
 import AVFoundation
 import SwiftUI
+#if os(iOS)
 import MediaPipeTasksVision
+#endif
 
 /// UI state never owns a running MediaPipe graph. The worker serializes model
 /// creation, inference and teardown on one background queue.
@@ -30,6 +32,12 @@ final class LandmarkSession {
 
     func start() {
         guard !wanted else { return }
+        #if os(macOS)
+        guard AVCaptureDevice.default(for: .video) != nil else {
+            messageKey = "camera.unavailable"
+            return
+        }
+        #endif
         wanted = true
         generation += 1
         let token = generation
@@ -81,6 +89,7 @@ final class LandmarkSession {
 /// Live-stream mode allowed graph callbacks to race deallocation (build 8).
 /// Holding the worker strongly until stop finishes also keeps its destructor
 /// and MediaPipe's logging shutdown off SwiftUI's main thread.
+#if os(iOS)
 final class LandmarkWorker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
     struct Update {
         var points: [[String: Double]] = []
@@ -280,6 +289,8 @@ struct CameraView: UIViewRepresentable {
     }
 }
 
+#endif
+
 /// The points themselves: small for a face mesh, larger and joined for a hand.
 struct LandmarkOverlay: View {
     let points: [CGPoint]
@@ -324,11 +335,27 @@ struct LandmarkOverlay: View {
 struct CameraFlipButton: View {
     let session: LandmarkSession
 
+    private var label: String {
+        #if os(macOS)
+        t("camera.switch")
+        #else
+        session.position == .front ? t("camera.front") : t("camera.back")
+        #endif
+    }
+
+    private var accessibilityLabel: String {
+        #if os(macOS)
+        t("camera.switch")
+        #else
+        l(session.position == .front ? "Switch to the back camera" : "Switch to the front camera")
+        #endif
+    }
+
     var body: some View {
         if session.canFlip {
             Button { session.flip() } label: {
                 Label(
-                    session.position == .front ? t("camera.front") : t("camera.back"),
+                    label,
                     systemImage: "arrow.triangle.2.circlepath.camera"
                 )
                 .font(Typeface.sans(13, weight: .semibold))
@@ -339,7 +366,7 @@ struct CameraFlipButton: View {
                 .overlay(Capsule().strokeBorder(Palette.goldLine, lineWidth: 1))
             }
             .padding(10)
-            .accessibilityLabel(l(session.position == .front ? "Switch to the back camera" : "Switch to the front camera"))
+            .accessibilityLabel(accessibilityLabel)
         }
     }
 }

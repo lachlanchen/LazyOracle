@@ -50,7 +50,10 @@ This sync updates only the isolated desktop workspace. It does not replace
 the native iOS release workspace or the classic Auspice workspace. The build
 produces `release/LazyOracle-macOS-1.0.0-1.zip` and checks its signature and two
 architectures. This is an **ad-hoc signed development package**, not a notarized
-download or Mac App Store release.
+download or Mac App Store release. It is installed at
+`~/Applications/LazyOracle.app` on the KVM Mac and 7050/iMac; test launches
+were closed after verification. The [build receipt](../store/artifacts/macos-preview-2026-09-25.json)
+records the source commit, package hash and checked payloads.
 
 For a normal Mac checkout, prepare the shared prompts, strings and engine
 resources as in `macos-sync.sh`, then run `tools/macos-build.sh`. The committed
@@ -64,7 +67,7 @@ recreates Mac icon sizes from the owned LazyOracle icon; it needs Pillow.
 | Host | Result |
 | --- | --- |
 | KVM Mac, macOS 15.7.9 / Xcode 26.3 | Universal build; native UI test for tarot with an empty question, I Ching, saved state after navigation/relaunch, live Tianji chat, home-to-chat sending and Chinese UI; production Swift/JSCore contracts |
-| 7050/iMac via LazyTunnel, macOS 15.7.7 / Intel HD 530 | 72 offline model detections, six complete model lifecycles, stable repeated landmarks, face and palm engine results and Codable save/load round trips |
+| 7050/iMac via LazyTunnel, macOS 15.7.7 / Intel HD 530 | Installed Release signature/hash and visible window verified; 72 offline model detections, six complete model lifecycles, stable repeated landmarks, face and palm engine results and Codable save/load round trips |
 | 3040 via LazyTunnel, macOS 12.7.6 | Engine contracts pass. OS is below the UI minimum; its older WebKit also rejects the current vision Wasm. No full-app support is claimed |
 
 The engine contract suite covers all 78 tarot cards in 300 draws, 100 I Ching

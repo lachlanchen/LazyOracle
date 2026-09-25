@@ -81,3 +81,19 @@ open_issues:
   Classic Auspice/PWA retain their existing camera path. Physical repeatability testing
   remains pending.
 backend_commit: 57d1117
+
+macos:
+  verified_date: 2026-09-25
+  bundle_id: art.lazying.lazyoracle
+  marketing_version: 1.0.0
+  build: 1
+  minimum_os: '14.0'
+  architectures: [x86_64, arm64]
+  implementation: Shared native SwiftUI with Mac camera adapter
+  source_commit: 325ee2aae9fb54e7bb5229564ff2a81b59ec2c6d
+  artifact: LazyOracle-macOS-1.0.0-1.zip
+  sha256: 70dc8ea2e25b8db15ca619807763530516e54743065ace4f06a425f119f6b7d3
+  distribution: Ad-hoc signed local development package; not notarized or submitted
+  installed: KVM Mac and 7050/iMac, ~/Applications/LazyOracle.app
+  evidence: store/artifacts/macos-preview-2026-09-25.json
+  limitations: 3040 macOS 12 is below minimum; physical webcam and Apple Silicon runtime unverified

@@ -1,0 +1,42 @@
+{
+  "date": "2026-09-25",
+  "app": "LazyOracle",
+  "platform": "macOS",
+  "version": "1.0.0",
+  "build": 1,
+  "source_commit": "325ee2aae9fb54e7bb5229564ff2a81b59ec2c6d",
+  "bundle_id": "art.lazying.lazyoracle",
+  "minimum_macos": "14.0",
+  "architectures": [
+    "x86_64",
+    "arm64"
+  ],
+  "artifact": "LazyOracle-macOS-1.0.0-1.zip",
+  "bytes": 35944621,
+  "sha256": "70dc8ea2e25b8db15ca619807763530516e54743065ace4f06a425f119f6b7d3",
+  "signing": "ad-hoc local development; codesign --verify --deep --strict passed",
+  "distribution": "local test package; not notarized or submitted to Mac App Store",
+  "payload_sha256": {
+    "lazyoracle-engines.js": "49f6edf65f74b9ee3be44d115d86a82817da14c7bdf49a00f1a824398bbeafce",
+    "auspice-content.json": "6c0cb8282610d36e6cf1c805f04c94fb76143a85c49b333064680a0a6e22661b",
+    "Vision/face_landmarker.task": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff",
+    "Vision/hand_landmarker.task": "fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1",
+    "Vision/runner.js": "a416e52fc9e43a98b762ee1b03e47e6c60d93ed24c724507a38181b13c7b5874",
+    "Vision/vision_wasm_internal.wasm": "8da277a733926eacd0474b8704b36742d6ec3231c57a860c5b889dff8f1df886"
+  },
+  "validation": {
+    "shared_tests": 138,
+    "lint": "passed",
+    "ios_regression_build": "passed",
+    "kvm_macos": "15.7.9; native UI, chat, empty-question tarot, I Ching, state restore, home-send, Chinese UI, Command-Return, no-camera lifecycle passed; installed Release launch and visible native window verified",
+    "imac_7050": "15.7.7; 72 offline real-model detections, six model lifecycles, shared face/palm engine results and native save/load round trips passed; installed Release signature/hash and visible native window verified",
+    "optiplex_3040": "12.7.6; production Swift/JSCore engine contracts passed; too old for full UI and current Wasm",
+    "engine_contracts": "all 78 tarot cards / 300 draws; 100 I Ching casts; BaZi, astrology, almanac, Feng Shui, books, face migration",
+    "hardware_limits": "No physical camera enumerated. Live webcam permission/preview/switch/repeatability unverified. Apple Silicon compiled, hardware runtime unverified."
+  },
+  "mobile_releases": "iOS 18 / Android 17 unchanged; existing production reviews untouched",
+  "installed": {
+    "KVM Mac": "~/Applications/LazyOracle.app",
+    "7050/iMac": "~/Applications/LazyOracle.app"
+  }
+}

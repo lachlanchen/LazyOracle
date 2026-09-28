@@ -23,6 +23,58 @@ final class AuspiceUITests: XCTestCase {
         shot.name = name; shot.lifetime = .keepAlways; add(shot)
     }
 
+    /// Store captures use the shipping UI, real calculations and notes entered
+    /// through native controls. Run on a dedicated, empty store simulator.
+    func testStoreStudyScreenshots() {
+        for language in ["en", "zh-Hans"] {
+            launch(language)
+            evidence("store-01-home-" + language)
+            app.buttons["home.atlas"].tap()
+            app.descendants(matching: .any).matching(identifier: "atlas.choose").firstMatch.tap()
+            app.buttons[language == "en" ? "1 · The Creative" : "1 · 乾"].tap()
+            let reset = app.buttons["atlas.reset"]
+            for _ in 0..<4 where !reset.isHittable { app.swipeUp() }
+            reset.tap()
+            for _ in 0..<3 where !app.buttons["atlas.line.6"].isHittable { app.swipeDown() }
+            app.buttons["atlas.line.3"].tap()
+            app.buttons["atlas.line.1"].tap()
+            for _ in 0..<3 { app.swipeDown() }
+            evidence("store-02-atlas-lines-" + language)
+            app.swipeUp()
+            evidence("store-03-atlas-figures-" + language)
+            let save = app.buttons["notebook.save"]
+            for _ in 0..<5 where !save.isHittable { app.swipeUp() }
+            if save.isEnabled { save.tap() }
+            XCTAssertFalse(save.isEnabled)
+            app.navigationBars.buttons.element(boundBy: 0).tap()
+            app.buttons["home.notebook"].tap()
+            app.buttons["notebook.entry.atlas"].firstMatch.tap()
+            let notes = language == "en" ? [
+                "A change in approach can create space for a different result.",
+                "Try a smaller first step and listen before deciding.",
+                "The conversation was calmer when I left room for another view."
+            ] : ["换一种做法，也许就能打开新的可能。", "先迈出一小步，听完对方的想法再决定。", "给不同意见留出空间后，沟通更平和了。"]
+            for (key, text) in zip(["notebook.reflection", "notebook.action", "notebook.observation"], notes) {
+                let field = app.descendants(matching: .any).matching(identifier: key).matching(NSPredicate(format: "elementType == %d OR elementType == %d", XCUIElement.ElementType.textField.rawValue, XCUIElement.ElementType.textView.rawValue)).firstMatch
+                for _ in 0..<5 where !field.isHittable { app.swipeUp() }
+                field.tap()
+                let old = field.value as? String ?? ""
+                if !old.isEmpty && old != field.placeholderValue {
+                    field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: old.count))
+                }
+                field.typeText(text)
+            }
+            let saveNotes = app.buttons["notebook.saveNotes"]
+            for _ in 0..<5 where !saveNotes.isHittable { app.swipeUp() }
+            saveNotes.tap()
+            for _ in 0..<5 { app.swipeDown() }
+            evidence("store-04-notebook-original-" + language)
+            app.swipeUp()
+            evidence("store-05-notebook-reflection-" + language)
+            app.terminate()
+        }
+    }
+
     func testAtlasAndNotebookWorkflow() {
         launch()
         evidence("study-home-en")

@@ -22,7 +22,7 @@ android {
         create("lazyoracle") {
             dimension = "identity"
             applicationId = "art.lazying.lazyoracle"
-            versionCode = 18
+            versionCode = 19
             versionName = "1.0.0"
             resValue("string", "app_name", "LazyOracle")
         }

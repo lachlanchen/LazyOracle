@@ -59,10 +59,10 @@ import kotlinx.serialization.json.*
                 (6 downTo 1).forEach { position ->
                     Row(Modifier.fillMaxWidth().heightIn(min = 44.dp).clickable {
                         changing = if (position in changing) changing - position else changing + position
-                    }.testTag("atlas.line.$position").semantics { contentDescription = "${t("study.lines")} $position: ${l(if (value.primary.lines[position - 1] == 1) "阳" else "阴")} → ${l(if (value.resulting.lines[position - 1] == 1) "阳" else "阴")}" }, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    }.testTag("atlas.line.$position").semantics { contentDescription = "${t("study.lines")} $position: ${l(if (value.primary.lines[position - 1] == 1) "阳" else "阴")} ${l("→")} ${l(if (value.resulting.lines[position - 1] == 1) "阳" else "阴")}" }, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         Text(position.toString(), color = Palette.gold, modifier = Modifier.width(22.dp))
                         AtlasLine(value.primary.lines[position - 1] == 1, Modifier.weight(1f))
-                        Text("→", color = Palette.gold)
+                        Text(l("→"), color = Palette.gold)
                         AtlasLine(value.resulting.lines[position - 1] == 1, Modifier.weight(1f))
                         Text(if (position in changing) "✓" else "○", color = Palette.gold, modifier = Modifier.width(24.dp))
                     }
@@ -75,7 +75,7 @@ import kotlinx.serialization.json.*
                 listOf("study.nuclear" to value.nuclear, "study.opposite" to value.opposite, "study.inverse" to value.inverse).forEach { (key, hex) ->
                     Column(Modifier.fillMaxWidth().heightIn(min = 54.dp).clickable { number = hex.number; changing = emptyList() }.testTag(key)) {
                         Text(t(key), style = Type.sans(13), color = Palette.inkMute)
-                        Text("${hex.number} · ${l(hex.name.en)} →", style = Type.serif(18), color = Palette.gold)
+                        Text("${hex.number} · ${l(hex.name.en)} ${l("→")}", style = Type.serif(18), color = Palette.gold)
                     }
                 }
             }

@@ -35,12 +35,12 @@ struct ChangeAtlasScreen: View {
                             HStack(spacing: 16) {
                                 Text("\(position)").frame(width: 22)
                                 AtlasLine(yang: study.primary.lines[position - 1] == 1)
-                                Image(systemName: "arrow.right").font(.system(size: 12))
+                                Image(systemName: Localisation.shared.layoutDirection == .rightToLeft ? "arrow.left" : "arrow.right").font(.system(size: 12))
                                 AtlasLine(yang: study.resulting.lines[position - 1] == 1)
                                 Image(systemName: changing.contains(position) ? "checkmark.circle.fill" : "circle").frame(width: 24)
                             }.foregroundStyle(Palette.gold).frame(minHeight: 44).contentShape(Rectangle())
                         }.buttonStyle(.plain).accessibilityLabel("\(t("study.lines")) \(position)")
-                            .accessibilityValue("\(l(study.primary.lines[position - 1] == 1 ? "阳" : "阴")) → \(l(study.resulting.lines[position - 1] == 1 ? "阳" : "阴"))").accessibilityIdentifier("atlas.line.\(position)")
+                            .accessibilityValue("\(l(study.primary.lines[position - 1] == 1 ? "阳" : "阴")) \(l("→")) \(l(study.resulting.lines[position - 1] == 1 ? "阳" : "阴"))").accessibilityIdentifier("atlas.line.\(position)")
                     }
                     Button(t("study.reset")) { changing = [] }.frame(minHeight: 44).accessibilityIdentifier("atlas.reset")
                 }
@@ -83,7 +83,7 @@ struct ChangeAtlasScreen: View {
         Button { number = hex.number; changing = [] } label: {
             VStack(alignment: .leading, spacing: 5) {
                 Text(t(key)).font(Typeface.sans(13)).foregroundStyle(Palette.inkMute)
-                Text("\(hex.number) · \(l(hex.name.en)) →").font(Typeface.serif(18)).foregroundStyle(Palette.gold)
+                Text("\(hex.number) · \(l(hex.name.en)) \(l("→"))").font(Typeface.serif(18)).foregroundStyle(Palette.gold)
             }.frame(maxWidth: .infinity, minHeight: 54, alignment: .leading)
         }.buttonStyle(.plain).accessibilityIdentifier(key)
     }

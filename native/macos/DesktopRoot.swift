@@ -12,6 +12,10 @@ struct DesktopRoot: View {
                     .accessibilityIdentifier("desktop.home")
                 NavigationLink(value: "chat") { Label(t("chat.title"), systemImage: "bubble.left.and.bubble.right") }
                     .accessibilityIdentifier("desktop.chat")
+                NavigationLink(value: "atlas") { Label(t("study.title"), systemImage: "square.stack.3d.up") }
+                    .accessibilityIdentifier("desktop.atlas")
+                NavigationLink(value: "notebook") { Label(t("notebook.title"), systemImage: "book.closed") }
+                    .accessibilityIdentifier("desktop.notebook")
                 Section {
                     ForEach(Practice.allCases) { practice in
                         NavigationLink(value: practice.rawValue) { Label(practice.name, systemImage: practice.symbol) }
@@ -33,6 +37,10 @@ struct DesktopRoot: View {
                         PracticeScreen(practice: practice)
                     } else if selection == "chat" {
                         ChatScreen()
+                    } else if selection == "atlas" {
+                        ChangeAtlasScreen()
+                    } else if selection == "notebook" {
+                        NotebookScreen()
                     } else if selection == "settings" {
                         SettingsScreen()
                     } else {

@@ -4,12 +4,16 @@ import CryptoKit
 /// Narration receives the existing result; it has no tools to redraw or recast.
 struct ExplainReading<Result: Encodable>: View {
     let result: Result
+    let practice: String
     var body: some View {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys]
         let facts = (try? encoder.encode(result)).flatMap { String(data: $0, encoding: .utf8) } ?? ""
         let key = SHA256.hash(data: Data(facts.utf8)).map { String(format: "%02x", $0) }.joined()
-        return ReadingExplanation(facts: facts, key: key).id(key)
+        return VStack(spacing: 14) {
+            SaveReadingButton(practice: practice, facts: facts)
+            ReadingExplanation(facts: facts, key: key).id(key)
+        }
     }
 }
 

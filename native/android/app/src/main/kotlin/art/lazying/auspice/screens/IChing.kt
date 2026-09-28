@@ -118,7 +118,7 @@ fun IChingScreen(navController: NavController) {
                     Relative(l("Inverse hexagram"), result.inverse)
                 }
             }
-            ExplainReading(Json.encodeToString(result))
+            ExplainReading(Json.encodeToString(result), "iching")
         }
     }
 }

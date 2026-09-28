@@ -90,7 +90,7 @@ fun TarotScreen(navController: NavController) {
                 }
             }
             result.cards.filter { revealed.contains(it.position.id) }.forEach { CardReading(it) }
-            ExplainReading(Json.encodeToString(result))
+            ExplainReading(Json.encodeToString(result), "tarot")
         }
     }
 }

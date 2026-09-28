@@ -8,7 +8,10 @@ final class AuspiceUITests: XCTestCase {
     private func launch(_ language: String = "en") {
         app.launchArguments = ["-auspice.language", language]
         app.launch()
-        XCTAssertTrue(app.buttons["practice.tarot"].waitForExistence(timeout: 15))
+        let atlas = app.buttons["home.atlas"]
+        XCTAssertTrue(atlas.waitForExistence(timeout: 20))
+        expectation(for: NSPredicate(format: "enabled == true"), evaluatedWith: atlas)
+        waitForExpectations(timeout: 20)
     }
     private func open(_ practice: String) {
         let button = app.buttons["practice.\(practice)"]
@@ -18,6 +21,67 @@ final class AuspiceUITests: XCTestCase {
     private func evidence(_ name: String) {
         let shot = XCTAttachment(screenshot: app.screenshot())
         shot.name = name; shot.lifetime = .keepAlways; add(shot)
+    }
+
+    func testAtlasAndNotebookWorkflow() {
+        launch()
+        evidence("study-home-en")
+        app.buttons["home.atlas"].tap()
+        let picker = app.descendants(matching: .any).matching(identifier: "atlas.choose").firstMatch
+        XCTAssertTrue(picker.waitForExistence(timeout: 10)); picker.tap()
+        app.buttons["1 · The Creative"].tap()
+        let reset = app.buttons["atlas.reset"]
+        for _ in 0..<4 where !reset.isHittable { app.swipeUp() }
+        reset.tap()
+        for _ in 0..<4 where !app.buttons["atlas.line.6"].isHittable { app.swipeDown() }
+        for position in (1...6).reversed() {
+            let line = app.buttons["atlas.line.\(position)"]
+            for _ in 0..<3 where !line.isHittable { app.swipeUp() }
+            line.tap()
+        }
+        for _ in 0..<4 where !app.staticTexts["2 · The Receptive"].isHittable { app.swipeUp() }
+        XCTAssertTrue(app.staticTexts["2 · The Receptive"].exists)
+        evidence("atlas-six-lines")
+        let save = app.buttons["notebook.save"]
+        for _ in 0..<5 where !save.isHittable { app.swipeUp() }
+        if save.isEnabled { save.tap() }
+        XCTAssertFalse(save.isEnabled)
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.buttons["home.notebook"].tap()
+        let entry = app.buttons["notebook.entry.atlas"].firstMatch
+        XCTAssertTrue(entry.waitForExistence(timeout: 8)); entry.tap()
+        let reflection = app.descendants(matching: .any).matching(identifier: "notebook.reflection").matching(NSPredicate(format: "elementType == %d OR elementType == %d", XCUIElement.ElementType.textField.rawValue, XCUIElement.ElementType.textView.rawValue)).firstMatch
+        for _ in 0..<4 where !reflection.isHittable { app.swipeUp() }
+        reflection.tap(); reflection.typeText(" A small experiment")
+        app.swipeUp()
+        let saveNotes = app.buttons["notebook.saveNotes"]
+        for _ in 0..<5 where !saveNotes.isHittable { app.swipeUp() }
+        saveNotes.tap()
+        XCTAssertEqual(saveNotes.label, "Notes saved")
+        evidence("notebook-reflection")
+        app.terminate(); launch()
+        app.buttons["home.notebook"].tap(); app.buttons["notebook.entry.atlas"].firstMatch.tap()
+        let restored = app.descendants(matching: .any).matching(identifier: "notebook.reflection").matching(NSPredicate(format: "elementType == %d OR elementType == %d", XCUIElement.ElementType.textField.rawValue, XCUIElement.ElementType.textView.rawValue)).firstMatch
+        for _ in 0..<4 where !restored.isHittable { app.swipeUp() }
+        XCTAssertTrue((restored.value as? String)?.contains("A small experiment") == true)
+        XCTAssertTrue(app.staticTexts["notebook.original"].exists)
+        evidence("notebook-restored")
+    }
+
+    func testStudyChineseAndArabic() {
+        for language in ["zh-Hans", "ar"] {
+            launch(language)
+            evidence("study-home-" + language)
+            app.buttons["home.atlas"].tap()
+            XCTAssertTrue(app.buttons["atlas.line.6"].waitForExistence(timeout: 10))
+            XCTAssertFalse(app.staticTexts["Change Atlas"].exists)
+            evidence("study-atlas-" + language)
+            app.navigationBars.buttons.element(boundBy: 0).tap()
+            app.buttons["home.notebook"].tap()
+            XCTAssertFalse(app.staticTexts["Reading notebook"].exists)
+            evidence("study-notebook-" + language)
+            app.terminate()
+        }
     }
 
     func testCameraCaptureNeedsFreshFrames() {

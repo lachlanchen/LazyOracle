@@ -171,7 +171,7 @@ fun BaziScreen(navController: NavController) {
                     style = Type.serif(15), color = Palette.inkMute
                 )
             }
-            ExplainReading(Json.encodeToString(c))
+            ExplainReading(Json.encodeToString(c), "bazi")
         }
     }
 }

@@ -31,7 +31,7 @@ struct BaziScreen: View {
                 elementsPanel(chart)
                 luckPanel(chart)
                 methodPanel(chart)
-                ExplainReading(result: chart)
+                ExplainReading(result: chart, practice: "bazi")
             }
         }
         .sheet(isPresented: $editing) {

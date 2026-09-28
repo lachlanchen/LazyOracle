@@ -4887,6 +4887,19 @@
     "zh-Hans": "祸害",
     "zh-Hant": "禍害"
   },
+  "Mixed": {
+    "ar": "مختلط",
+    "de": "Mischform",
+    "en": "Mixed",
+    "es": "Mixto",
+    "fr": "Mixte",
+    "ja": "混合型",
+    "ko": "혼합형",
+    "ru": "Смешанный",
+    "vi": "Hỗn hợp",
+    "zh-Hans": "混合型",
+    "zh-Hant": "混合型"
+  },
   "Model": {
     "ar": "الطراز",
     "de": "Modell",
@@ -4990,6 +5003,19 @@
     "vi": "Hãy tiến về phía ánh sáng.",
     "zh-Hans": "朝亮的地方走。",
     "zh-Hant": "朝亮的地方走。"
+  },
+  "Moving lines": {
+    "ar": "الخطوط المتغيرة",
+    "de": "Wandelnde Linien",
+    "en": "Moving lines",
+    "es": "Líneas cambiantes",
+    "fr": "Traits changeants",
+    "ja": "変爻",
+    "ko": "변효",
+    "ru": "Меняющиеся черты",
+    "vi": "Hào động",
+    "zh-Hans": "变爻",
+    "zh-Hant": "變爻"
   },
   "N": {
     "ar": "ش",
@@ -9228,6 +9254,19 @@
     "vi": "Thượng đình",
     "zh-Hans": "上庭",
     "zh-Hant": "上庭"
+  },
+  "Upright": {
+    "ar": "مستقيمة",
+    "de": "Aufrecht",
+    "en": "Upright",
+    "es": "Derecha",
+    "fr": "À l’endroit",
+    "ja": "正位置",
+    "ko": "정방향",
+    "ru": "Прямое положение",
+    "vi": "Xuôi",
+    "zh-Hans": "正位",
+    "zh-Hant": "正位"
   },
   "Uranus": {
     "ar": "أورانوس",

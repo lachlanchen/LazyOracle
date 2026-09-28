@@ -31,6 +31,9 @@ import art.lazying.auspice.screens.IChingScreen
 import art.lazying.auspice.screens.PalmScreen
 import art.lazying.auspice.screens.SettingsScreen
 import art.lazying.auspice.screens.TarotScreen
+import art.lazying.auspice.screens.ChangeAtlasScreen
+import art.lazying.auspice.screens.NotebookScreen
+import art.lazying.auspice.screens.NotebookDetail
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,6 +71,7 @@ fun AuspiceApp() {
         Engines.start(context)
         Profiles.load(context)
         Conversations.load(context)
+        NotebookStore.load(context)
         LegacyImport.run(context)
         loaded = true
     }
@@ -99,7 +103,9 @@ fun AuspiceApp() {
                         ready = loaded,
                         open = { navController.navigate(it.route) },
                         openChat = { navController.navigate("chat?opening=${android.net.Uri.encode(it)}") },
-                        openSettings = { navController.navigate("settings") }
+                        openSettings = { navController.navigate("settings") },
+                        openAtlas = { navController.navigate("atlas") },
+                        openNotebook = { navController.navigate("notebook") }
                     )
                 }
                 composable(Practice.ALMANAC.route) { AlmanacScreen(navController) }
@@ -112,6 +118,9 @@ fun AuspiceApp() {
                 composable(Practice.FACE.route) { FaceScreen(navController) }
                 composable(Practice.ANSWERS.route) { AnswersScreen(navController) }
                 composable("settings") { SettingsScreen(navController) }
+                composable("atlas") { ChangeAtlasScreen(navController) }
+                composable("notebook") { NotebookScreen(navController) }
+                composable("notebook/{id}") { entry -> NotebookDetail(navController, entry.arguments?.getString("id").orEmpty()) }
                 composable("chat?opening={opening}") { entry ->
                     ChatScreen(navController, entry.arguments?.getString("opening").orEmpty())
                 }

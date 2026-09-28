@@ -190,7 +190,7 @@ fun FengShuiScreen(navController: NavController) {
                     if (index < m.sectors.lastIndex) HorizontalDivider(color = Palette.line)
                 }
             }
-            ExplainReading(Json.encodeToString(m))
+            ExplainReading(Json.encodeToString(m), "fengshui")
         }
     }
 }

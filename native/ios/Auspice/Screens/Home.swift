@@ -14,7 +14,20 @@ struct HomeScreen: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
                     header
+                    NavigationLink { ChangeAtlasScreen() } label: {
+                        Panel {
+                            Label(t("study.title"), systemImage: "square.stack.3d.up").font(Typeface.display(26)).foregroundStyle(Palette.gold)
+                            Text(t("study.tagline")).font(Typeface.serif(18)).foregroundStyle(Palette.inkSoft)
+                        }
+                    }.buttonStyle(.plain).accessibilityIdentifier("home.atlas")
+                    NavigationLink { NotebookScreen() } label: {
+                        Panel {
+                            Label(t("notebook.title"), systemImage: "book.closed").font(Typeface.display(23)).foregroundStyle(Palette.gold)
+                            Text(t("notebook.tagline")).font(Typeface.serif(17)).foregroundStyle(Palette.inkSoft)
+                        }
+                    }.buttonStyle(.plain).accessibilityIdentifier("home.notebook")
                     todayStrip
+                    Text(t("study.practices")).font(Typeface.display(23)).foregroundStyle(Palette.ink)
                     grid
                     Button { chatOpening = ""; asking = true } label: {
                         Panel {
@@ -89,7 +102,7 @@ struct HomeScreen: View {
                 .font(Typeface.display(44))
                 .foregroundStyle(Palette.ink)
                 .padding(.top, 8)
-            Text(t("app.tagline"))
+            Text(t("study.home"))
                 .font(Typeface.serif(19))
                 .italic()
                 .foregroundStyle(Palette.inkSoft)

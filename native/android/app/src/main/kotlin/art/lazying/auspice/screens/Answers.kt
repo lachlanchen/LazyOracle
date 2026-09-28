@@ -87,7 +87,7 @@ fun AnswersScreen(navController: NavController) {
                     )
                 }
             }
-            ExplainReading(Json.encodeToString(page))
+            ExplainReading(Json.encodeToString(page), "answers")
         }
     }
 }

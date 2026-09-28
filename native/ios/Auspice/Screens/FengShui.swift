@@ -113,7 +113,7 @@ struct FengShuiScreen: View {
                         }
                     }
                 }
-                ExplainReading(result: mansions)
+                ExplainReading(result: mansions, practice: "fengshui")
             }
         }
         .sheet(isPresented: $editing) {

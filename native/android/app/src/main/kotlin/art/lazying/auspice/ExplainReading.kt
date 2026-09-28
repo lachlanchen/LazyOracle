@@ -1,6 +1,7 @@
 package art.lazying.auspice
 
 import art.lazying.auspice.screens.AuspiceField
+import art.lazying.auspice.screens.SaveReadingButton
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
 import androidx.compose.material3.CircularProgressIndicator
@@ -20,7 +21,7 @@ data class ReadingReply(val id: String = UUID.randomUUID().toString(), val role:
 
 /** Local conversation for the displayed result. It never calls an engine. */
 @Composable
-fun ExplainReading(facts: String) {
+fun ExplainReading(facts: String, practice: String) {
     val key = remember(facts) { MessageDigest.getInstance("SHA-256").digest(facts.toByteArray()).joinToString("") { "%02x".format(it) } }
     var question by rememberPracticeState("explain.$key.question", "")
     var replies by rememberPracticeState("explain.$key.replies", emptyList<ReadingReply>())
@@ -30,6 +31,7 @@ fun ExplainReading(facts: String) {
     val scope = rememberCoroutineScope()
     var job by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
     DisposableEffect(key) { onDispose { job?.cancel() } }
+    SaveReadingButton(practice, facts)
     Panel(title = l("Ask Tianji")) {
         Text(l("Get a clear explanation of this result, or ask a follow-up question."), style = Type.serif(16), color = Palette.inkSoft)
         replies.forEach { reply ->

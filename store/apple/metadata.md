@@ -1,5 +1,8 @@
 # App Store metadata
 
+> Historical classic listing; do not reuse for the native study candidate.
+> See [current candidate copy and review walkthrough](native-study-review.md).
+
 ## Primary locale — English (U.S.)
 
 - Name: `LazyOracle: Tarot, BaZi, I Ching`

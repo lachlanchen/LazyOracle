@@ -78,7 +78,7 @@ struct TarotScreen: View {
                 ForEach(draw.cards.filter { revealed.contains($0.id) }) { card in
                     CardReading(card: card)
                 }
-                ExplainReading(result: draw).id(draw.seed)
+                ExplainReading(result: draw, practice: "tarot").id(draw.seed)
             }
         }
         .sheet(item: $selected) { card in

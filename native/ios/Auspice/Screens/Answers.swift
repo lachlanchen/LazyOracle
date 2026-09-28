@@ -39,7 +39,7 @@ struct AnswersScreen: View {
                 page(opening)
                     .rotation3DEffect(.degrees(open ? 0 : 92), axis: (x: 1, y: 0, z: 0), anchor: .top, perspective: 0.5)
                     .opacity(open ? 1 : 0)
-                ExplainReading(result: opening).id(opening.seed)
+                ExplainReading(result: opening, practice: "answers").id(opening.seed)
             }
         }
     }

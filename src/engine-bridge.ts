@@ -22,9 +22,11 @@ import { faceFeatures } from './engines/face/face'
 import { resolveFace } from './engines/face/shape'
 import { captureFace, capturePalm, type LandmarkFrame } from './engines/vision/capture'
 import { castHexagram, hexagramByNumber } from './engines/iching/cast'
+import { exploreHexagram } from './engines/iching/explore'
 import { palmFeatures } from './engines/palm/palm'
 import { drawSpread } from './engines/tarot/draw'
 import { SPREADS } from './engines/tarot/spreads'
+import { notebookSummary } from './lib/notebook-summary'
 
 /** The version of this contract. Native code checks it before trusting a result. */
 export const BRIDGE_VERSION = 1
@@ -37,6 +39,7 @@ function need<T>(value: T | undefined | null, what: string): T {
 }
 
 const ENGINES: Record<string, (input: Input) => unknown> = {
+  'notebook.summary': (input) => notebookSummary(need(input.practice as string, 'practice'), need(input.result as Input, 'result')),
   'tarot.draw': (input) => drawSpread((input.spread as 'one' | 'three' | 'celtic') ?? 'three', {
     seed: input.seed as number | undefined,
     question: (input.question as string) ?? '',
@@ -49,6 +52,7 @@ const ENGINES: Record<string, (input: Input) => unknown> = {
     question: (input.question as string) ?? '',
   }),
   'iching.hexagram': (input) => hexagramByNumber(need(input.number as number, 'number')),
+  'iching.explore': (input) => exploreHexagram(need(input.number as number, 'number'), (input.changing as number[]) ?? []),
 
   'bazi.chart': (input) => computeBazi(input as unknown as Parameters<typeof computeBazi>[0]),
 

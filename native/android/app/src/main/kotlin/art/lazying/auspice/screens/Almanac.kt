@@ -84,7 +84,7 @@ fun AlmanacScreen(navController: NavController) {
         }
 
         day?.let { d ->
-            ExplainReading(Json.encodeToString(d))
+            ExplainReading(Json.encodeToString(d), "almanac")
             Panel {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(standingWord(d.standing), style = Type.display(26), color = standingColour(d.standing))

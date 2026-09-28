@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.testTag
 import art.lazying.auspice.*
 import java.time.LocalDate
 import kotlinx.serialization.json.JsonPrimitive
@@ -37,7 +38,9 @@ fun HomeScreen(
     ready: Boolean,
     open: (Practice) -> Unit,
     openChat: (String) -> Unit,
-    openSettings: () -> Unit
+    openSettings: () -> Unit,
+    openAtlas: () -> Unit,
+    openNotebook: () -> Unit
 ) {
     var today by remember { mutableStateOf<AlmanacDay?>(null) }
     var draft by remember { mutableStateOf("") }
@@ -100,13 +103,25 @@ fun HomeScreen(
                     }
                     Text(t("app.name"), style = Type.display(44), color = Palette.ink, modifier = Modifier.padding(top = 8.dp))
                     Text(
-                        t("app.tagline"),
+                        t("study.home"),
                         style = Type.serif(19).copy(fontStyle = FontStyle.Italic),
                         color = Palette.inkSoft
                     )
                 }
             }
 
+            item(span = { GridItemSpan(2) }) {
+                Panel(Modifier.clickable(enabled = ready, onClick = openAtlas).testTag("home.atlas")) {
+                    Text(t("study.title"), style = Type.display(26), color = Palette.gold)
+                    Text(t("study.tagline"), style = Type.serif(18), color = Palette.inkSoft)
+                }
+            }
+            item(span = { GridItemSpan(2) }) {
+                Panel(Modifier.clickable(enabled = ready, onClick = openNotebook).testTag("home.notebook")) {
+                    Text(t("notebook.title"), style = Type.display(23), color = Palette.gold)
+                    Text(t("notebook.tagline"), style = Type.serif(17), color = Palette.inkSoft)
+                }
+            }
             today?.let { day ->
                 item(span = { GridItemSpan(2) }) {
                     Panel(Modifier.clickable { open(Practice.ALMANAC) }) {
@@ -133,6 +148,7 @@ fun HomeScreen(
                 }
             }
 
+            item(span = { GridItemSpan(2) }) { Text(t("study.practices"), style = Type.display(23), color = Palette.ink) }
             items(Practice.entries) { practice ->
                 Tile(practice) { open(practice) }
             }

@@ -72,6 +72,13 @@ struct RootView: View {
         }
         .background(Sky())
         .disabled(restoring)
+        .overlay {
+            if restoring {
+                ProgressView().controlSize(.large).tint(Palette.gold)
+                    .padding(24).background(Palette.night, in: RoundedRectangle(cornerRadius: 18))
+                    .accessibilityIdentifier("startup.restoring")
+            }
+        }
         .task { await LegacyImport.shared.run(); restoring = false }
         // The conversation can send the reader to a screen — the camera, most
         // often, because a palm cannot be read without one.
@@ -110,6 +117,7 @@ struct ScreenScaffold<Content: View>: View {
     let eyebrow: String
     let title: String
     var tagline: String?
+    var bottomPadding: CGFloat = 180
     @ViewBuilder var content: Content
 
     var body: some View {
@@ -134,7 +142,7 @@ struct ScreenScaffold<Content: View>: View {
                     content
                 }
                 .padding(.horizontal, 18)
-                .padding(.bottom, 180)
+                .padding(.bottom, bottomPadding)
                 .frame(maxWidth: 560)
                 .frame(maxWidth: .infinity)
             }

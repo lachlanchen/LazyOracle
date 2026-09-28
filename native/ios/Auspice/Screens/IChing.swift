@@ -105,7 +105,7 @@ struct IChingScreen: View {
                         relative("Opposite hexagram", cast.opposite)
                         relative("Inverse hexagram", cast.inverse)
                     }
-                    ExplainReading(result: cast).id(cast.seed)
+                    ExplainReading(result: cast, practice: "iching").id(cast.seed)
                 }
             }
         }

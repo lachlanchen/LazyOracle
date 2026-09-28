@@ -156,7 +156,7 @@ struct FaceScreen: View {
                         .foregroundStyle(Palette.inkSoft)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                ExplainReading(result: features)
+                ExplainReading(result: features, practice: "face")
             }
         }
         .onAppear { restoreClassification(); Router.shared.face = features; camera.start() }

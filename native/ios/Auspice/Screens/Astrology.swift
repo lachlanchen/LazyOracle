@@ -99,7 +99,7 @@ struct AstrologyScreen: View {
                         .foregroundStyle(Palette.inkSoft)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                ExplainReading(result: chart)
+                ExplainReading(result: chart, practice: "astrology")
             }
         }
         .sheet(isPresented: $editing) {

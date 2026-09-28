@@ -138,7 +138,7 @@ struct AlmanacScreen: View {
                 listsPanel(day)
                 hoursPanel(day)
                 tablesPanel(day)
-                ExplainReading(result: day).id(day.date)
+                ExplainReading(result: day, practice: "almanac").id(day.date)
             }
         }
         .onAppear { if store.day == nil { store.load() } }

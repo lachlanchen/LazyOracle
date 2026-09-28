@@ -216,7 +216,7 @@ fun FaceScreen(navController: NavController) {
                     style = Type.serif(16), color = Palette.inkSoft
                 )
             }
-            ExplainReading(Json.encodeToString(f))
+            ExplainReading(Json.encodeToString(f), "face")
         }
     }
 }

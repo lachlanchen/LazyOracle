@@ -2,6 +2,17 @@
 
 Written 2026-09-21 from the owner's request (chat with the L & N session). Treat this as the contract; refine it in place as decisions are made and record the date of each change.
 
+## Native differentiation — 2026-09-29
+
+The owner requested distinct native features after Apple's 4.3(b) rejection of
+classic build 12. The native candidate now leads with Change Atlas (deliberate
+hexagram construction, line comparison and related transformations) and a local
+reading notebook (immutable computed snapshots, reflection, action and later
+observation). Existing practices and cameras remain. This extends native
+LazyOracle; classic Auspice is not duplicated or resubmitted as the new product.
+See [implementation scope](plans/native-study-2026-09-29.md) and
+[candidate review walkthrough](../store/apple/native-study-review.md).
+
 ## Current owner decisions — 2026-09-24, native LazyOracle
 
 These supersede the earlier product split below.

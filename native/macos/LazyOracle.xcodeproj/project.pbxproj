@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		56282FD29FB972999A4500B9 /* ChangeAtlas.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89B64465464ACA66A0428F8F /* ChangeAtlas.swift */; };
+		B377E5CB48A7F35A003ECEBC /* Notebook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C30C70ED9B103B157FB9529 /* Notebook.swift */; };
 		0DFA8FBA27FBE054C25B0159 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 41F627FAE9787A693EA83AD7 /* Cocoa.framework */; };
 		2171487490964357785BCC51 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AD24E3EE68626C572A16BECA /* Assets.xcassets */; };
 		28BF4E314A44721E3B5D7B4B /* LegacyImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631A310282DBCDECA9E69827 /* LegacyImport.swift */; };
@@ -59,6 +61,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		89B64465464ACA66A0428F8F /* ChangeAtlas.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ChangeAtlas.swift; path = Screens/ChangeAtlas.swift; sourceTree = "<group>"; };
+		4C30C70ED9B103B157FB9529 /* Notebook.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Notebook.swift; path = Notebook.swift; sourceTree = "<group>"; };
 		012B0873F17CC32927DF646D /* Home.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Home.swift; path = Screens/Home.swift; sourceTree = "<group>"; };
 		0DD42C512EAA900C98B0B1CA /* Router.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
 		1528D8B0240A79A9DE83F70B /* ReadingPrompt.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReadingPrompt.swift; sourceTree = "<group>"; };
@@ -190,6 +194,8 @@
 				631A310282DBCDECA9E69827 /* LegacyImport.swift */,
 				AE8AAE84173E74B40BEDA87C /* Localisation.swift */,
 				30A5AD808CA43A6252974457 /* Models.swift */,
+				89B64465464ACA66A0428F8F /* ChangeAtlas.swift */,
+				4C30C70ED9B103B157FB9529 /* Notebook.swift */,
 				4B1ECDD7F059B84ADA10F9DC /* Platform.swift */,
 				D66ACF18DB7669B36593D312 /* PracticeState.swift */,
 				610FAFD49C77AF681A5B29E0 /* Profile.swift */,
@@ -345,6 +351,8 @@
 				CDB2AC0106B21595FC48243D /* Relay.swift in Sources */,
 				ECDB148500C2B24957F4517D /* Router.swift in Sources */,
 				34E8C4E2059C660ED4C01DFA /* Almanac.swift in Sources */,
+				56282FD29FB972999A4500B9 /* ChangeAtlas.swift in Sources */,
+				B377E5CB48A7F35A003ECEBC /* Notebook.swift in Sources */,
 				34605C4D439BC5B7AE284746 /* Answers.swift in Sources */,
 				BCE7D755D97767452FB0699A /* Astrology.swift in Sources */,
 				B9B279CF9610A6ACE33AD88D /* Bazi.swift in Sources */,

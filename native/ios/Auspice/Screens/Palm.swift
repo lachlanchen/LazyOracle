@@ -113,7 +113,7 @@ struct PalmScreen: View {
                         .foregroundStyle(Palette.inkSoft)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                ExplainReading(result: features)
+                ExplainReading(result: features, practice: "palm")
             }
         }
         .onAppear { Router.shared.palm = features; camera.start() }

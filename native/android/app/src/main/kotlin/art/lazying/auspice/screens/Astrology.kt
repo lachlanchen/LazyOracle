@@ -152,7 +152,7 @@ fun AstrologyScreen(navController: NavController) {
                     style = Type.serif(16), color = Palette.inkSoft
                 )
             }
-            ExplainReading(Json.encodeToString(c))
+            ExplainReading(Json.encodeToString(c), "astrology")
         }
     }
 }

@@ -31,7 +31,8 @@ final class AuspiceUITests: XCTestCase {
             evidence("store-01-home-" + language)
             app.buttons["home.atlas"].tap()
             app.descendants(matching: .any).matching(identifier: "atlas.choose").firstMatch.tap()
-            app.buttons[language == "en" ? "1 · The Creative" : "1 · 乾"].tap()
+            // A different original per locale keeps demonstration notes separate.
+            app.buttons[language == "en" ? "1 · The Creative" : "2 · 坤"].tap()
             let reset = app.buttons["atlas.reset"]
             for _ in 0..<4 where !reset.isHittable { app.swipeUp() }
             reset.tap()
@@ -59,9 +60,7 @@ final class AuspiceUITests: XCTestCase {
                 for _ in 0..<5 where !field.isHittable { app.swipeUp() }
                 field.tap()
                 let old = field.value as? String ?? ""
-                if !old.isEmpty && old != field.placeholderValue {
-                    field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: old.count))
-                }
+                XCTAssertTrue(old.isEmpty || old == field.placeholderValue, "Use an empty store simulator so notes cannot be duplicated.")
                 field.typeText(text)
             }
             let saveNotes = app.buttons["notebook.saveNotes"]

@@ -1,0 +1,76 @@
+{
+  "date": "2026-09-29",
+  "identity": "art.lazying.lazyoracle",
+  "source_commit": "362f187abaec9337ae7d1705aff69d1eaba2da06",
+  "features": [
+    "Offline deterministic Change Atlas",
+    "Local immutable reading snapshots and reflection notebook",
+    "Native home discovery, eleven-language UI and RTL comparison flow",
+    "Visible iOS legacy-import progress"
+  ],
+  "ios": {
+    "version": "1.0.0",
+    "build": 20,
+    "ipa_sha256": "3c1538d796bdd96eb86a6bd77ba37bb7fe929c70b97a0a201efb84584242ee8d",
+    "bytes": 28489700,
+    "upload_delivery": "2a86aee4-a93d-4e84-8e26-4c2df82ef7ce",
+    "validation": "SUCCEEDED",
+    "upload": "SUCCEEDED",
+    "testflight": "IN_BETA_TESTING",
+    "build_id": "2a86aee4-a93d-4e84-8e26-4c2df82ef7ce",
+    "internal_group_verified": true,
+    "public_group_verified": true,
+    "beta_review": "APPROVED",
+    "test_link": "https://testflight.apple.com/join/JZJM3PFb"
+  },
+  "android": {
+    "version": "1.0.0",
+    "build": 19,
+    "aab_sha256": "aa9b08845eea29383fe5ef185b02dbd63ca1687d170e6a595e0da288bc30caa5",
+    "bytes": 43615441,
+    "internal": "Available to internal testers",
+    "test_link": "https://play.google.com/apps/internaltest/4701677916092886102",
+    "newly_excluded_devices": 0,
+    "notes": "Existing optional mapping/native-symbol warnings; minification disabled; library symbols unavailable."
+  },
+  "macos": {
+    "intel_build": "PASSED, Xcode26.3",
+    "arm64_build": "PASSED, Xcode27.0, Mac mini",
+    "arm64_signature": "ad-hoc verification PASSED",
+    "distribution": "Development validation only; no new Mac store submission"
+  },
+  "validation": {
+    "shared_tests": 144,
+    "android_unit_tests": 10,
+    "atlas_combinations": 4096,
+    "shared_lint_types_web_build": "PASSED",
+    "iphone_workflow": "PASSED",
+    "ipad_workflow": "PASSED",
+    "chinese_arabic_ui": "PASSED; final RTL screenshot checked",
+    "android_offline_workflow": "PASSED",
+    "native_notebook_persistence": "PASSED, duplicate saves, immutable originals, relaunch and corrupt/future archive protection",
+    "fresh_physical_camera_test": "Not performed; camera implementation unchanged"
+  },
+  "rollback": {
+    "source_tag": "rollback/native-before-study-2026-09-29",
+    "previous_testflight": 18,
+    "previous_android_internal": 17,
+    "superseded_before_distribution": {
+      "ios": 19,
+      "android": 18
+    }
+  },
+  "formal_review": {
+    "apple_version": "1.0.0",
+    "apple_build": 12,
+    "apple_state": "REJECTED",
+    "guideline": "4.3(b)",
+    "review_date": "2026-09-28",
+    "new_formal_submission_sent": false,
+    "review_materials": "store/apple/native-study-review.md",
+    "play_build": 11,
+    "play_state": "Changes in review",
+    "play_formal_modified": false
+  },
+  "evidence": ".runtime/2026-09-29-distinctive/"
+}

@@ -66,3 +66,15 @@ by API at 18:50 HKT; its earlier beta-review wait is complete.
 - Artifact hashes and delivery IDs: `store/artifacts/stability-2026-09-24.json`.
   Physical iPhone SE 3 camera verification is pending; simulator stress and
   native UI tests passed.
+
+## 2026-09-29 — native study update, TestFlight20
+
+- The formal review rejected classic build12 on September28 under 4.3(b).
+  It is still REJECTED; this update did not send a formal reply or resubmission.
+- Native build20 (1.0.0) passed validation/upload and is VALID, with internal
+  and public TestFlight membership verified. Beta review is APPROVED and both
+  groups report IN_BETA_TESTING.
+- Change Atlas and the local reflection notebook lead the new native home.
+  iPhone/iPad workflows, offline storage and Chinese/Arabic UI checks pass.
+- Receipt: [native-study-2026-09-29.json](../artifacts/native-study-2026-09-29.json).
+  Formal candidate copy/walkthrough: [native-study-review.md](native-study-review.md).

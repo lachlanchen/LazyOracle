@@ -23,7 +23,7 @@ figures. Both native apps call the same bundled engine.
 
 ## Notebook
 
-An explicit save stores a complete computed result plus a readable excerpt.
+An explicit save stores the computed native result plus a readable excerpt.
 The result is never recalculated while saving, editing or reopening an entry.
 The same practice/result is deduplicated using a SHA-256 digest of canonical JSON.
 Editing can change only the reflection, action, observation and reviewed flag;
@@ -54,8 +54,9 @@ original calculation.
   canonical deduplication, immutable fields and damaged/future-version protection.
   Existing contracts still pass for 300 tarot draws covering all 78 cards,
   100 I Ching casts and the other chart engines.
-- iPhone workflow and Chinese/Arabic navigation have passed. Current iPad and
-  release verification is recorded in the dated release receipt/handoff.
+- iPhone and iPad Air 11-inch workflows pass, including Chinese/Arabic navigation
+  and a final RTL screenshot check. A fresh-install test exposed an early tap
+  during legacy import; startup now shows progress until navigation is enabled.
 - macOS builds pass on the Intel KVM Mac and the Apple Silicon Mac mini. The
   mini uses its installed Xcode 27; existing iOS signing remains on the qualified
   Xcode 26.3 host. No signing credentials were copied to the mini.
@@ -64,3 +65,8 @@ Evidence and raw store responses remain under `.runtime/2026-09-29-distinctive/`
 These tests do not imply a new physical-camera validation or App Store approval.
 The [review draft](../store/apple/native-study-review.md) describes the concrete
 workflow and the rejected classic build, without claiming universal uniqueness.
+
+Curated [home](../store/screenshots/native-study-qa/home-ipad-en.png),
+[notebook](../store/screenshots/native-study-qa/notebook-ipad-en.png) and
+[Arabic Atlas](../store/screenshots/native-study-qa/atlas-ipad-ar.png) screenshots
+show the tested native interface. These have not replaced the formal listing.

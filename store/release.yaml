@@ -1,9 +1,9 @@
-verified_date: 2026-09-24
+verified_date: '2026-09-29'
 app: LazyOracle
 version: 1.0.0
 price_usd: 0.99
-source_commit: 58e44aea3c69f6e99e9986784643d3663b35a988
-evidence: store/artifacts/native-face-reading-2026-09-24.json
+source_commit: 362f187abaec9337ae7d1705aff69d1eaba2da06
+evidence: store/artifacts/native-study-2026-09-29.json
 web:
   domain: oracle.lazying.art
   host: sshem-admin (Aliyun)
@@ -16,16 +16,15 @@ web:
     checks passed
 android:
   package: art.lazying.lazyoracle
-  versionCode: 17
+  versionCode: 19
   versionName: 1.0.0
   artifact: native/android/app/build/outputs/bundle/lazyoracleRelease/app-lazyoracle-release.aab
-  bundle_sha256: a3920ff6680230c5d934104f14a45a715f8e3407808f8aedcf866582742b6980
+  bundle_sha256: aa9b08845eea29383fe5ef185b02dbd63ca1687d170e6a595e0da288bc30caa5
   play_app_id: '4975413590951100628'
-  internal_testing: build 17 available to internal testers; verified in Play Console
+  internal_testing: build 19 available to internal testers; verified in Play Console
   internal_testing_link: https://play.google.com/apps/internaltest/4701677916092886102
-  previous_internal: native build 16 and classic build 13 retained for rollback
-  production: build 11 in Changes in review; freshly verified in Play Console and
-    untouched
+  previous_internal: native build 17 and classic build 13 retained for rollback
+  production: build 11 in Changes in review; verified September 29 and untouched
   keystore: ~/.config/lazyoracle/android/upload-keystore.jks
   key_alias: lazyoracle-upload
   implementation: native Compose
@@ -34,16 +33,17 @@ ios:
   app_id: '6814663937'
   profile: LazyOracle App Store 1
   marketing_version: 1.0.0
-  build: 18
-  ipa_sha256: 79d526c9f9622dc21d6002643e40971ea7374aee6ff075493cdaed28a96855ec
-  delivery: ce476a5e-8da0-40b9-bbfb-93f77cf2ebfb
-  testflight: build 18 IN_BETA_TESTING in internal and public groups; beta review
-    APPROVED; API verified
+  build: 20
+  ipa_sha256: 3c1538d796bdd96eb86a6bd77ba37bb7fe929c70b97a0a201efb84584242ee8d
+  delivery: 2a86aee4-a93d-4e84-8e26-4c2df82ef7ce
+  testflight: build 20 IN_BETA_TESTING in internal and public groups; beta review APPROVED;
+    API verified
   public_beta: https://testflight.apple.com/join/JZJM3PFb
-  app_store: 1.0.0 with build 12 WAITING_FOR_REVIEW; verified by API and untouched
+  app_store: 1.0.0 build 12 REJECTED under 4.3(b), reviewed September 28; native study candidate
+    not formally resubmitted
   implementation: native SwiftUI
-  source_commit: 58e44aea3c69f6e99e9986784643d3663b35a988
-  previous_internal: native build 17 and classic build 15 retained for rollback
+  source_commit: 362f187abaec9337ae7d1705aff69d1eaba2da06
+  previous_internal: native build 18 and classic build 15 retained for rollback
 auspice:
   package: art.lazying.auspice
   site: https://auspice.lazying.art
@@ -56,39 +56,40 @@ auspice:
   ios_sha256: dd8724432e1625d49e4e8ac805f9ad07eff9b39f1178450f1ba96ffe7c293658
   ios_source_commit: 94ea1c34a206e9ca7109ea47ab62d978dbc3232f
   ios_evidence: store/artifacts/classic-swap-2026-09-24.json
-  testflight: classic build12 IN_BETA_TESTING in Auspice internal; VALID and group
-    membership verified by API
+  testflight: classic build12 IN_BETA_TESTING in Auspice internal; VALID and group membership
+    verified by API
   android_versionCode: 7
   android_artifact: android/app/build/outputs/bundle/auspiceRelease/app-auspice-release.aab
   android_sha256: 7d1a5b57d05fe957aa1718f81875b5984326dcf0ca397c88d3d649e24d6064fb
-  internal_testing: classic build 7 available to internal testers; verified in Play
-    Console
+  internal_testing: classic build 7 available to internal testers; verified in Play Console
   internal_testing_link: https://play.google.com/apps/internaltest/4701649823136226500
   previous_internal: native build 6 retained for rollback
-  app_store: version 1.0 PREPARE_FOR_SUBMISSION, no build attached; formal release
-    not authorized
+  app_store: version 1.0 PREPARE_FOR_SUBMISSION, no build attached; formal release not authorized
   implementation: classic React/Capacitor from the PWA source
 open_issues:
-- Auspice iOS12 scene-restoration fix passed simulator upgrade/resume and keyboard
-  checks; physical iPhone SE 3 confirmation pending.
-- Physical iPhone SE 3 live camera/orientation/background/memory retest remains pending;
-  simulator camera lifecycle checks passed.
-- Native LazyOracle requires iOS17 and AndroidAPI26; Play reports 1382 previously
-  supported devices excluded.
+- 'Formal Apple resubmission pending: new native Atlas/notebook features, reviewer walkthrough
+  and candidate listing prepared; store/apple/native-study-review.md.'
+- Auspice iOS12 scene-restoration fix passed simulator upgrade/resume and keyboard checks;
+  physical iPhone SE 3 confirmation pending.
+- Physical iPhone SE 3 live camera/orientation/background/memory retest remains pending; simulator
+  camera lifecycle checks passed.
+- Native LazyOracle requires iOS17 and AndroidAPI26; Play reports 1382 previously supported
+  devices excluded.
 - Classic Auspice/PWA interface supports English and Simplified Chinese; native LazyOracle
   supports eleven interface languages.
 - Native measurement v2 and resolved face classification ship on LazyOracle iOS18/Android17.
-  Classic Auspice/PWA retain their existing camera path. Physical repeatability testing
-  remains pending.
+  Classic Auspice/PWA retain their existing camera path. Physical repeatability testing remains
+  pending.
 backend_commit: 57d1117
-
 macos:
   verified_date: 2026-09-25
   bundle_id: art.lazying.lazyoracle
   marketing_version: 1.0.0
   build: 1
   minimum_os: '14.0'
-  architectures: [x86_64, arm64]
+  architectures:
+  - x86_64
+  - arm64
   implementation: Shared native SwiftUI with Mac camera adapter
   source_commit: 325ee2aae9fb54e7bb5229564ff2a81b59ec2c6d
   artifact: LazyOracle-macOS-1.0.0-1.zip
@@ -97,3 +98,10 @@ macos:
   installed: KVM Mac and 7050/iMac, ~/Applications/LazyOracle.app
   evidence: store/artifacts/macos-preview-2026-09-25.json
   limitations: 3040 macOS 12 is below minimum; physical webcam and Apple Silicon runtime unverified
+  native_study_validation:
+    date: '2026-09-29'
+    source_commit: 362f187abaec9337ae7d1705aff69d1eaba2da06
+    intel_build: PASSED, Xcode26.3
+    arm64_build: PASSED on new Mac mini, Xcode27.0; ad-hoc signature verified
+    evidence: store/artifacts/native-study-2026-09-29.json
+    packaged_release: Existing September25 package retained; current validation app is development-only

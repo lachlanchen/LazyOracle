@@ -10,7 +10,10 @@ hexagram construction, line comparison and related transformations) and a local
 reading notebook (immutable computed snapshots, reflection, action and later
 observation). Existing practices and cameras remain. This extends native
 LazyOracle; classic Auspice is not duplicated or resubmitted as the new product.
-See [implementation scope](plans/native-study-2026-09-29.md) and
+Native iOS20 is in internal/public TestFlight (beta review approved), and Android19
+is available to internal testers. The formal rejected build12 has not been
+resubmitted. See [the release handoff](handoffs/2026-09-29-native-study.md),
+[implementation scope](plans/native-study-2026-09-29.md) and
 [candidate review walkthrough](../store/apple/native-study-review.md).
 
 ## Current owner decisions — 2026-09-24, native LazyOracle

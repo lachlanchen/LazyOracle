@@ -31,8 +31,10 @@ Chinese and Arabic UI; offline Android save/relaunch, deduplication and corrupte
 archive protection. Source, lint, type checks and PWA production build pass.
 Physical cameras were not retested in this feature update.
 
-Formal resubmission has **not** been sent. The English/Chinese candidate listing
-and reviewer walkthrough are in [the review draft](../../store/apple/native-study-review.md).
+The owner subsequently authorized formal resubmission. iOS **1.0.0 (20)** is now
+**WAITING_FOR_REVIEW**, submitted September 29 at 08:01 HKT with automatic release
+after approval. The 4.3(b) reply was sent; both localized listings and sixteen
+current native screenshots were verified. See the [formal handoff](2026-09-29-apple-formal.md).
 Use screenshots from the new native candidate when updating the formal listing;
 the old classic screenshots and on-device-LLM marketing copy are inappropriate.
 Unique implementation details do not establish that Apple will approve 4.3(b).

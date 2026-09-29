@@ -78,3 +78,20 @@ by API at 18:50 HKT; its earlier beta-review wait is complete.
   iPhone/iPad workflows, offline storage and Chinese/Arabic UI checks pass.
 - Receipt: [native-study-2026-09-29.json](../artifacts/native-study-2026-09-29.json).
   Formal candidate copy/walkthrough: [native-study-review.md](native-study-review.md).
+
+## 2026-09-29 — formal native resubmission, build20
+
+The owner authorized formal submission after the 4.3(b) rejection. Native
+**1.0.0 (20)** replaced classic build12 and was resubmitted at **08:01 HKT**.
+Both App Store Connect and its API confirm **WAITING_FOR_REVIEW**; automatic
+release after approval remains enabled.
+
+The App Review reply explains Change Atlas and the local reflection notebook.
+English and Simplified Chinese metadata, reviewer walkthrough and sixteen
+native iPhone/iPad screenshots were verified. Stale on-device-LLM claims were
+removed from the listing; privacy/support pages were corrected and deployed.
+No Auspice or other app submission was changed.
+
+[Formal receipt](../artifacts/apple-native-study-submission-2026-09-29.json) ·
+[Handoff](../../docs/handoffs/2026-09-29-apple-formal.md) ·
+[Exact submitted copy](native-study-metadata.json).

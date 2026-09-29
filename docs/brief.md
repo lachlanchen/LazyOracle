@@ -11,8 +11,10 @@ reading notebook (immutable computed snapshots, reflection, action and later
 observation). Existing practices and cameras remain. This extends native
 LazyOracle; classic Auspice is not duplicated or resubmitted as the new product.
 Native iOS20 is in internal/public TestFlight (beta review approved), and Android19
-is available to internal testers. The formal rejected build12 has not been
-resubmitted. See [the release handoff](handoffs/2026-09-29-native-study.md),
+is available to internal testers. The owner subsequently authorized formal resubmission: iOS 1.0.0 (20) is
+WAITING_FOR_REVIEW as of September 29 at 08:01 HKT, with automatic release after
+approval. The 4.3(b) response, updated English/Chinese listing and sixteen current
+iPhone/iPad screenshots were sent; see [the formal receipt](../store/artifacts/apple-native-study-submission-2026-09-29.json). See [the release handoff](handoffs/2026-09-29-native-study.md),
 [implementation scope](plans/native-study-2026-09-29.md) and
 [candidate review walkthrough](../store/apple/native-study-review.md).
 

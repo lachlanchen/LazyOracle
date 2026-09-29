@@ -1,0 +1,177 @@
+{
+  "checkedAt": "2026-09-29T00:00:37.977527+00:00",
+  "appId": "6814663937",
+  "versionId": "1e287ce1-6004-4964-85cd-4b6ae2445be5",
+  "version": "1.0.0",
+  "build": 20,
+  "buildId": "2a86aee4-a93d-4e84-8e26-4c2df82ef7ce",
+  "state": "WAITING_FOR_REVIEW",
+  "releaseType": "AFTER_APPROVAL",
+  "locales": {
+    "en-US": {
+      "name": "LazyOracle: Atlas & Notebook",
+      "metadataMatches": true,
+      "screenshots": {
+        "APP_IPHONE_67": [
+          {
+            "id": "030c2615-1e23-45e4-bf24-77e6bccc5c5d",
+            "file": "01-home.png",
+            "sha256": "b03483620db3d57fcf26dcc902edc49470416451205259f664521abe956064ab",
+            "state": "COMPLETE"
+          },
+          {
+            "id": "d05d03f4-81ab-45be-9758-b134e7f1d7c2",
+            "file": "02-atlas-lines.png",
+            "sha256": "c94fcb26b13be633166fb2b9cee89da22b912c97118794672190edfd4144bd5f",
+            "state": "COMPLETE"
+          },
+          {
+            "id": "fa51fbbe-fc4d-43de-99fc-c6059f6422ad",
+            "file": "03-notebook.png",
+            "sha256": "9256eb012bad7d09d9b1c3e139952cd8e38433cc69bcf371648c1582ee4016db",
+            "state": "COMPLETE"
+          },
+          {
+            "id": "40ab4644-0d29-48e8-80a9-ab38de25d652",
+            "file": "04-atlas-figures.png",
+            "sha256": "6488e34560df9d1fdcc3cc3c151286ecf248dcb50ae5230a33922c7a965dabaf",
+            "state": "COMPLETE"
+          }
+        ],
+        "APP_IPAD_PRO_3GEN_129": [
+          {
+            "id": "6e82bf52-2275-4da1-9ceb-e14e77236ad0",
+            "file": "01-home.png",
+            "sha256": "626d06000a71c0b4e09ec175bd27a91bde1cdb84c87ba31893d34118ea787f45",
+            "state": "COMPLETE"
+          },
+          {
+            "id": "69dca964-5cc7-4aea-9029-bedf6e9c3cde",
+            "file": "02-atlas-lines.png",
+            "sha256": "c054ce52bd66c8a0bf19c3e02c702edf0620ca3b78b0d9802e85e1e6b1c09f54",
+            "state": "COMPLETE"
+          },
+          {
+            "id": "1458cd58-e3aa-4546-8f93-a31fe1f55b9a",
+            "file": "03-notebook.png",
+            "sha256": "cc22ebb945935cd1289e0aa10874f8f5812fc425a80e931dbf213597b31b422d",
+            "state": "COMPLETE"
+          },
+          {
+            "id": "630264c2-acf3-4a3c-bfc1-55b99a31ff12",
+            "file": "04-atlas-figures.png",
+            "sha256": "112a676ce7ba1154094888dc4027017c6a3513822e02626a47b4568d6bbb1496",
+            "state": "COMPLETE"
+          }
+        ]
+      }
+    },
+    "zh-Hans": {
+      "name": "LazyOracle 易变与随记",
+      "metadataMatches": true,
+      "screenshots": {
+        "APP_IPHONE_67": [
+          {
+            "id": "efba2ec0-2b48-416d-96e8-521edb456496",
+            "file": "01-home.png",
+            "sha256": "1d484a97250a7e96330cc381fd27829e19402bdb9f65a11a3b398815d800f4c1",
+            "state": "COMPLETE"
+          },
+          {
+            "id": "5e04b4e7-f6c6-43fd-a282-7fa68e954ec9",
+            "file": "02-atlas-lines.png",
+            "sha256": "3d2943515cf68e34c7fb3b62a018fc8df98ee178062d1a9770a0cf5b533936da",
+            "state": "COMPLETE"
+          },
+          {
+            "id": "9b7d65cf-0755-4b6c-8bed-b784fb08045b",
+            "file": "03-notebook.png",
+            "sha256": "4cd50a6fd360010ada778f98a94218a90aa34e20d17b559fcd637eaad396d7f9",
+            "state": "COMPLETE"
+          },
+          {
+            "id": "d66676c8-628d-4b1f-8fb1-2d44614bec53",
+            "file": "04-atlas-figures.png",
+            "sha256": "bd1ae5154f25b8fae5e887740ad14bf33e07b132b1da8b98bf408e0a1d55eba2",
+            "state": "COMPLETE"
+          }
+        ],
+        "APP_IPAD_PRO_3GEN_129": [
+          {
+            "id": "2c1ae98e-a3a2-4dd5-90c8-f774c20cbf78",
+            "file": "01-home.png",
+            "sha256": "3360e319b42cf21c82a54d168bebefa671165fc76f8487c8d75bf2d65d9bb942",
+            "state": "COMPLETE"
+          },
+          {
+            "id": "5ed81fad-e515-4c4f-86ff-0c5e202996eb",
+            "file": "02-atlas-lines.png",
+            "sha256": "7c7f62d61ed737391f7abb3165560e0aa0d7d73648003a91e0c174f42ddbee8a",
+            "state": "COMPLETE"
+          },
+          {
+            "id": "b3d17186-cf07-4175-9e50-7397ef58dcd5",
+            "file": "03-notebook.png",
+            "sha256": "f570c05dcb15c7901084cb275e112587aa847be9160656794f238fb746db250d",
+            "state": "COMPLETE"
+          },
+          {
+            "id": "dd025267-ab95-4925-b59a-3021540f4a18",
+            "file": "04-atlas-figures.png",
+            "sha256": "cc3a4a3f2e642bedb2eb41e3da8f5f675c6e61b3bd079fa740ad84e1608e1b3d",
+            "state": "COMPLETE"
+          }
+        ]
+      }
+    }
+  },
+  "reviewNotesMatch": true,
+  "loginRequired": false,
+  "submissionId": "6ffe94c1-4460-4f06-8c83-6da3adf3a27e",
+  "submittedAt": "2026-09-29T00:01:35.034Z",
+  "submittedAtHKT": "2026-09-29 08:01:35 +08:00",
+  "verifiedAt": "2026-09-29T00:02:46.713945+00:00",
+  "buildSourceCommit": "362f187abaec9337ae7d1705aff69d1eaba2da06",
+  "submissionMaterialsCommit": "83f50d6",
+  "ipaSHA256": "3c1538d796bdd96eb86a6bd77ba37bb7fe929c70b97a0a201efb84584242ee8d",
+  "previousFormalBuild": 12,
+  "previousRejection": {
+    "guideline": "4.3(b)",
+    "reviewDate": "2026-09-28"
+  },
+  "reviewReply": {
+    "sent": true,
+    "uiMessageCount": 2,
+    "textSource": "store/apple/native-study-metadata.json#reviewReply"
+  },
+  "validation": {
+    "sharedTests": 144,
+    "atlasCombinations": 4096,
+    "storeCaptureIPhone": "PASS, 129.753 seconds, English and Simplified Chinese",
+    "storeCaptureIPad": "PASS, 155.830 seconds, English and Simplified Chinese",
+    "screenshots": 16,
+    "screenshotDimensionsAndChecksums": "Verified against Apple API; all COMPLETE",
+    "physicalCameraRetested": false
+  },
+  "webLegal": {
+    "oracle.lazying.art/privacy.html": {
+      "sha256": "2e21e7bd6b25386312b250e98738d70eb0294b0344981a9d853bf900507446be",
+      "matchesSource": true
+    },
+    "oracle.lazying.art/support.html": {
+      "sha256": "e89db61192a3c26a751d5b06b6164d84b69c767df3f7a6cbb015a64b9bc3f513",
+      "matchesSource": true
+    },
+    "oracle-fast.lazying.art/privacy.html": {
+      "sha256": "2e21e7bd6b25386312b250e98738d70eb0294b0344981a9d853bf900507446be",
+      "matchesSource": true
+    },
+    "oracle-fast.lazying.art/support.html": {
+      "sha256": "e89db61192a3c26a751d5b06b6164d84b69c767df3f7a6cbb015a64b9bc3f513",
+      "matchesSource": true
+    }
+  },
+  "webRelease": "native-study-legal-0a915e4",
+  "priceUSD": 0.99,
+  "scope": "LazyOracle iOS formal resubmission only; Android production, Auspice and other apps unchanged"
+}

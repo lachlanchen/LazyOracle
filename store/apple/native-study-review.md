@@ -1,6 +1,10 @@
-# Native study candidate — review preparation, September 29, 2026
+# Native study — Apple review submission, September 29, 2026
 
-Status: local draft. No new review reply or formal submission sent by this work.
+Status: formally resubmitted September 29, 2026 at 08:01 HKT. Native 1.0.0 (20)
+is WAITING_FOR_REVIEW; automatic release after approval remains enabled. The
+4.3(b) response was sent in App Review. Exact submitted copy is in
+[native-study-metadata.json](native-study-metadata.json); verification is in the
+[formal receipt](../artifacts/apple-native-study-submission-2026-09-29.json).
 The rejected submission was 1.0.0 (12), reviewed September 28 under 4.3(b).
 It used the older classic interface. The native TestFlight baseline is build 18.
 Replacing a web interface with native views alone does not address saturation.

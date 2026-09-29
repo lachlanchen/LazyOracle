@@ -8,12 +8,12 @@ web:
   domain: oracle.lazying.art
   host: sshem-admin (Aliyun)
   release_root: /opt/lazyoracle-web/releases
-  live_release: native-language-57d1117
+  live_release: native-study-legal-0a915e4
   mirror: https://oracle-fast.lazying.art
-  mirror_release: /srv/lazyoracle/releases/95dec20989fbfcf4
+  mirror_release: /srv/lazyoracle/releases/native-study-legal-0a915e4
   live_asset: assets/index-V5e0jQwO.js
-  verification: Both sites HTTP 200 and matching JavaScript SHA256; shared relay language
-    checks passed
+  verification: Native privacy/support pages match source SHA256 on both hosts;
+    v1/health returns JSON status ok; prior application assets and relay preserved
 android:
   package: art.lazying.lazyoracle
   versionCode: 19
@@ -39,8 +39,9 @@ ios:
   testflight: build 20 IN_BETA_TESTING in internal and public groups; beta review APPROVED;
     API verified
   public_beta: https://testflight.apple.com/join/JZJM3PFb
-  app_store: 1.0.0 build 12 REJECTED under 4.3(b), reviewed September 28; native study candidate
-    not formally resubmitted
+  app_store: 1.0.0 build 20 WAITING_FOR_REVIEW; formally resubmitted September 29 at
+    08:01 HKT with response to 4.3(b); automatic release after approval
+  formal_receipt: store/artifacts/apple-native-study-submission-2026-09-29.json
   implementation: native SwiftUI
   source_commit: 362f187abaec9337ae7d1705aff69d1eaba2da06
   previous_internal: native build 18 and classic build 15 retained for rollback
@@ -67,8 +68,8 @@ auspice:
   app_store: version 1.0 PREPARE_FOR_SUBMISSION, no build attached; formal release not authorized
   implementation: classic React/Capacitor from the PWA source
 open_issues:
-- 'Formal Apple resubmission pending: new native Atlas/notebook features, reviewer walkthrough
-  and candidate listing prepared; store/apple/native-study-review.md.'
+- 'Apple formal review pending: native build20 WAITING_FOR_REVIEW with the 4.3(b)
+  response and new English/Chinese listing/screenshots submitted. Approval remains pending.'
 - Auspice iOS12 scene-restoration fix passed simulator upgrade/resume and keyboard checks;
   physical iPhone SE 3 confirmation pending.
 - Physical iPhone SE 3 live camera/orientation/background/memory retest remains pending; simulator

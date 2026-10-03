@@ -285,9 +285,9 @@ struct BaguaRose: View {
                 if let heading {
                     Needle()
                         .fill(Palette.gold)
-                        .frame(width: size * 0.05, height: outer * 0.95)
-                        .position(x: centre.x, y: centre.y - outer * 0.475)
-                        .rotationEffect(.degrees(-heading), anchor: .center)
+                        .frame(width: size, height: size)
+                        .rotationEffect(.degrees(heading), anchor: .center)
+                        .position(centre)
                         .shadow(color: Palette.gold.opacity(0.6), radius: 6)
                         .animation(.easeOut(duration: 0.25), value: heading)
                 }
@@ -298,9 +298,9 @@ struct BaguaRose: View {
     private struct Needle: Shape {
         func path(in rect: CGRect) -> Path {
             var path = Path()
-            path.move(to: CGPoint(x: rect.midX, y: rect.minY))
-            path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
-            path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+            path.move(to: CGPoint(x: rect.midX, y: rect.minY + rect.height * 0.06))
+            path.addLine(to: CGPoint(x: rect.midX + rect.width * 0.025, y: rect.midY))
+            path.addLine(to: CGPoint(x: rect.midX - rect.width * 0.025, y: rect.midY))
             path.closeSubpath()
             return path
         }

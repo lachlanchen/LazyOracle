@@ -30,6 +30,19 @@ loss of supported devices. Android20 is in production review; see the
 [validation receipt](../store/artifacts/android-16kb-2026-10-03.json) and
 [Play submission log](../store/google-play/submission.md).
 
+## Compass and BaZi follow-up — 2026-10-03
+
+The Feng Shui compass rose now keeps its direction labels fixed and turns the
+needle clockwise to the measured bearing, matching the printed facing and
+sector result on iOS/macOS, Android and the PWA. The shared-device camera and
+palm screens still need a clearer capture-start/complete state and an annotated
+guide showing where the heart, head, life and fate lines are; these remain
+follow-up work. The owner also asked for a useful simple BaZi reading first,
+with an optional paid deeper analysis. The report's purchase model/price and
+whether the whole app should change from its current USD 0.99 store price have
+not yet been decided; no pricing or billing changes have been made. See the
+[follow-up handoff](handoffs/2026-10-03-product-followup.md).
+
 ## Current owner decisions — 2026-09-24, native LazyOracle
 
 These supersede the earlier product split below.

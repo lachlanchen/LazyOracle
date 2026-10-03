@@ -56,10 +56,10 @@ function useCompass(): { heading: number | null; state: CompassState; enable: ()
 export function BaguaRose({ sectors, heading, en }: { sectors: { direction: Direction; auspicious: boolean; label: string }[]; heading: number | null; en: boolean }) {
   const size = 300
   const c = size / 2
-  const rotation = heading === null ? 0 : -heading
+  const rotation = heading ?? 0
   return (
     <svg viewBox={`0 0 ${size} ${size}`} className="bagua-rose" role="img" aria-label="bagua compass">
-      <g style={{ transform: `rotate(${rotation}deg)`, transformOrigin: '50% 50%', transition: 'transform .3s ease-out' }}>
+      <g>
         {sectors.map((sector, index) => {
           const start = ((index * 45 - 22.5 - 90) * Math.PI) / 180
           const end = ((index * 45 + 22.5 - 90) * Math.PI) / 180
@@ -79,7 +79,11 @@ export function BaguaRose({ sectors, heading, en }: { sectors: { direction: Dire
           )
         })}
       </g>
-      <polygon points={`${c},${c - 62} ${c - 7},${c - 40} ${c + 7},${c - 40}`} className="rose-needle" />
+      <polygon
+        points={`${c},${c - 62} ${c - 7},${c - 40} ${c + 7},${c - 40}`}
+        className="rose-needle"
+        transform={`rotate(${rotation} ${c} ${c})`}
+      />
       <circle cx={c} cy={c} r={4} className="rose-pin" />
     </svg>
   )

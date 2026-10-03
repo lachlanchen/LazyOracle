@@ -2,6 +2,8 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
+import { BaguaRose } from './components/FengShuiScreen'
+import { DIRECTIONS } from './engines/fengshui/fengshui'
 
 vi.mock('./lib/hand-detect', () => ({
   detectHand: vi.fn(async () => {
@@ -46,6 +48,17 @@ function saveDefaultProfile() {
 }
 
 describe('LazyOracle shell', () => {
+  it('points the feng shui needle at the measured heading while keeping compass labels fixed', () => {
+    const sectors = DIRECTIONS.map((direction) => ({ direction, auspicious: true, label: direction }))
+    const { rerender } = render(<BaguaRose sectors={sectors} heading={90} en />)
+    const rose = screen.getByRole('img', { name: 'bagua compass' })
+    expect(rose.querySelector('.rose-needle')?.getAttribute('transform')).toBe('rotate(90 150 150)')
+    expect(rose.querySelector('.sector')?.getAttribute('transform')).toBeNull()
+
+    rerender(<BaguaRose sectors={sectors} heading={270} en />)
+    expect(rose.querySelector('.rose-needle')?.getAttribute('transform')).toBe('rotate(270 150 150)')
+  })
+
   it('opens Tarot from the home grid, draws a three-card spread, and reads it offline', async () => {
     openPractice('tarot')
     fireEvent.change(screen.getByTestId('tarot-question'), { target: { value: 'Should I move this year?' } })

@@ -283,7 +283,7 @@ private fun BaguaRose(mansions: EightMansions, heading: Float?) {
         }
 
         if (heading != null) {
-            rotate(-needle, centre) {
+            rotate(needle, centre) {
                 val path = Path().apply {
                     moveTo(centre.x, centre.y - outer * 0.95f)
                     lineTo(centre.x + extent * 0.025f, centre.y)

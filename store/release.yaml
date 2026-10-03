@@ -2,7 +2,7 @@ verified_date: '2026-10-03'
 app: LazyOracle
 version: 1.0.0
 price_usd: 0.99
-source_commit: 362f187abaec9337ae7d1705aff69d1eaba2da06
+source_commit: bb73902
 evidence: store/artifacts/native-study-2026-09-29.json
 web:
   domain: oracle.lazying.art
@@ -26,6 +26,7 @@ android:
   internal_testing_link: https://play.google.com/apps/internaltest/4701677916092886102
   previous_internal: native build 17 and classic build 13 retained for rollback
   production: build 11 active; build 20 Changes in review as of October 3; Play quick checks running
+  source_commit: bb73902
   page_size_16k: Verified; all packaged ELF LOAD segments aligned and bundletool reports PAGE_ALIGNMENT_16K
   media_pipe_tasks_vision: 0.10.26.1
   keystore: ~/.config/lazyoracle/android/upload-keystore.jks

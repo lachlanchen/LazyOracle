@@ -31,5 +31,5 @@
     "automatic_release": "Managed publishing is off; release after approval",
     "submission_date": "2026-10-03"
   },
-  "source_base_commit": "d09b12f8c42369ad29c5238887cefa7447379644"
+  "source_commit": "bb73902"
 }

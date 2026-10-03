@@ -22,7 +22,7 @@ android {
         create("lazyoracle") {
             dimension = "identity"
             applicationId = "art.lazying.lazyoracle"
-            versionCode = 19
+            versionCode = 20
             versionName = "1.0.0"
             resValue("string", "app_name", "LazyOracle")
         }
@@ -63,7 +63,10 @@ android {
     kotlinOptions { jvmTarget = "17" }
     buildFeatures { compose = true; buildConfig = true }
     sourceSets["main"].java.srcDirs("src/main/kotlin")
-    packaging { resources.excludes += "/META-INF/{AL2.0,LGPL2.1}" }
+    packaging {
+        jniLibs.useLegacyPackaging = false
+        resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
+    }
 }
 
 dependencies {
@@ -90,5 +93,5 @@ dependencies {
     implementation("androidx.camera:camera-camera2:1.4.1")
     implementation("androidx.camera:camera-lifecycle:1.4.1")
     implementation("androidx.camera:camera-view:1.4.1")
-    implementation("com.google.mediapipe:tasks-vision:0.10.21")
+    implementation("com.google.mediapipe:tasks-vision:0.10.26.1")
 }

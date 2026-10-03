@@ -18,6 +18,18 @@ iPhone/iPad screenshots were sent; see [the formal receipt](../store/artifacts/a
 [implementation scope](plans/native-study-2026-09-29.md) and
 [candidate review walkthrough](../store/apple/native-study-review.md).
 
+## Android 16 KB compatibility — 2026-10-03
+
+Google Play flagged the MediaPipe 0.10.21 native library in Android19 as
+incompatible with 16 KB memory pages. Android20 updates MediaPipe Tasks Vision
+to 0.10.26.1 and explicitly retains uncompressed native-library packaging.
+The Android release and unit tests pass; bundletool validates the bundle and
+reports `PAGE_ALIGNMENT_16K`, and every packaged native library has 16 KB ELF
+LOAD alignment. Play's preview retains version11 as a fallback and reports no
+loss of supported devices. Android20 is in production review; see the
+[validation receipt](../store/artifacts/android-16kb-2026-10-03.json) and
+[Play submission log](../store/google-play/submission.md).
+
 ## Current owner decisions — 2026-09-24, native LazyOracle
 
 These supersede the earlier product split below.

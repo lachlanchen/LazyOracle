@@ -1,4 +1,4 @@
-verified_date: '2026-09-29'
+verified_date: '2026-10-03'
 app: LazyOracle
 version: 1.0.0
 price_usd: 0.99
@@ -16,15 +16,18 @@ web:
     v1/health returns JSON status ok; prior application assets and relay preserved
 android:
   package: art.lazying.lazyoracle
-  versionCode: 19
+  versionCode: 20
   versionName: 1.0.0
   artifact: native/android/app/build/outputs/bundle/lazyoracleRelease/app-lazyoracle-release.aab
-  bundle_sha256: aa9b08845eea29383fe5ef185b02dbd63ca1687d170e6a595e0da288bc30caa5
+  bundle_sha256: b199a9a7f3a04b9a36d50da5f47d0f1a9e5e751e7a8a2f18689e1cf48b7fda78
+  artifact_copy: .runtime/releases/LazyOracle-android-1.0.0-20.aab
   play_app_id: '4975413590951100628'
   internal_testing: build 19 available to internal testers; verified in Play Console
   internal_testing_link: https://play.google.com/apps/internaltest/4701677916092886102
   previous_internal: native build 17 and classic build 13 retained for rollback
-  production: build 11 in Changes in review; verified September 29 and untouched
+  production: build 11 active; build 20 Changes in review as of October 3; Play quick checks running
+  page_size_16k: Verified; all packaged ELF LOAD segments aligned and bundletool reports PAGE_ALIGNMENT_16K
+  media_pipe_tasks_vision: 0.10.26.1
   keystore: ~/.config/lazyoracle/android/upload-keystore.jks
   key_alias: lazyoracle-upload
   implementation: native Compose

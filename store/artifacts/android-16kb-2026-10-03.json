@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-03",
+  "identity": "art.lazying.lazyoracle",
+  "version": "1.0.0",
+  "build": 20,
+  "aab_sha256": "b199a9a7f3a04b9a36d50da5f47d0f1a9e5e751e7a8a2f18689e1cf48b7fda78",
+  "bytes": 35237838,
+  "changes": [
+    "Upgrade MediaPipe Tasks Vision from 0.10.21 to 0.10.26.1, whose Android native libraries support 16 KB page sizes.",
+    "Declare uncompressed native-library packaging explicitly with modern Android Gradle Plugin 8.13.0.",
+    "Preserve version 11 app bundle in the production release as a fallback for devices not supported by version 20."
+  ],
+  "validation": {
+    "android_release_build": "PASSED",
+    "android_unit_tests": "PASSED",
+    "bundletool_version": "1.18.3",
+    "bundletool_validate": "PASSED",
+    "bundle_zip_alignment": "PAGE_ALIGNMENT_16K",
+    "elf_load_alignment": "All packaged .so LOAD segments are 0x4000 across arm64-v8a, armeabi-v7a, x86 and x86_64",
+    "play_device_coverage": "Including version 11 as a fallback removed all 1,362 previously excluded devices in Play Console preview",
+    "runtime_16kb_emulator": "Not run; no 16 KB system image installed"
+  },
+  "play": {
+    "app_id": "4975413590951100628",
+    "track": "production",
+    "release_name": "20 (1.0.0) 16 KB page-size support",
+    "rollout_percentage": 100,
+    "countries": "All existing targeted countries",
+    "previous_release_fallback": 11,
+    "submission_state": "Changes in review; Play quick checks still running",
+    "automatic_release": "Managed publishing is off; release after approval",
+    "submission_date": "2026-10-03"
+  },
+  "source_base_commit": "d09b12f8c42369ad29c5238887cefa7447379644"
+}

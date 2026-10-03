@@ -46,3 +46,22 @@
 - LazyOracle production **11** remains under “Changes in review”, verified
   after this internal release. No Auspice production submission was made.
 - Artifact hashes and validation: `store/artifacts/stability-2026-09-24.json`.
+
+## 2026-10-03 — Android 16 KB compatibility update submitted
+
+- LazyOracle **20 (1.0.0)** is submitted to production review. Google Play
+  showed **Changes in review** after the explicit send-for-review action;
+  automated quick checks were still running at verification.
+- The upload replaces a discarded draft of build19, which Play flagged because
+  MediaPipe 0.10.21 contained a 4 KB-aligned native library. Android20 uses
+  MediaPipe Tasks Vision 0.10.26.1 and requests 16 KB native-library packaging.
+- Bundletool 1.18.3 validation passed and reported `PAGE_ALIGNMENT_16K`; all
+  packaged ELF LOAD segments are aligned at 0x4000. Android release build and
+  unit tests passed. No 16 KB emulator image was installed for runtime testing.
+- The previous production bundle 11 is included as a compatibility fallback;
+  Play's preview reports zero devices losing support. All existing targeted
+  countries and the 100% rollout are retained. Managed publishing remains off,
+  so approval triggers the configured automatic release.
+- Play reports two optional warnings only: no deobfuscation file (R8 is off)
+  and no uploaded native debug-symbol archive. Exact bundle hash and checks are
+  recorded in `store/artifacts/android-16kb-2026-10-03.json`.

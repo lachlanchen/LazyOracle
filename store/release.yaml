@@ -25,7 +25,7 @@ android:
   internal_testing: build 19 available to internal testers; verified in Play Console
   internal_testing_link: https://play.google.com/apps/internaltest/4701677916092886102
   previous_internal: native build 17 and classic build 13 retained for rollback
-  production: build 11 active; build 20 Changes in review as of October 3; Play quick checks running
+  production: build 11 active; build 20 in review as of October 3; Play quick checks complete
   source_commit: bb73902
   page_size_16k: Verified; all packaged ELF LOAD segments aligned and bundletool reports PAGE_ALIGNMENT_16K
   media_pipe_tasks_vision: 0.10.26.1

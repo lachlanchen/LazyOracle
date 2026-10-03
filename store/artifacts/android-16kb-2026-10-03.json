@@ -27,7 +27,7 @@
     "rollout_percentage": 100,
     "countries": "All existing targeted countries",
     "previous_release_fallback": 11,
-    "submission_state": "Changes in review; Play quick checks still running",
+    "submission_state": "In review; Play quick checks complete",
     "automatic_release": "Managed publishing is off; release after approval",
     "submission_date": "2026-10-03"
   },

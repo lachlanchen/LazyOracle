@@ -50,8 +50,9 @@
 ## 2026-10-03 — Android 16 KB compatibility update submitted
 
 - LazyOracle **20 (1.0.0)** is submitted to production review. Google Play
-  showed **Changes in review** after the explicit send-for-review action;
-  automated quick checks were still running at verification.
+  showed **Changes in review** after the explicit send-for-review action.
+  Automated quick checks have now completed and Play confirms the changes are
+  in review.
 - The upload replaces a discarded draft of build19, which Play flagged because
   MediaPipe 0.10.21 contained a 4 KB-aligned native library. Android20 uses
   MediaPipe Tasks Vision 0.10.26.1 and requests 16 KB native-library packaging.

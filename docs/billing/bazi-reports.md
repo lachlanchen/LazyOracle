@@ -18,7 +18,7 @@ Generation starts after verified payment and has at most three workers. A failed
 
 ## Operations
 
-Production paths: `/v1/reports/{create,list,get,verify,checkout,retry}` (POST, installation Bearer capability); `/v1/reports/catalog` (GET); `/v1/reports/stripe-webhook` (POST, Stripe signature). Unknown methods/actions, wrong capabilities and wrong store bindings fail closed. Durable state belongs in `/var/lib/lazyoracle`, credentials in `/etc/lazyoracle/billing`, both protected for the service identity.
+Production paths: `/v1/reports/{create,list,get,verify,checkout,retry}` (POST, installation Bearer capability); `/v1/reports/catalog` (GET); `/v1/reports/stripe-webhook` (POST, Stripe signature). Unknown methods/actions, wrong capabilities and wrong store bindings fail closed. Durable state belongs in `/var/lib/lazyoracle`, credentials in `/etc/lazyoracle/billing`, both protected for the service identity. The service explicitly sets `StateDirectoryMode=0700` and `UMask=0077`; the directory mode must survive systemd restarts.
 
 Stripe qualification uses a separate ledger and test credentials at `/v1/reports-test/*`, additionally requiring a protected test key. Its signed webhook uses `/v1/reports/stripe-webhook-test`. Never route a test checkout into the production ledger or use a test transaction to claim live charged-payment qualification. Native local StoreKit tests use Apple's Xcode environment and a test-only transport; the production verifier rejects Xcode-signed receipts.
 

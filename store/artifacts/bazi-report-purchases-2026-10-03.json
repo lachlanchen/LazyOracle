@@ -10,7 +10,7 @@
   "source": {
     "native_production": "0d3e8af",
     "ios_local_storekit_test_project": "c1083fd",
-    "web_and_privacy_source": "bc085b3; subsequent support/listing corrections recorded by the release commit"
+    "web_and_privacy_source": "a077616a7a7eb8872044252cb194c94a285e6f2f"
   },
   "ios": {
     "version": "1.0.0",
@@ -24,7 +24,7 @@
     "submitted_at": "2026-10-03T10:05:27.749Z",
     "release": "AFTER_APPROVAL",
     "internal_testflight": "IN_BETA_TESTING",
-    "public_beta_review": "WAITING_FOR_REVIEW",
+    "public_beta_review": "APPROVED",
     "test_link": "https://testflight.apple.com/join/JZJM3PFb",
     "consumable": {
       "id": "6818739496",
@@ -35,14 +35,15 @@
       "territories": 175,
       "review_screenshot": "COMPLETE"
     },
-    "privacy": "Published: optional birth inputs, selected reading/question, face/hand geometry, installation ID and purchase history; app functionality; no tracking"
+    "privacy": "Published: optional birth inputs, selected reading/question, face/hand geometry, installation ID and purchase history; app functionality; no tracking",
+    "public_testflight": "IN_BETA_TESTING"
   },
   "android": {
     "version": "1.0.0",
     "build": 21,
     "aab_sha256": "ab3b8462c4d61cd4e20047892034576e69b140a56837f745f65ad9dff67b596f",
     "internal": "Available to internal testers",
-    "production": "Changes in review; automated quick checks running at submission",
+    "production": "Changes in review; automated quick checks completed successfully",
     "release": "100% rollout after approval; managed publishing off; existing 172 countries unchanged",
     "test_link": "https://play.google.com/apps/internaltest/4701677916092886102",
     "fallback_version": 11,
@@ -57,7 +58,19 @@
     "data_safety": "Saved and submitted: optional birth inputs/questions shared with narrative provider, purchase history/installation IDs collected, encrypted transport, no account required, support deletion link",
     "service_account_access": "Owner-approved LazyOracle-only View app info/quality, View financial data and purchases API, Manage orders; no publishing or account-admin expansion",
     "warnings": "Existing R8 mapping and third-party native debug-symbol warnings only; no release errors",
-    "alignment": "Bundle PAGE_ALIGNMENT_16K; all 7 packaged 64-bit ELF libraries have LOAD alignment >=16KB"
+    "alignment": "Bundle PAGE_ALIGNMENT_16K; all 7 packaged 64-bit ELF libraries have LOAD alignment >=16KB",
+    "listing": {
+      "localizations": [
+        "en-US",
+        "zh-CN"
+      ],
+      "phone_screenshots": "3 actual native Atlas/notebook screenshots; Chinese uses corrected default graphics",
+      "screenshots": {
+        "02-atlas-result.png": "52640b17a6518bee6dda1e2ba09c4fab6407a6672396909d8be2d9c7b89ce9da",
+        "01-atlas-lines.png": "ac64dcfb0869687cb567129d387d4ca4f6d6dbde56479ce96876f99cd9c1937c",
+        "03-notebook.png": "7b4b5cd6bb3114fcb79718b2bf5644cc6a9bca288e6a8335b3cb788c922bba21"
+      }
+    }
   },
   "web": {
     "status": "LIVE",
@@ -65,7 +78,13 @@
     "mirror": "https://oracle-fast.lazying.art",
     "gateway": "Primary authoritative SQLite ledger; mirror uses primary report API",
     "stripe": "USD499-cent one-time configured Price; server verification and signed webhook; production checkout available",
-    "previous_release": "native-study-legal-0a915e4; pre-billing unit/Caddy/web rollback in protected operator handoff"
+    "previous_release": "native-study-legal-0a915e4; pre-billing unit/Caddy/web rollback in protected operator handoff",
+    "primary_release": "b4d2a333cd376a7f1e3f1817b9efc62da474a31a8931bee76a5fd16afcad5df9",
+    "mirror_release": "a077616a7a7eb887",
+    "main_asset": "index-qOYpne38.js",
+    "privacy_sha256": "3b6996f3576aa9405ff8912597765d36c4ef85f4491b67127875a9443aa5c687",
+    "support_sha256": "42c978fec3f50bf151efbacfa763c5897d62db330b6aa8a6a6c935299183de4b",
+    "storage": "UMask0077; StateDirectoryMode0700; ledger and credentials are private to the service identity"
   },
   "features": [
     "Free deterministic BaZi summary before optional purchase",
@@ -106,5 +125,5 @@
     "artifacts": "Current and immediately previous signed packages retained privately; builds remain in store history",
     "classic_auspice": "Unchanged"
   },
-  "status_checked_at": "2026-10-03T10:17:29+00:00"
+  "status_checked_at": "2026-10-03T10:24:34+00:00"
 }

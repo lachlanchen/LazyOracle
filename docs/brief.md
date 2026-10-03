@@ -278,3 +278,7 @@ narrative reading, cited to the structured facts
 - App Store: the pending review was cancelled, build 9 attached in place of build 1, the description and keywords rewritten for face reading and the chat, and version 1.0.0 resubmitted (review submission d9ecda5e). Screenshots for iPhone 6.7 and iPad 12.9 replaced and processed.
 - Google Play: production release "1.0.0 (8)" created from the library bundle, the listing description rewritten to match, and both sent for review, which replaced the earlier in-review release 1.
 - Web: both hosts carry the new build, Aliyun via `tools/deploy-web.sh` and the Huanayun mirror via the new `tools/deploy-web-fast.sh`.
+
+## BaZi detailed reports, owner decision 2026-10-03
+
+The simple BaZi summary remains included in the existing USD0.99 app. Detailed reports cost USD4.99 once per report, with native store payments and web Stripe checkout. Each report is bound to a saved deterministic chart, with durable verified delivery and free retries on generation failure. No subscription or login dependency. Contract and recovery boundaries: [BaZi reports](billing/bazi-reports.md). Product/release qualification is recorded separately; source implementation alone does not mean a store release is live.

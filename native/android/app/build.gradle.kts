@@ -22,7 +22,7 @@ android {
         create("lazyoracle") {
             dimension = "identity"
             applicationId = "art.lazying.lazyoracle"
-            versionCode = 20
+            versionCode = 21
             versionName = "1.0.0"
             resValue("string", "app_name", "LazyOracle")
         }
@@ -70,6 +70,7 @@ android {
 }
 
 dependencies {
+    implementation("com.android.billingclient:billing:8.3.0")
     testImplementation("junit:junit:4.13.2")
     val composeBom = platform("androidx.compose:compose-bom:2025.09.00")
     implementation(composeBom)

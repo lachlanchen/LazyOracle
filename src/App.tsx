@@ -34,7 +34,7 @@ const PRACTICES: { id: Practice; icon: typeof Sparkles }[] = [
 
 function App() {
   const [language, setLanguage] = useState<ReadingLanguage>(initialLanguage)
-  const [view, setView] = useState<View>('home')
+  const [view, setView] = useState<View>(() => new URLSearchParams(location.search).has('report_checkout') || new URLSearchParams(location.search).has('report_cancelled') ? 'bazi' : 'home')
   const copy = uiCopy(language)
 
   const [pendingQuestion, setPendingQuestion] = useState('')

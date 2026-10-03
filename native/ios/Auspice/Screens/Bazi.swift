@@ -47,6 +47,7 @@ struct BaziScreen: View {
                 elementsPanel(chart)
                 luckPanel(chart)
                 methodPanel(chart)
+                DeepReportPanel(profile: store.profile)
                 ExplainReading(result: chart, practice: "bazi")
             }
         }

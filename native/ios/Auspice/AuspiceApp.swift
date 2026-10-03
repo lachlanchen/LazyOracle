@@ -2,12 +2,15 @@ import SwiftUI
 
 @main
 struct AuspiceApp: App {
+    @Environment(\.scenePhase) private var scenePhase
     var body: some Scene {
         #if os(macOS)
         Window("LazyOracle", id: "main") {
             DesktopRoot()
                 .environment(\.locale, Locale(identifier: Localisation.shared.code))
                 .environment(\.layoutDirection, Localisation.shared.layoutDirection)
+                .task { await DeepReports.shared.start() }
+                .onChange(of: scenePhase) { _, phase in if phase == .active { Task { await DeepReports.shared.recover() } } }
                 .preferredColorScheme(.dark)
                 .tint(Palette.gold)
         }
@@ -26,6 +29,8 @@ struct AuspiceApp: App {
             RootView()
                 .environment(\.locale, Locale(identifier: Localisation.shared.code))
                 .environment(\.layoutDirection, Localisation.shared.layoutDirection)
+                .task { await DeepReports.shared.start() }
+                .onChange(of: scenePhase) { _, phase in if phase == .active { Task { await DeepReports.shared.recover() } } }
                 .preferredColorScheme(.dark)
                 .tint(Palette.gold)
         }

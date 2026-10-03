@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Exercise the real HTTP relay with a local, deterministic upstream fixture."""
 import importlib.util
+import sys
+sys.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parent.parent / "ops"))
 import io
 import json
 from pathlib import Path

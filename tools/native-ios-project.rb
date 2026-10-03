@@ -13,7 +13,7 @@ app_group = project.main_group.find_subpath('Auspice', false)
   app.build_configurations.find { |c| c.name == name }.build_settings.merge!(
     'PRODUCT_BUNDLE_IDENTIFIER' => 'art.lazying.lazyoracle',
     'APP_DISPLAY_NAME' => 'LazyOracle',
-    'CURRENT_PROJECT_VERSION' => '16', 'MARKETING_VERSION' => '1.0.0',
+    'CURRENT_PROJECT_VERSION' => '21', 'MARKETING_VERSION' => '1.0.0',
     'PROVISIONING_PROFILE_SPECIFIER' => 'LazyOracle App Store 1',
     'ASSETCATALOG_COMPILER_APPICON_NAME' => 'LazyOracleIcon'
   )

@@ -26,6 +26,7 @@ of text per message, 40 requests per 10 minutes per client address, 90 s
 upstream timeout. Only POST /v1/chat/completions and GET /v1/health are served.
 """
 import http.server
+import hmac
 import json
 import os
 import socketserver
@@ -34,6 +35,8 @@ import threading
 import time
 import urllib.error
 import urllib.request
+import urllib.parse
+from report_service import Reports, StoreVerifier, ReportError, generate_report
 
 LISTEN = os.environ.get("ORACLE_GATEWAY_LISTEN", "127.0.0.1:18963")
 MAX_BODY = 8 * 1024 * 1024
@@ -74,15 +77,26 @@ if os.environ.get("LAZYEDGE_URL") and os.environ.get("LAZYEDGE_TOKEN"):
         },
     ))
 
+REPORTS = None
+if os.environ.get("ORACLE_REPORT_DB"):
+    REPORTS = Reports(os.environ["ORACLE_REPORT_DB"], generator=lambda row: generate_report(row, PROVIDERS))
+
+REPORTS_TEST = None
+if os.environ.get("ORACLE_REPORT_TEST_DB") and os.environ.get("ORACLE_REPORT_TEST_KEY"):
+    settings = dict(os.environ)
+    for field in ("SECRET", "PRICE", "WEBHOOK"):
+        settings["ORACLE_STRIPE_" + field] = os.environ.get("ORACLE_STRIPE_TEST_" + field, "")
+    REPORTS_TEST = Reports(os.environ["ORACLE_REPORT_TEST_DB"], verifier=StoreVerifier(settings), generator=lambda row: generate_report(row, PROVIDERS))
+
 _lock = threading.Lock()
 _hits: dict[str, list[float]] = {}
 
 
-def allowed(client: str) -> bool:
+def allowed(client: str, limit=RATE_LIMIT) -> bool:
     now = time.time()
     with _lock:
         stamps = [t for t in _hits.get(client, []) if now - t < RATE_WINDOW]
-        if len(stamps) >= RATE_LIMIT:
+        if len(stamps) >= limit:
             _hits[client] = stamps
             return False
         stamps.append(now)
@@ -139,11 +153,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
     def _cors(self):
         origin = self.headers.get("Origin", "")
-        if origin.endswith(".lazying.art") or origin.startswith("capacitor://") or origin.startswith("http://localhost") or origin == "https://localhost":
+        parsed = urllib.parse.urlparse(origin)
+        if origin in ("https://oracle.lazying.art", "https://oracle-fast.lazying.art", "capacitor://localhost", "https://localhost") or (parsed.scheme == "http" and parsed.hostname in ("localhost", "127.0.0.1")):
             self.send_header("Access-Control-Allow-Origin", origin)
             self.send_header("Vary", "Origin")
-        self.send_header("Access-Control-Allow-Methods", "POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Oracle-Test-Key")
         self.send_header("Access-Control-Max-Age", "86400")
 
     def do_OPTIONS(self):
@@ -151,7 +166,24 @@ class Handler(http.server.BaseHTTPRequestHandler):
         self._cors()
         self.end_headers()
 
+    def _json(self, body, code=200):
+        encoded = json.dumps(body, ensure_ascii=False).encode()
+        self.send_response(code)
+        self._cors()
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("Content-Length", str(len(encoded)))
+        self.end_headers()
+        self.wfile.write(encoded)
+
     def do_GET(self):
+        if self.path == "/v1/reports/catalog":
+            self._json({"appleProduct": "art.lazying.lazyoracle.bazi.deep_report",
+                        "googleProduct": "bazi_deep_report", "currency": "USD", "amount": 499,
+                        "apple": bool(REPORTS and os.environ.get("ORACLE_APPLE_ROOTS")),
+                        "google": bool(REPORTS and os.environ.get("ORACLE_GOOGLE_CREDENTIALS")),
+                        "web": bool(REPORTS and os.environ.get("ORACLE_STRIPE_PRICE"))})
+            return
         if self.path == "/v1/health":
             body = json.dumps({"status": "ok", "providers": [p[0] for p in PROVIDERS]}).encode()
             self.send_response(200)
@@ -172,6 +204,40 @@ class Handler(http.server.BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_POST(self):
+        if self.path.startswith(("/v1/reports/", "/v1/reports-test/")):
+            test_request = self.path.startswith("/v1/reports-test/") or self.path == "/v1/reports/stripe-webhook-test"
+            service = REPORTS_TEST if test_request else REPORTS
+            if service is None:
+                self._reject(503, "reports temporarily unavailable")
+                return
+            try:
+                length = int(self.headers.get("Content-Length") or 0)
+                if length <= 0 or length > 65536:
+                    raise ReportError(413, "request too large")
+                raw = self.rfile.read(length)
+                action = self.path.rsplit("/", 1)[-1]
+                if action in ("stripe-webhook", "stripe-webhook-test"):
+                    result = service.webhook(raw, self.headers.get("Stripe-Signature", ""))
+                else:
+                    if test_request and not hmac.compare_digest(self.headers.get("X-Oracle-Test-Key", ""), os.environ["ORACLE_REPORT_TEST_KEY"]):
+                        raise ReportError(401, "test access required")
+                    client = self.headers.get("X-Oracle-Client-Address") or self.client_address[0]
+                    if not allowed("report:" + client, limit=240):
+                        raise ReportError(429, "too many requests; try again shortly")
+                    payload = json.loads(raw)
+                    if not isinstance(payload, dict):
+                        raise ReportError(400, "invalid request")
+                    authorization = self.headers.get("Authorization", "")
+                    capability = authorization[7:] if authorization.startswith("Bearer ") else ""
+                    result = service.request(action, capability, payload)
+                self._json(result)
+            except ReportError as error:
+                self._reject(error.code, str(error))
+            except (ValueError, TypeError, KeyError):
+                self._reject(400, "invalid request")
+            except Exception:
+                self._reject(503, "report service temporarily unavailable; your purchase is preserved")
+            return
         if self.path != "/v1/chat/completions":
             self._reject(404, "not found")
             return

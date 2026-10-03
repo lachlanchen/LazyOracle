@@ -19,6 +19,7 @@ SOURCE_COMMIT="$(git rev-parse HEAD)"
 
 echo "== build"
 npm run check >/dev/null
+node tools/build-report-engine.mjs
 (cd dist && find . -type f | LC_ALL=C sort | xargs sha256sum) > dist-manifest.sha256
 MAIN_ASSET="$(basename "$(ls dist/assets/index-*.js | head -1)")"
 
@@ -29,7 +30,7 @@ python3 - "$SOURCE_COMMIT" "$MAIN_ASSET" > "$STAGE/release-manifest.json" <<'PY'
 import datetime, json, sys
 print(json.dumps({"sourceCommit": sys.argv[1], "builtAt": datetime.datetime.now().astimezone().isoformat(timespec="seconds"), "mainAsset": f"assets/{sys.argv[2]}", "distManifest": "dist-manifest.sha256"}, indent=2))
 PY
-tar --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner -czf "$STAGE/release.tar.gz" -C "$REPO" dist dist-manifest.sha256 ops/oracle_gateway.py -C "$STAGE" release-manifest.json
+tar --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner -czf "$STAGE/release.tar.gz" -C "$REPO" dist dist-manifest.sha256 ops -C "$STAGE" release-manifest.json
 RELEASE="$(sha256sum "$STAGE/release.tar.gz" | cut -d' ' -f1)"
 echo "release id $RELEASE (source $SOURCE_COMMIT, $MAIN_ASSET)"
 

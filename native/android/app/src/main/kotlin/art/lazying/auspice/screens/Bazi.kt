@@ -185,6 +185,7 @@ fun BaziScreen(navController: NavController) {
                     style = Type.serif(15), color = Palette.inkMute
                 )
             }
+            DeepReportPanel(profile)
             ExplainReading(Json.encodeToString(c), "bazi")
         }
     }

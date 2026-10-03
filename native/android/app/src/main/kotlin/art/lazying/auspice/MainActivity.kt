@@ -39,8 +39,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        DeepReports.load(applicationContext)
         setContent { AuspiceApp() }
     }
+    override fun onResume() { super.onResume(); DeepReports.start() }
 }
 
 /** The nine practices, in the order the home screen shows them. */

@@ -122,3 +122,6 @@ web = REPO / 'src/generated/reading-content.json'
 web.parent.mkdir(exist_ok=True)
 web.write_text(json.dumps({source: {code: row[code] for code in ['en', 'zh-Hans']}
     for source, row in {**GLOSSARY, **CONTENT}.items()}, ensure_ascii=False, separators=(',', ':')) + '\n')
+
+# Paid-report copy shares the native catalogue.
+(REPO / "src/lib/report-copy.json").write_text(json.dumps({key: row for key, row in CATALOGUE["strings"].items() if key.startswith("report.")}, ensure_ascii=False, indent=2) + "\n")

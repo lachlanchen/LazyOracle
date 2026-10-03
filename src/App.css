@@ -648,3 +648,9 @@ select {
 
 .reading-explain { display: grid; gap: 0.8rem; margin-top: 1rem; }
 .reading-explain textarea { width: 100%; box-sizing: border-box; }
+
+.deep-report-panel h2 { display: flex; align-items: center; gap: .6rem; }
+.deep-report-panel textarea { width: 100%; min-height: 80px; margin: 8px 0; padding: 12px; color: var(--ink, #eee); background: rgba(0,0,0,.2); border: 1px solid rgba(255,255,255,.18); border-radius: 12px; font: inherit; }
+.report-history-row { width: 100%; text-align: start; margin: 8px 0; overflow-wrap: anywhere; }
+.report-detail { margin-top: 24px; border-top: 1px solid rgba(255,255,255,.15); padding-top: 16px; overflow-wrap: anywhere; }
+.report-detail article { margin: 24px 0; }

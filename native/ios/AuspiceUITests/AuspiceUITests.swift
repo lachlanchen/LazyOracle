@@ -23,6 +23,35 @@ final class AuspiceUITests: XCTestCase {
         shot.name = name; shot.lifetime = .keepAlways; add(shot)
     }
 
+    func testBaziFreeSummaryBeforeOptionalPurchase() {
+        launch()
+        open("bazi")
+        let add = app.buttons["Add your birth details"]
+        if add.exists {
+            add.tap()
+            let place = app.textFields["birth.place"]
+            for _ in 0..<5 where !place.isHittable { app.swipeUp() }
+            XCTAssertTrue(place.exists)
+            place.tap(); place.typeText("Shanghai")
+            let save = app.buttons["birth.save"]
+            for _ in 0..<5 where !save.isHittable { app.swipeUp() }
+            save.tap()
+        }
+        let summary = app.staticTexts["Your free quick reading"]
+        XCTAssertTrue(summary.waitForExistence(timeout: 15))
+        for _ in 0..<5 where !summary.isHittable { app.swipeDown() }
+        evidence("bazi-free-summary")
+        let buy = app.buttons["report.buy"]
+        for _ in 0..<12 where !buy.isHittable { app.swipeUp() }
+        XCTAssertTrue(buy.exists)
+        XCTAssertTrue(app.buttons["report.recover"].exists)
+        XCTAssertFalse(app.staticTexts["report.unavailable"].exists)
+        evidence("bazi-optional-purchase")
+        app.terminate(); launch(); open("bazi")
+        XCTAssertFalse(app.buttons["Add your birth details"].exists)
+        XCTAssertTrue(summary.waitForExistence(timeout: 15))
+    }
+
     /// Store captures use the shipping UI, real calculations and notes entered
     /// through native controls. Run on a dedicated, empty store simulator.
     func testStoreStudyScreenshots() {

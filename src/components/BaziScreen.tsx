@@ -7,6 +7,7 @@ import { baziContext, baziOffline, baziSystemPrompt } from '../lib/contexts'
 import { loadProfile, type BirthProfile } from '../lib/profile'
 import type { ReadingLanguage } from '../types'
 import { ProfileForm } from './ProfileForm'
+import { DeepReportPanel } from './DeepReportPanel'
 import { ReadingPanel } from './ReadingPanel'
 
 interface BaziScreenProps {
@@ -147,6 +148,7 @@ export function BaziScreen({ copy, language }: BaziScreenProps) {
             </button>
           </section>
 
+          {chart && profile && <DeepReportPanel profile={profile} language={language} />}
           {chart && context && (
             <ReadingPanel
               copy={copy}

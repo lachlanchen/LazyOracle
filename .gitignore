@@ -35,3 +35,6 @@ __pycache__/
 # macOS resources are assembled from the shared engines and pinned npm package.
 native/macos/Resources/
 native/macos/build/
+
+# Server bundle uses the exact same deterministic BaZi source as clients.
+ops/report_engine.cjs

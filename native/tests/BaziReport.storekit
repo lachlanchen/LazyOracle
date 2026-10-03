@@ -1,0 +1,11 @@
+{
+  "identifier": "lazyoracle-report-tests",
+  "nonRenewingSubscriptions": [],
+  "products": [{
+    "displayPrice": "4.99", "familyShareable": false, "internalID": "report-fixture",
+    "localizations": [{"description": "One local test report", "displayName": "Detailed BaZi Report", "locale": "en_US"}],
+    "productID": "art.lazying.lazyoracle.bazi.deep_report", "referenceName": "BaZi report fixture", "type": "Consumable"
+  }],
+  "settings": {"_askToBuyEnabled": false, "_disableDialogs": true, "_failTransactionsEnabled": false, "_locale": "en_US", "_storefront": "USA", "_timeRate": 0},
+  "subscriptionGroups": [], "version": {"major": 3, "minor": 0}
+}

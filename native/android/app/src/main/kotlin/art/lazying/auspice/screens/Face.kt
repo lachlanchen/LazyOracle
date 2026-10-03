@@ -28,6 +28,7 @@ import androidx.navigation.NavController
 import art.lazying.auspice.*
 import kotlin.math.roundToInt
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.coroutines.yield
 
 private val COURT_NAMES = mapOf(
     "upper" to "Upper court", "middle" to "Middle court", "lower" to "Lower court"
@@ -53,6 +54,7 @@ fun FaceScreen(navController: NavController) {
 
     var features by rememberPracticeState<FaceFeatures?>("face.capture", null)
     var error by remember { mutableStateOf<String?>(null) }
+    var measuring by remember { mutableStateOf(false) }
     var reads by remember { mutableIntStateOf(0) }
     LaunchedEffect(features) { Router.face = features }
 
@@ -68,11 +70,17 @@ fun FaceScreen(navController: NavController) {
 
     LaunchedEffect(reads) {
         if (reads == 0) return@LaunchedEffect
-        val frames = session.captureFrames()
-        if (frames.isEmpty()) { error = t("vision.hold"); return@LaunchedEffect }
-        runCatching {
-            Engines.evaluateAs<FaceFeatures>("face.capture", buildJsonObject { put("frames", frames) })
-        }.onSuccess { features = it; Router.face = it; error = null }.onFailure { error = visionError(it) }
+        measuring = true
+        yield()
+        try {
+            val frames = session.captureFrames()
+            if (frames.isEmpty()) { error = t("vision.hold"); return@LaunchedEffect }
+            runCatching {
+                Engines.evaluateAs<FaceFeatures>("face.capture", buildJsonObject { put("frames", frames) })
+            }.onSuccess { features = it; Router.face = it; error = null }.onFailure { error = visionError(it) }
+        } finally {
+            measuring = false
+        }
     }
 
     ScreenScaffold(
@@ -116,10 +124,10 @@ fun FaceScreen(navController: NavController) {
                 }
             }
             session.message?.let { Text(it, style = Type.sans(13), color = Palette.inkMute) }
-            Text(t(if(session.ready) "vision.ready" else "vision.hold"), style = Type.sans(13), color = Palette.inkMute)
+            Text(t(when { measuring -> "vision.measuring"; features != null -> "vision.complete"; session.ready -> "vision.ready"; else -> "vision.hold" }), style = Type.sans(13), color = if (measuring) Palette.gold else Palette.inkMute)
             PrimaryButton(
-                if (features == null) t("face.read") else t("palm.readAgain"),
-                enabled = session.ready
+                if (measuring) t("vision.measuring") else if (features == null) t("face.read") else t("palm.readAgain"),
+                enabled = session.ready && !measuring
             ) { reads++ }
             Text(
                 t("face.privacy"),

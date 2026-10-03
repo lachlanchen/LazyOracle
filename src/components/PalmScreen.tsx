@@ -28,6 +28,7 @@ export function PalmScreen({ copy, language }: PalmScreenProps) {
   const [features, setFeatures] = usePracticeState<PalmFeatures | null>('palm.features', null)
   const [question, setQuestion] = usePracticeState('palm.question', '')
   const [round, setRound] = usePracticeState('palm.round', 0)
+  const [measuring, setMeasuring] = useState(false)
   const cameraRef = useRef<HTMLInputElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const t = copy.palm
@@ -55,10 +56,13 @@ export function PalmScreen({ copy, language }: PalmScreenProps) {
     }
   }
 
-  const read = () => {
+  const read = async () => {
     if (!landmarks) return
+    setMeasuring(true)
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
     setFeatures(palmFeatures(landmarks, lines))
     setRound((r) => r + 1)
+    setMeasuring(false)
   }
 
   const context = features && round > 0 ? palmContext(features, language, question) : null
@@ -104,16 +108,19 @@ export function PalmScreen({ copy, language }: PalmScreenProps) {
 
       {phase === 'found' && landmarks && (
         <section className="panel lines-panel" data-testid="palm-lines">
+          <p className="hint" role="status">{features ? t.measured : measuring ? t.measuring : t.measureReady}</p>
+          <p className="body">{t.linesNote}</p>
           {(
             [
-              ['heart', ['index', 'middle', 'between'], ['heartIndex', 'heartMiddle', 'heartBetween']],
-              ['head', ['straight', 'curved'], ['headStraight', 'headCurved']],
-              ['life', ['wide', 'close'], ['lifeWide', 'lifeClose']],
-              ['fate', ['present', 'absent', 'unsure'], ['fatePresent', 'fateAbsent', 'fateUnsure']],
+              ['heart', 'heartGuide', ['index', 'middle', 'between'], ['heartIndex', 'heartMiddle', 'heartBetween']],
+              ['head', 'headGuide', ['straight', 'curved'], ['headStraight', 'headCurved']],
+              ['life', 'lifeGuide', ['wide', 'close'], ['lifeWide', 'lifeClose']],
+              ['fate', 'fateGuide', ['present', 'absent', 'unsure'], ['fatePresent', 'fateAbsent', 'fateUnsure']],
             ] as const
-          ).map(([key, values, labels]) => (
+          ).map(([key, guide, values, labels]) => (
             <div className="field" key={key}>
               <span>{t[key]}</span>
+              <small className="hint">{t[guide]}</small>
               <div className="chip-row" role="group" aria-label={t[key]}>
                 {values.map((value, index) => (
                   <button
@@ -133,8 +140,8 @@ export function PalmScreen({ copy, language }: PalmScreenProps) {
             <span>{copy.common.question}</span>
             <textarea value={question} onChange={(e) => setQuestion(e.target.value)} placeholder={copy.common.questionPlaceholder} rows={2} />
           </label>
-          <button type="button" className="primary-button" onClick={read} data-testid="palm-read">
-            {t.read}
+          <button type="button" className="primary-button" onClick={() => void read()} disabled={measuring} data-testid="palm-read">
+            {measuring ? t.measuring : features ? t.read : t.read}
           </button>
         </section>
       )}

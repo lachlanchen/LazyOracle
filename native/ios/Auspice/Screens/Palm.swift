@@ -6,6 +6,7 @@ struct PalmScreen: View {
     @SavedPractice("palm.lines") private var lines = LineTraits()
     @SavedPractice("palm.features") private var features: PalmFeatures? = nil
     @State private var error: String?
+    @State private var measuring = false
     @SavedPractice("palm.captured") private var captured = false
 
     private let fingerNames = [
@@ -42,14 +43,15 @@ struct PalmScreen: View {
                 if let message = camera.message {
                     Text(message).font(Typeface.sans(13)).foregroundStyle(Palette.inkMute)
                 }
-                Text(t(camera.ready ? "vision.ready" : "vision.hold")).font(Typeface.sans(13)).foregroundStyle(Palette.inkMute)
+                Text(t(measuring ? "vision.measuring" : captured ? "vision.complete" : camera.ready ? "vision.ready" : "vision.hold"))
+                    .font(Typeface.sans(13)).foregroundStyle(measuring ? Palette.gold : Palette.inkMute)
                 Button(action: read) {
-                    Label(captured ? t("palm.readAgain") : t("palm.read"), systemImage: "hand.raised")
+                    Label(measuring ? t("vision.measuring") : captured ? t("palm.readAgain") : t("palm.read"), systemImage: "hand.raised")
                 }
                 .buttonStyle(PrimaryButtonStyle())
                 .accessibilityIdentifier("palm.measure")
-                .disabled(!camera.ready)
-                .opacity(camera.ready ? 1 : 0.5)
+                .disabled(!camera.ready || measuring)
+                .opacity(camera.ready && !measuring ? 1 : 0.5)
                 Text(t("face.privacy")).font(Typeface.sans(12)).foregroundStyle(Palette.inkMute).fixedSize(horizontal: false, vertical: true)
             }
 
@@ -58,10 +60,10 @@ struct PalmScreen: View {
                     .font(Typeface.serif(16))
                     .foregroundStyle(Palette.inkSoft)
                     .fixedSize(horizontal: false, vertical: true)
-                lineChoice(l("Heart line ends"), ["unsure": "Not sure", "index": "Under the index", "middle": "Under the middle", "between": "Between them"], $lines.heart)
-                lineChoice(l("Head line"), ["unsure": "Not sure", "straight": "Straight", "curved": "Curved"], $lines.head)
-                lineChoice(l("Life line"), ["unsure": "Not sure", "wide": "Sweeps wide", "close": "Hugs the thumb"], $lines.life)
-                lineChoice(l("Fate line"), ["present": "Present", "absent": "Absent", "unsure": "Not sure"], $lines.fate)
+                lineChoice(l("Heart line ends"), t("palm.heartGuide"), ["unsure": "Not sure", "index": "Under the index", "middle": "Under the middle", "between": "Between them"], $lines.heart)
+                lineChoice(l("Head line"), t("palm.headGuide"), ["unsure": "Not sure", "straight": "Straight", "curved": "Curved"], $lines.head)
+                lineChoice(l("Life line"), t("palm.lifeGuide"), ["unsure": "Not sure", "wide": "Sweeps wide", "close": "Hugs the thumb"], $lines.life)
+                lineChoice(l("Fate line"), t("palm.fateGuide"), ["present": "Present", "absent": "Absent", "unsure": "Not sure"], $lines.fate)
             }
 
             if let error {
@@ -123,9 +125,13 @@ struct PalmScreen: View {
         }
     }
 
-    private func lineChoice(_ label: String, _ options: [String: String], _ binding: Binding<String>) -> some View {
+    private func lineChoice(_ label: String, _ guidance: String, _ options: [String: String], _ binding: Binding<String>) -> some View {
         VStack(alignment: .leading, spacing: 7) {
             FieldLabel(label)
+            Text(guidance)
+                .font(Typeface.sans(13))
+                .foregroundStyle(Palette.inkMute)
+                .fixedSize(horizontal: false, vertical: true)
             FlowRow(spacing: 8) {
                 ForEach(options.sorted(by: { $0.key < $1.key }), id: \.key) { key, title in
                     Chip(label: l(title), active: binding.wrappedValue == key) {
@@ -151,20 +157,26 @@ struct PalmScreen: View {
     }
 
     private func read() {
-        let frames = camera.captureFrames()
-        guard !frames.isEmpty else { error = t("vision.hold"); return }
-        do {
-            let measured = try Engines.shared.evaluate(
-                "palm.capture",
-                ["frames": frames, "lines": lines.dictionary],
-                as: PalmFeatures.self
-            )
-            features = measured
-            Router.shared.palm = measured
-            error = nil
-            captured = true
-        } catch {
-            self.error = visionError(error)
+        guard !measuring else { return }
+        measuring = true
+        Task { @MainActor in
+            await Task.yield()
+            defer { measuring = false }
+            let frames = camera.captureFrames()
+            guard !frames.isEmpty else { error = t("vision.hold"); return }
+            do {
+                let measured = try Engines.shared.evaluate(
+                    "palm.capture",
+                    ["frames": frames, "lines": lines.dictionary],
+                    as: PalmFeatures.self
+                )
+                features = measured
+                Router.shared.palm = measured
+                error = nil
+                captured = true
+            } catch {
+                self.error = visionError(error)
+            }
         }
     }
 }

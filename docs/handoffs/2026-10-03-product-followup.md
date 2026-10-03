@@ -27,18 +27,41 @@ Validation:
 - No physical compass test was run. The corrected source has not yet been
   packaged as a new iOS or Android store build.
 
-## Remaining owner requests
+## Face and palm capture UX
 
-- Make face/hand capture phases obvious so people know when measurement begins
-  and finishes.
-- Add a clear palm diagram or equivalent labels explaining the heart, head,
-  life and fate lines before readers confirm their observations.
-- Show a useful simple BaZi summary first and offer a paid detailed analysis
-  only when a reader asks for more depth.
-- The owner has not selected one-time-per-report versus subscription or the
-  detailed-report price. The current LazyOracle listing is USD 0.99. It is also
-  unclear whether only the simple BaZi summary or the whole app should be free.
-  Store pricing and billing remain unchanged while those choices are pending.
+The native iOS/macOS and Android camera buttons now show ready, measuring and
+completed states around the eight-frame capture. The PWA photo flow states when
+a face/hand has been detected and when the result is complete. Palm crease
+questions now include concise localized location guides and clarify that the
+camera measures geometry, not palm creases. PWA interaction tests assert the
+start message, crease guidance and completed state.
+
+Validation after this change:
+
+- PWA lint, all 145 tests and production build pass.
+- Android LazyOracle release Kotlin compile and unit tests pass.
+- Shared SwiftUI Face and Palm screens compile in the Apple Silicon Mac
+  release target. Existing `Sendable` warnings in `MacCamera.swift` remain.
+- The Mac mini route timed out before the later BaZi summary edit could be
+  rebuilt on the Apple target; rerun that compile after the route recovers.
+- No new package was signed or installed; no physical camera session was run.
+
+## BaZi paid report decision and remaining work
+
+- The owner confirmed the summary remains free within the current USD 0.99
+  app, and each expanded BaZi report is a one-time USD 4.99 purchase. Do not
+  change the app price.
+- The concise free summary now appears before the detailed chart. It names the
+  computed Day Master, calculated strength and favourable elements; it does not
+  ask an LLM to recalculate any chart facts.
+- Before showing a live $4.99 pay button, configure Apple and Google consumable
+  products, native purchase flows, Google purchase verification, and a PWA
+  purchase path. Preserve a delivered report in the local notebook.
+- No purchase products or billing code are currently present. Apple/Play
+  product setup and a secure Google verification path remain required before
+  charging users. The PWA currently has no checkout backend.
+- Android20 production review remains in progress. Do not replace it with a
+  successor until a new version has passed these purchase flows and testing.
 
 Continue these changes for native LazyOracle and the PWA together. The production
 review for Android20 is already in progress; any later production update needs a

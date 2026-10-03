@@ -15,6 +15,7 @@ interface BaziScreenProps {
 }
 
 const ELEMENT_CLASS: Record<string, string> = { 木: 'wood', 火: 'fire', 土: 'earth', 金: 'metal', 水: 'water' }
+const STEM_EN: Record<string, string> = { 甲: 'Jia', 乙: 'Yi', 丙: 'Bing', 丁: 'Ding', 戊: 'Wu', 己: 'Ji', 庚: 'Geng', 辛: 'Xin', 壬: 'Ren', 癸: 'Gui' }
 
 function PillarCard({ pillar, title, isDay, en }: { pillar: Pillar; title: string; isDay: boolean; en: boolean }) {
   return (
@@ -71,6 +72,14 @@ export function BaziScreen({ copy, language }: BaziScreenProps) {
         <>
           {chart && (
             <section className="panel chart-panel" data-testid="bazi-chart">
+              <div className="bazi-quick-summary" data-testid="bazi-quick-summary" aria-live="polite">
+                <h2>{t.quickTitle}</h2>
+                <p>{t.quickSummary.replace('{0}', en ? STEM_EN[chart.dayMaster.stem] : chart.dayMaster.stem)
+                  .replace('{1}', en ? ELEMENT_EN[chart.dayMaster.element] : chart.dayMaster.element)
+                  .replace('{2}', t.strength[chart.strength])
+                  .replace('{3}', chart.favourable.map((e) => (en ? ELEMENT_EN[e] : e)).join(en ? ', ' : '、'))}</p>
+                <p className="hint">{t.quickNote}</p>
+              </div>
               <div className="pillars">
                 <PillarCard pillar={chart.pillars.hour} title={t.hour} isDay={false} en={en} />
                 <PillarCard pillar={chart.pillars.day} title={t.day} isDay en={en} />

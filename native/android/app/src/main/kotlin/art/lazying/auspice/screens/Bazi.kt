@@ -70,6 +70,20 @@ fun BaziScreen(navController: NavController) {
         error?.let { Panel(title = t("common.notComputed")) { Text(it, style = Type.serif(16), color = Palette.inkSoft) } }
 
         chart?.let { c ->
+            Panel(title = t("bazi.quickTitle")) {
+                Text(
+                    lf(
+                        t("bazi.quickSummary"),
+                        l(c.dayMaster.stem),
+                        l(c.dayMaster.element),
+                        strengthLine(c.strength),
+                        c.favourable.joinToString(" · ") { l(it) }
+                    ),
+                    style = Type.serif(17), color = Palette.ink
+                )
+                Text(t("bazi.quickNote"), style = Type.sans(13), color = Palette.inkMute)
+            }
+
             Panel {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     PillarColumn(t("bazi.hour"), c.pillars.hour, false, Modifier.weight(1f))

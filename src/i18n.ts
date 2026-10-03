@@ -46,12 +46,12 @@ export interface UICopy {
     tapToReveal: string
   }
   iching: { eyebrow: string; title: string; method: string; coins: string; yarrow: string; cast: string; castAgain: string; primary: string; resulting: string; changing: string; noChange: string; judgement: string; line: string; related: string; rule: string }
-  bazi: { eyebrow: string; title: string; year: string; month: string; day: string; hour: string; dayMaster: string; elements: string; strength: Record<'strong' | 'balanced' | 'weak', string>; favourable: string; luck: string; thisYear: string; hidden: string; compute: string; solarTerms: string }
+  bazi: { eyebrow: string; title: string; year: string; month: string; day: string; hour: string; dayMaster: string; elements: string; strength: Record<'strong' | 'balanced' | 'weak', string>; favourable: string; luck: string; thisYear: string; hidden: string; compute: string; solarTerms: string; quickTitle: string; quickSummary: string; quickNote: string }
   astrology: { eyebrow: string; title: string; ascendant: string; midheaven: string; placements: string; house: string; aspects: string; today: string; noTransits: string; retrograde: string; compute: string }
   fengshui: { eyebrow: string; title: string; gua: string; east: string; west: string; compass: string; enableCompass: string; heading: string; facing: string; good: string; bad: string; noCompass: string; compute: string }
-  palm: { eyebrow: string; title: string; takePhoto: string; choosePhoto: string; analysing: string; noHand: string; processingFailed: string; retake: string; heart: string; heartIndex: string; heartMiddle: string; heartBetween: string; head: string; headStraight: string; headCurved: string; life: string; lifeWide: string; lifeClose: string; fate: string; fatePresent: string; fateAbsent: string; fateUnsure: string; read: string; shape: string; fingersLabel: string; palacesLabel: string; handLabel: string; hint: string }
+  palm: { eyebrow: string; title: string; takePhoto: string; choosePhoto: string; analysing: string; noHand: string; processingFailed: string; retake: string; measureReady: string; measuring: string; measured: string; linesNote: string; heart: string; heartGuide: string; heartIndex: string; heartMiddle: string; heartBetween: string; head: string; headGuide: string; headStraight: string; headCurved: string; life: string; lifeGuide: string; lifeWide: string; lifeClose: string; fate: string; fateGuide: string; fatePresent: string; fateAbsent: string; fateUnsure: string; read: string; shape: string; fingersLabel: string; palacesLabel: string; handLabel: string; hint: string }
   answers: { eyebrow: string; title: string; answers: string; questions: string; open: string; openAgain: string; page: string; hint: string }
-  face: { eyebrow: string; title: string; takePhoto: string; choosePhoto: string; analysing: string; noFace: string; processingFailed: string; read: string; element: string; courts: string; proportions: string; palaces: string; hint: string }
+  face: { eyebrow: string; title: string; takePhoto: string; choosePhoto: string; analysing: string; noFace: string; processingFailed: string; measureReady: string; measuring: string; measured: string; read: string; element: string; courts: string; proportions: string; palaces: string; hint: string }
   almanac: { eyebrow: string; title: string; hint: string; pickDate: string; previousDay: string; nextDay: string; today: string; suitable: string; avoid: string; nothingListed: string; officer: string; clash: string; harm: string; hours: string; pengzu: string; canI: string; read: string }
   chat: { eyebrow: string; title: string; opening: string; placeholder: string; dockPlaceholder: string; send: string; stop: string; clear: string; thinking: string; failed: string; newChat: string; history: string; historyEmpty: string; earlier: string; latest: string }
   modelPrompt: { title: string; body: string; cloudNote: string; useCloud: string; later: string }
@@ -121,20 +121,22 @@ const copies: Record<ReadingLanguage, UICopy> = {
       upright: 'upright', reversed: 'reversed', seed: 'Draw', tapToReveal: 'Tap a card to turn it',
     },
     iching: { eyebrow: 'I Ching', title: 'Cast a hexagram', method: 'Method', coins: 'Three coins', yarrow: 'Yarrow stalks', cast: 'Cast the lines', castAgain: 'Cast again', primary: 'Primary hexagram', resulting: 'Moving toward', changing: 'Changing lines', noChange: 'No changing lines', judgement: 'Judgement', line: 'Line', related: 'Inner, counterpart, reverse', rule: 'Where to read' },
-    bazi: { eyebrow: 'BaZi 四柱', title: 'Four pillars', year: 'Year', month: 'Month', day: 'Day', hour: 'Hour', dayMaster: 'Day master', elements: 'Five elements', strength: { strong: 'strong', balanced: 'balanced', weak: 'weak' }, favourable: 'Favourable', luck: 'Luck cycles', thisYear: 'This year', hidden: 'hidden', compute: 'Compute the chart', solarTerms: 'Solar terms' },
+    bazi: { eyebrow: 'BaZi 四柱', title: 'Four pillars', year: 'Year', month: 'Month', day: 'Day', hour: 'Hour', dayMaster: 'Day master', elements: 'Five elements', strength: { strong: 'strong', balanced: 'balanced', weak: 'weak' }, favourable: 'Favourable', luck: 'Luck cycles', thisYear: 'This year', hidden: 'hidden', compute: 'Compute the chart', solarTerms: 'Solar terms', quickTitle: 'Your free quick reading', quickSummary: 'Your Day Master is {0} {1}. Its calculated strength is {2}; this chart’s favourable elements are {3}.', quickNote: 'This is the free starting point. A deeper reading can explore the ten gods, hidden stems and luck cycles in detail.' },
     astrology: { eyebrow: 'Astrology', title: 'Natal chart', ascendant: 'Ascendant', midheaven: 'Midheaven', placements: 'Placements', house: 'house', aspects: 'Aspects', today: 'Today\'s sky', noTransits: 'No close transits to your natal planets today.', retrograde: 'retrograde', compute: 'Draw the chart' },
     fengshui: { eyebrow: 'Feng Shui 八宅', title: 'Eight Mansions', gua: 'Personal trigram', east: 'East group', west: 'West group', compass: 'Compass', enableCompass: 'Enable the compass', heading: 'Heading', facing: 'Facing', good: 'Favourable', bad: 'Avoid', noCompass: 'No compass on this device; read the sectors from a map.', compute: 'Find my directions' },
     palm: {
       eyebrow: 'Palmistry', title: 'Your hand', takePhoto: 'Take a photo of your palm', choosePhoto: 'Choose a photo', analysing: 'Finding the hand…', processingFailed: 'Image analysis could not start. Please try again or use an updated browser.', noHand: 'No hand found. Fill the frame with an open palm in good light.', retake: 'Try another photo',
-      heart: 'Where does your heart line end?', heartIndex: 'Under the index finger', heartMiddle: 'Under the middle finger', heartBetween: 'Between them',
-      head: 'Is your head line straight or curved?', headStraight: 'Straight', headCurved: 'Curved',
-      life: 'Does your life line sweep wide or hug the thumb?', lifeWide: 'Sweeps wide', lifeClose: 'Hugs the thumb',
-      fate: 'Is there a line running up the centre of your palm?', fatePresent: 'Yes, clear', fateAbsent: 'No', fateUnsure: 'Hard to tell',
+      measureReady: 'Hand found. Check the four crease guides below, then tap Read to finish the measurement.', measuring: 'Measuring your hand…', measured: 'Measurement complete. Hand shape and finger proportions were measured; crease answers came from you.', linesNote: 'The camera finds hand shape, not palm creases. Use these landmarks to answer; choose “Not sure” whenever a line is unclear.',
+      heart: 'Heart line · where does it end?', heartGuide: 'Upper palm, just below the fingers; follow the crease from the little-finger side inward.', heartIndex: 'Under the index finger', heartMiddle: 'Under the middle finger', heartBetween: 'Between them',
+      head: 'Head line · straight or curved?', headGuide: 'Crosses the middle of the palm, usually from below the index finger toward the outer edge.', headStraight: 'Straight', headCurved: 'Curved',
+      life: 'Life line · how does it curve?', lifeGuide: 'Curves around the thumb base, from between thumb and index down toward the wrist.', lifeWide: 'Sweeps wide', lifeClose: 'Hugs the thumb',
+      fate: 'Fate line · can you see one?', fateGuide: 'If visible, it runs up the centre of the palm toward the middle finger; it may be faint or absent.', fatePresent: 'Yes, clear', fateAbsent: 'No', fateUnsure: 'Hard to tell',
       read: 'Read my hand', shape: 'Hand shape', fingersLabel: 'Fingers', palacesLabel: 'Palaces', handLabel: 'Hand', hint: 'The photo never leaves the device.',
     },
     face: {
       eyebrow: 'Face reading', title: 'Your face', takePhoto: 'Take a photo', choosePhoto: 'Choose a photo',
       analysing: 'Finding the face…', processingFailed: 'Image analysis could not start. Please try again or use an updated browser.', noFace: 'No face found. Face the camera in even light, with your whole face in the frame.',
+      measureReady: 'Face found. Tap Read to measure the proportions and finish this scan.', measuring: 'Measuring your face…', measured: 'Measurement complete. The proportions below come from this photo.',
       read: 'Read my face', element: 'Face type', courts: 'Three courts', proportions: 'Proportions', palaces: 'Palaces',
       hint: 'The photo is measured on this device and never leaves it.',
     },
@@ -234,21 +236,23 @@ const copies: Record<ReadingLanguage, UICopy> = {
       upright: '正位', reversed: '逆位', seed: '牌局', tapToReveal: '点击牌面翻开',
     },
     iching: { eyebrow: '周易', title: '起一卦', method: '起卦方式', coins: '三枚铜钱', yarrow: '蓍草', cast: '起卦', castAgain: '再起一卦', primary: '本卦', resulting: '之卦', changing: '变爻', noChange: '无变爻', judgement: '卦辞', line: '爻', related: '互卦 / 错卦 / 综卦', rule: '断法' },
-    bazi: { eyebrow: '八字 四柱', title: '四柱八字', year: '年柱', month: '月柱', day: '日柱', hour: '时柱', dayMaster: '日主', elements: '五行', strength: { strong: '身强', balanced: '中和', weak: '身弱' }, favourable: '喜用', luck: '大运', thisYear: '流年', hidden: '藏干', compute: '排盘', solarTerms: '节气' },
+    bazi: { eyebrow: '八字 四柱', title: '四柱八字', year: '年柱', month: '月柱', day: '日柱', hour: '时柱', dayMaster: '日主', elements: '五行', strength: { strong: '身强', balanced: '中和', weak: '身弱' }, favourable: '喜用', luck: '大运', thisYear: '流年', hidden: '藏干', compute: '排盘', solarTerms: '节气', quickTitle: '免费简要解读', quickSummary: '你的日主为{0}{1}，计算结果为{2}；本盘喜用五行为{3}。', quickNote: '这是免费的入门解读。深入版本会进一步分析十神、藏干与大运。' },
     astrology: { eyebrow: '星座', title: '本命盘', ascendant: '上升', midheaven: '天顶', placements: '行星落座', house: '宫', aspects: '相位', today: '今日星空', noTransits: '今日与本命行星没有紧密的行运相位。', retrograde: '逆行', compute: '绘制星盘' },
     fengshui: { eyebrow: '风水 八宅', title: '八宅方位', gua: '命卦', east: '东四命', west: '西四命', compass: '罗盘', enableCompass: '开启罗盘', heading: '朝向', facing: '面向', good: '吉方', bad: '凶方', noCompass: '此设备没有罗盘，请对照地图查看方位。', compute: '查看我的方位' },
     palm: {
       eyebrow: '手相', title: '你的手', takePhoto: '拍摄手掌', choosePhoto: '选择照片', analysing: '正在识别手掌……', processingFailed: '暂时无法启动图像分析，请重试或使用更新的浏览器。', noHand: '没有识别到手。请在光线充足处张开手掌，占满画面。', retake: '换一张照片',
-      heart: '你的感情线止于哪里？', heartIndex: '食指下方', heartMiddle: '中指下方', heartBetween: '两指之间',
-      head: '你的智慧线是直的还是弯的？', headStraight: '平直', headCurved: '弯曲',
-      life: '你的生命线弧度开阔，还是贴近拇指？', lifeWide: '弧度开阔', lifeClose: '贴近拇指',
-      fate: '掌心中央有一条竖纹（事业线）吗？', fatePresent: '有，清晰', fateAbsent: '没有', fateUnsure: '看不清',
-      read: '解读我的手', shape: '手型', fingersLabel: '五指', palacesLabel: '八宫', handLabel: '掌形', hint: '照片不会离开本设备。',
+      measureReady: '已识别到手掌。先看下方四条掌纹的位置说明，再点击“开始解读”完成测量。', measuring: '正在测量手掌……', measured: '测量完成。手形与手指比例来自图像；掌纹答案由你提供。', linesNote: '相机只识别手形，不识别掌纹。请按位置说明作答；看不清时可选“不确定”。',
+      heart: '感情线 · 末端在哪里？', heartGuide: '在手指下方、手掌上部横向延伸；从小指侧向掌心找。', heartIndex: '食指下方', heartMiddle: '中指下方', heartBetween: '两指之间',
+      head: '智慧线 · 较直还是弯？', headGuide: '横过手掌中部，通常从食指下方向手掌外侧延伸。', headStraight: '较直', headCurved: '较弯',
+      life: '生命线 · 弧度如何？', lifeGuide: '从拇指与食指之间向手腕延伸，沿拇指根部弯曲。', lifeWide: '弧度较大', lifeClose: '贴近拇指',
+      fate: '事业线 · 能看到吗？', fateGuide: '若能看到，会从掌心向上朝中指方向延伸；有些手掌不明显。', fatePresent: '有，较清楚', fateAbsent: '没有', fateUnsure: '看不清',
+      read: '开始解读', shape: '手型', fingersLabel: '五指', palacesLabel: '八宫', handLabel: '掌形', hint: '照片不会离开本设备。',
     },
     face: {
       eyebrow: '面相', title: '你的面相', takePhoto: '拍摄面部', choosePhoto: '选择照片',
       analysing: '正在识别面部……', processingFailed: '暂时无法启动图像分析，请重试或使用更新的浏览器。', noFace: '没有识别到面部。请正面对准镜头，光线均匀，整张脸在画面内。',
-      read: '开始看面相', element: '面型', courts: '三停', proportions: '比例', palaces: '十二宫',
+      measureReady: '已识别到面部。点击“开始解读”测量比例并完成本次分析。', measuring: '正在测量面部……', measured: '测量完成。下方比例由这张照片计算。',
+      read: '开始解读', element: '面型', courts: '三停', proportions: '比例', palaces: '十二宫',
       hint: '照片在本设备上测量，不会离开这台设备。',
     },
     almanac: {

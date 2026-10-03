@@ -30,17 +30,25 @@ loss of supported devices. Android20 is in production review; see the
 [validation receipt](../store/artifacts/android-16kb-2026-10-03.json) and
 [Play submission log](../store/google-play/submission.md).
 
-## Compass and BaZi follow-up — 2026-10-03
+## Vision capture and BaZi follow-up — 2026-10-03
 
 The Feng Shui compass rose now keeps its direction labels fixed and turns the
 needle clockwise to the measured bearing, matching the printed facing and
-sector result on iOS/macOS, Android and the PWA. The shared-device camera and
-palm screens still need a clearer capture-start/complete state and an annotated
-guide showing where the heart, head, life and fate lines are; these remain
-follow-up work. The owner also asked for a useful simple BaZi reading first,
-with an optional paid deeper analysis. The report's purchase model/price and
-whether the whole app should change from its current USD 0.99 store price have
-not yet been decided; no pricing or billing changes have been made. See the
+sector result on iOS/macOS, Android and the PWA. Face and palm capture now show
+when the camera is ready, when the eight-frame measurement is running, and when
+it has completed. Palm questions explain where each crease runs and distinguish
+reader-observed lines from image-measured hand shape and finger proportions.
+The PWA has coverage for these prompts; Android release code compiles and its
+unit tests pass, and the shared SwiftUI screen compiles on the Mac mini.
+
+The owner confirmed a concise free BaZi summary inside the current USD 0.99
+app, followed by an optional one-time USD 4.99 purchase for each detailed
+report. The summary now leads with the computed Day Master, strength and
+favourable elements before the full chart. Do not change the app's price. No
+in-app purchase is wired or store product configured yet: Apple and Google
+products, platform transaction handling, Google purchase verification, and a
+web purchase route need a separate implementation and review. Keep the current
+store releases in review unchanged until that work is ready. See the
 [follow-up handoff](handoffs/2026-10-03-product-followup.md).
 
 ## Current owner decisions — 2026-09-24, native LazyOracle

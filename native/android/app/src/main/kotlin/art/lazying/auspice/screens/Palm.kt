@@ -27,6 +27,7 @@ import androidx.navigation.NavController
 import art.lazying.auspice.*
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.coroutines.yield
 
 private val FINGER_NAMES = mapOf(
     "jupiter" to "Index finger", "saturn" to "Middle finger",
@@ -50,24 +51,31 @@ fun PalmScreen(navController: NavController) {
     var lines by rememberPracticeState("palm.lines", LineTraits())
     var features by rememberPracticeState<PalmFeatures?>("palm.capture", null)
     var error by remember { mutableStateOf<String?>(null) }
+    var measuring by remember { mutableStateOf(false) }
     var reads by remember { mutableIntStateOf(0) }
     LaunchedEffect(features) { Router.palm = features }
 
     LaunchedEffect(reads) {
         if (reads == 0) return@LaunchedEffect
-        val frames = session.captureFrames()
-        if (frames.isEmpty()) { error = t("vision.hold"); return@LaunchedEffect }
-        runCatching {
-            Engines.evaluateAs<PalmFeatures>("palm.capture", buildJsonObject {
-                put("frames", frames)
-                put("lines", buildJsonObject {
-                    put("heart", JsonPrimitive(lines.heart))
-                    put("head", JsonPrimitive(lines.head))
-                    put("life", JsonPrimitive(lines.life))
-                    put("fate", JsonPrimitive(lines.fate))
+        measuring = true
+        yield()
+        try {
+            val frames = session.captureFrames()
+            if (frames.isEmpty()) { error = t("vision.hold"); return@LaunchedEffect }
+            runCatching {
+                Engines.evaluateAs<PalmFeatures>("palm.capture", buildJsonObject {
+                    put("frames", frames)
+                    put("lines", buildJsonObject {
+                        put("heart", JsonPrimitive(lines.heart))
+                        put("head", JsonPrimitive(lines.head))
+                        put("life", JsonPrimitive(lines.life))
+                        put("fate", JsonPrimitive(lines.fate))
+                    })
                 })
-            })
-        }.onSuccess { features = it; Router.palm = it; error = null }.onFailure { error = visionError(it) }
+            }.onSuccess { features = it; Router.palm = it; error = null }.onFailure { error = visionError(it) }
+        } finally {
+            measuring = false
+        }
     }
 
     ScreenScaffold(
@@ -111,10 +119,10 @@ fun PalmScreen(navController: NavController) {
                 }
             }
             session.message?.let { Text(it, style = Type.sans(13), color = Palette.inkMute) }
-            Text(t(if(session.ready) "vision.ready" else "vision.hold"), style = Type.sans(13), color = Palette.inkMute)
+            Text(t(when { measuring -> "vision.measuring"; features != null -> "vision.complete"; session.ready -> "vision.ready"; else -> "vision.hold" }), style = Type.sans(13), color = if (measuring) Palette.gold else Palette.inkMute)
             PrimaryButton(
-                if (features == null) t("palm.read") else t("palm.readAgain"),
-                enabled = session.ready
+                if (measuring) t("vision.measuring") else if (features == null) t("palm.read") else t("palm.readAgain"),
+                enabled = session.ready && !measuring
             ) { reads++ }
             Text(t("face.privacy"), style = Type.sans(12), color = Palette.inkMute)
         }
@@ -124,16 +132,16 @@ fun PalmScreen(navController: NavController) {
                 t("palm.linesNote"),
                 style = Type.serif(16), color = Palette.inkSoft
             )
-            LineChoice(l("Heart line ends"), listOf("unsure" to "Not sure", "index" to "Under the index", "middle" to "Under the middle", "between" to "Between them"), lines.heart) {
+            LineChoice(l("Heart line ends"), t("palm.heartGuide"), listOf("unsure" to "Not sure", "index" to "Under the index", "middle" to "Under the middle", "between" to "Between them"), lines.heart) {
                 lines = lines.copy(heart = it); features = features?.copy(lines = lines); Router.palm = features
             }
-            LineChoice(l("Head line"), listOf("unsure" to "Not sure", "straight" to "Straight", "curved" to "Curved"), lines.head) {
+            LineChoice(l("Head line"), t("palm.headGuide"), listOf("unsure" to "Not sure", "straight" to "Straight", "curved" to "Curved"), lines.head) {
                 lines = lines.copy(head = it); features = features?.copy(lines = lines); Router.palm = features
             }
-            LineChoice(l("Life line"), listOf("unsure" to "Not sure", "wide" to "Sweeps wide", "close" to "Hugs the thumb"), lines.life) {
+            LineChoice(l("Life line"), t("palm.lifeGuide"), listOf("unsure" to "Not sure", "wide" to "Sweeps wide", "close" to "Hugs the thumb"), lines.life) {
                 lines = lines.copy(life = it); features = features?.copy(lines = lines); Router.palm = features
             }
-            LineChoice(l("Fate line"), listOf("present" to "Present", "absent" to "Absent", "unsure" to "Not sure"), lines.fate) {
+            LineChoice(l("Fate line"), t("palm.fateGuide"), listOf("present" to "Present", "absent" to "Absent", "unsure" to "Not sure"), lines.fate) {
                 lines = lines.copy(fate = it); features = features?.copy(lines = lines); Router.palm = features
             }
         }
@@ -178,9 +186,10 @@ fun PalmScreen(navController: NavController) {
 }
 
 @Composable
-private fun LineChoice(label: String, options: List<Pair<String, String>>, selected: String, onPick: (String) -> Unit) {
+private fun LineChoice(label: String, guidance: String, options: List<Pair<String, String>>, selected: String, onPick: (String) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
         FieldLabel(label)
+        Text(guidance, style = Type.sans(13), color = Palette.inkMute)
         FlowRowOf {
             options.forEach { (key, title) ->
                 Chip(l(title), null, selected == key) { onPick(key) }

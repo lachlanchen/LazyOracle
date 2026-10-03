@@ -26,6 +26,22 @@ struct BaziScreen: View {
             }
 
             if let chart {
+                Panel(title: t("bazi.quickTitle")) {
+                    Text(lf(
+                        t("bazi.quickSummary"),
+                        l(chart.dayMaster.stem),
+                        l(chart.dayMaster.element),
+                        strengthLine(chart),
+                        chart.favourable.map(l).joined(separator: " · ")
+                    ))
+                    .font(Typeface.serif(17))
+                    .foregroundStyle(Palette.ink)
+                    .fixedSize(horizontal: false, vertical: true)
+                    Text(t("bazi.quickNote"))
+                        .font(Typeface.sans(13))
+                        .foregroundStyle(Palette.inkMute)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 pillarsPanel(chart)
                 dayMasterPanel(chart)
                 elementsPanel(chart)

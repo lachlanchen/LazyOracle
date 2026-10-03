@@ -5,6 +5,7 @@ struct FaceScreen: View {
     @State private var camera = LandmarkSession(kind: .face)
     @SavedPractice("face.features") private var features: FaceFeatures? = nil
     @State private var error: String?
+    @State private var measuring = false
     @SavedPractice("face.captured") private var captured = false
 
     private let courtNames = ["upper": "Upper court", "middle": "Middle court", "lower": "Lower court"]
@@ -42,14 +43,15 @@ struct FaceScreen: View {
                 if let message = camera.message {
                     Text(message).font(Typeface.sans(13)).foregroundStyle(Palette.inkMute)
                 }
-                Text(t(camera.ready ? "vision.ready" : "vision.hold")).font(Typeface.sans(13)).foregroundStyle(Palette.inkMute)
+                Text(t(measuring ? "vision.measuring" : captured ? "vision.complete" : camera.ready ? "vision.ready" : "vision.hold"))
+                    .font(Typeface.sans(13)).foregroundStyle(measuring ? Palette.gold : Palette.inkMute)
                 Button(action: read) {
-                    Label(captured ? t("palm.readAgain") : t("face.read"), systemImage: "face.smiling")
+                    Label(measuring ? t("vision.measuring") : captured ? t("palm.readAgain") : t("face.read"), systemImage: "face.smiling")
                 }
                 .buttonStyle(PrimaryButtonStyle())
                 .accessibilityIdentifier("face.measure")
-                .disabled(!camera.ready)
-                .opacity(camera.ready ? 1 : 0.5)
+                .disabled(!camera.ready || measuring)
+                .opacity(camera.ready && !measuring ? 1 : 0.5)
                 Text(t("face.privacy"))
                     .font(Typeface.sans(12))
                     .foregroundStyle(Palette.inkMute)
@@ -194,16 +196,22 @@ struct FaceScreen: View {
     }
 
     private func read() {
-        let frames = camera.captureFrames()
-        guard !frames.isEmpty else { error = t("vision.hold"); return }
-        do {
-            let measured = try Engines.shared.evaluate("face.capture", ["frames": frames], as: FaceFeatures.self)
-            features = measured
-            Router.shared.face = measured
-            error = nil
-            captured = true
-        } catch {
-            self.error = visionError(error)
+        guard !measuring else { return }
+        measuring = true
+        Task { @MainActor in
+            await Task.yield()
+            defer { measuring = false }
+            let frames = camera.captureFrames()
+            guard !frames.isEmpty else { error = t("vision.hold"); return }
+            do {
+                let measured = try Engines.shared.evaluate("face.capture", ["frames": frames], as: FaceFeatures.self)
+                features = measured
+                Router.shared.face = measured
+                error = nil
+                captured = true
+            } catch {
+                self.error = visionError(error)
+            }
         }
     }
 }

@@ -25,6 +25,7 @@ export function FaceScreen({ copy, language }: FaceScreenProps) {
   const [features, setFeatures] = usePracticeState<FaceFeatures | null>('face.features', null)
   const [question, setQuestion] = usePracticeState('face.question', '')
   const [round, setRound] = usePracticeState('face.round', 0)
+  const [measuring, setMeasuring] = useState(false)
   const cameraRef = useRef<HTMLInputElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const t = copy.face
@@ -52,10 +53,13 @@ export function FaceScreen({ copy, language }: FaceScreenProps) {
     }
   }
 
-  const read = () => {
+  const read = async () => {
     if (!landmarks) return
+    setMeasuring(true)
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
     setFeatures(faceFeatures(landmarks))
     setRound((current) => current + 1)
+    setMeasuring(false)
   }
 
   const context = features ? faceContext(features, language, question) : null
@@ -99,12 +103,13 @@ export function FaceScreen({ copy, language }: FaceScreenProps) {
 
       {phase === 'found' && landmarks && (
         <section className="panel">
+          <p className="status" role="status">{measuring ? t.measuring : features ? t.measured : t.measureReady}</p>
           <label className="field">
             <span>{copy.common.question}</span>
             <textarea value={question} onChange={(event) => setQuestion(event.target.value)} placeholder={copy.common.questionPlaceholder} rows={2} />
           </label>
-          <button type="button" className="primary-button" onClick={read} data-testid="face-read">
-            <ScanFace size={16} /> {t.read}
+          <button type="button" className="primary-button" onClick={() => void read()} disabled={measuring} data-testid="face-read">
+            <ScanFace size={16} /> {measuring ? t.measuring : t.read}
           </button>
         </section>
       )}

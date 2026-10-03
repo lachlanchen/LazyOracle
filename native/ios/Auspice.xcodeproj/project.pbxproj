@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8B167EF51EEF48A05A048054 /* BaziReport.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 47B26AD630449A2E8F1622A4 /* BaziReport.storekit */; };
 		91E2051D6C93565EC952EA83 /* AuspiceUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B6F9FF10DA1E06F0C715E9A /* AuspiceUITests.swift */; };
 		A1000101 /* MediaPipeTasksVision.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = A1000111 /* MediaPipeTasksVision.xcframework */; };
 		A1000102 /* MediaPipeTasksCommon.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = A1000112 /* MediaPipeTasksCommon.xcframework */; };
@@ -24,6 +25,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		47B26AD630449A2E8F1622A4 /* BaziReport.storekit */ = {isa = PBXFileReference; includeInIndex = 1; path = BaziReport.storekit; sourceTree = "<group>"; };
 		6B6F9FF10DA1E06F0C715E9A /* AuspiceUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuspiceUITests.swift; sourceTree = "<group>"; };
 		78E970ABA8F6B22478D2B406 /* AuspiceUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AuspiceUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1000001 /* Auspice.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Auspice.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -67,6 +69,7 @@
 			isa = PBXGroup;
 			children = (
 				6B6F9FF10DA1E06F0C715E9A /* AuspiceUITests.swift */,
+				47B26AD630449A2E8F1622A4 /* BaziReport.storekit */,
 			);
 			name = AuspiceUITests;
 			path = AuspiceUITests;
@@ -191,6 +194,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8B167EF51EEF48A05A048054 /* BaziReport.storekit in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

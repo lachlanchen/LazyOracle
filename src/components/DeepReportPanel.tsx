@@ -76,6 +76,11 @@ export function DeepReportPanel({ profile, language }: { profile: BirthProfile; 
   async function recover() {
     setBusy(true); setMessage(null)
     try {
+      const response = await fetch('https://oracle.lazying.art/v1/reports/catalog', { signal: AbortSignal.timeout(10000) })
+      if (response.ok) {
+        const catalog = await response.json() as { web: boolean }
+        setAvailable(catalog.web && !Capacitor.isNativePlatform())
+      }
       const result = await reportRequest<{ reports: DeepReport[] }>('list')
       for (const row of result.reports) {
         save(row)

@@ -38,3 +38,6 @@ native/macos/build/
 
 # Server bundle uses the exact same deterministic BaZi source as clients.
 ops/report_engine.cjs
+
+# StoreKit UI-test fixture copied from native/tests by auspice-sync.sh.
+native/ios/AuspiceUITests/BaziReport.storekit

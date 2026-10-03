@@ -1,4 +1,5 @@
 import XCTest
+import StoreKitTest
 
 final class AuspiceUITests: XCTestCase {
     let app = XCUIApplication()
@@ -23,21 +24,25 @@ final class AuspiceUITests: XCTestCase {
         shot.name = name; shot.lifetime = .keepAlways; add(shot)
     }
 
-    func testBaziFreeSummaryBeforeOptionalPurchase() {
+    func testBaziFreeSummaryBeforeOptionalPurchase() throws {
+        let session = try SKTestSession(configurationFileNamed: "BaziReport")
+        session.disableDialogs = true
+        session.clearTransactions()
         launch()
         open("bazi")
-        let add = app.buttons["Add your birth details"]
+        let add = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Add your birth details")).firstMatch
         if add.exists {
             add.tap()
             let place = app.textFields["birth.place"]
             for _ in 0..<5 where !place.isHittable { app.swipeUp() }
             XCTAssertTrue(place.exists)
             place.tap(); place.typeText("Shanghai")
+            app.swipeUp(); app.swipeUp()
             let save = app.buttons["birth.save"]
             for _ in 0..<5 where !save.isHittable { app.swipeUp() }
             save.tap()
         }
-        let summary = app.staticTexts["Your free quick reading"]
+        let summary = app.staticTexts["YOUR FREE QUICK READING"]
         XCTAssertTrue(summary.waitForExistence(timeout: 15))
         for _ in 0..<5 where !summary.isHittable { app.swipeDown() }
         evidence("bazi-free-summary")
@@ -48,7 +53,7 @@ final class AuspiceUITests: XCTestCase {
         XCTAssertFalse(app.staticTexts["report.unavailable"].exists)
         evidence("bazi-optional-purchase")
         app.terminate(); launch(); open("bazi")
-        XCTAssertFalse(app.buttons["Add your birth details"].exists)
+        XCTAssertFalse(add.exists)
         XCTAssertTrue(summary.waitForExistence(timeout: 15))
     }
 

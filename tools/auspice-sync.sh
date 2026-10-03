@@ -11,6 +11,7 @@ cd "$REPO"
 python3 tools/auspice-sync-prompt.py
 python3 tools/auspice-build-strings.py
 node tools/build-engine-bundle.mjs
+install -m 644 native/tests/BaziReport.storekit native/ios/AuspiceUITests/BaziReport.storekit
 mkdir -p native/ios/Auspice/Resources
 cp native/shared/lazyoracle-engines.js native/ios/Auspice/Resources/
 rsync -az --delete --exclude Frameworks --exclude build.sh --exclude release -e ssh native/ios/ echomind-kvm-macos:~/Projects/Auspice/

@@ -1,0 +1,110 @@
+{
+  "date": "2026-10-03",
+  "identity": "art.lazying.lazyoracle",
+  "pricing": {
+    "app_usd": 0.99,
+    "quick_summary": "included",
+    "detailed_report_usd": 4.99,
+    "billing": "one-time per frozen report; no subscription"
+  },
+  "source": {
+    "native_production": "0d3e8af",
+    "ios_local_storekit_test_project": "c1083fd",
+    "web_and_privacy_source": "bc085b3; subsequent support/listing corrections recorded by the release commit"
+  },
+  "ios": {
+    "version": "1.0.0",
+    "build": 21,
+    "ipa_sha256": "0257cf6362b2e3d277a0f6ccfb8297606fab73f738a782b53dcde5a9e6ef0101",
+    "build_id": "2080155c-ee35-4d8e-9cd1-b6b0ebaed294",
+    "upload_delivery": "2080155c-ee35-4d8e-9cd1-b6b0ebaed294",
+    "validation": "PASSED; archive, export, strict code signature, Apple upload validation",
+    "app_review": "WAITING_FOR_REVIEW",
+    "review_submission": "4324ad64-76da-4556-b0e5-321aca1c4f2a",
+    "submitted_at": "2026-10-03T10:05:27.749Z",
+    "release": "AFTER_APPROVAL",
+    "internal_testflight": "IN_BETA_TESTING",
+    "public_beta_review": "WAITING_FOR_REVIEW",
+    "test_link": "https://testflight.apple.com/join/JZJM3PFb",
+    "consumable": {
+      "id": "6818739496",
+      "sku": "art.lazying.lazyoracle.bazi.deep_report",
+      "state": "WAITING_FOR_REVIEW",
+      "submitted_with_app": true,
+      "base_price_usd": 4.99,
+      "territories": 175,
+      "review_screenshot": "COMPLETE"
+    },
+    "privacy": "Published: optional birth inputs, selected reading/question, face/hand geometry, installation ID and purchase history; app functionality; no tracking"
+  },
+  "android": {
+    "version": "1.0.0",
+    "build": 21,
+    "aab_sha256": "ab3b8462c4d61cd4e20047892034576e69b140a56837f745f65ad9dff67b596f",
+    "internal": "Available to internal testers",
+    "production": "Changes in review; automated quick checks running at submission",
+    "release": "100% rollout after approval; managed publishing off; existing 172 countries unchanged",
+    "test_link": "https://play.google.com/apps/internaltest/4701677916092886102",
+    "fallback_version": 11,
+    "newly_excluded_devices": 0,
+    "product": {
+      "sku": "bazi_deep_report",
+      "state": "ACTIVE",
+      "purchase_option": "standard-report",
+      "base_price_usd": 4.99,
+      "regions": 174
+    },
+    "data_safety": "Saved and submitted: optional birth inputs/questions shared with narrative provider, purchase history/installation IDs collected, encrypted transport, no account required, support deletion link",
+    "service_account_access": "Owner-approved LazyOracle-only View app info/quality, View financial data and purchases API, Manage orders; no publishing or account-admin expansion",
+    "warnings": "Existing R8 mapping and third-party native debug-symbol warnings only; no release errors",
+    "alignment": "Bundle PAGE_ALIGNMENT_16K; all 7 packaged 64-bit ELF libraries have LOAD alignment >=16KB"
+  },
+  "web": {
+    "status": "LIVE",
+    "primary": "https://oracle.lazying.art",
+    "mirror": "https://oracle-fast.lazying.art",
+    "gateway": "Primary authoritative SQLite ledger; mirror uses primary report API",
+    "stripe": "USD499-cent one-time configured Price; server verification and signed webhook; production checkout available",
+    "previous_release": "native-study-legal-0a915e4; pre-billing unit/Caddy/web rollback in protected operator handoff"
+  },
+  "features": [
+    "Free deterministic BaZi summary before optional purchase",
+    "Frozen chart, language and question; seven-section deep report",
+    "Server-verified Apple, Google and Stripe purchases",
+    "Durable purchase recovery before store finish/consumption",
+    "Failed generation can retry without payment",
+    "Saved report history, offline reading and export",
+    "Feng Shui direction correction and explicit face/palm measurement states with crease guides"
+  ],
+  "validation": {
+    "shared_web_tests": 153,
+    "backend_purchase_delivery_tests": 19,
+    "gateway_tests": 3,
+    "android_jvm_tests": 10,
+    "ios_local_storekit_transactions": {
+      "count": 3,
+      "environment": "Apple Xcode local StoreKit with test-only delivery transport",
+      "cases": [
+        "Purchase, deliver, archive, finish, offline reopening",
+        "Failed delivery retains unfinished transaction; blocks duplicate purchase; recovery succeeds",
+        "Ask to Buy pending grants nothing; approval delivers"
+      ]
+    },
+    "ios_ui": "Free summary, optional localized USD4.99 offer, birth-profile relaunch persistence passed",
+    "stripe_test_mode": "Declined test card grants nothing; successful test Checkout + signed webhook produced all seven sections; 8143-character export and offline re-open passed",
+    "production_boundary_checks": "Catalog 200; missing capability 401; missing qualification key 401; unknown admin route 404; chat health and mirror CORS pass",
+    "limitations": [
+      "No completed Apple App Store or Google Play store sandbox purchase this turn",
+      "No live charged payment used for qualification",
+      "No new physical-camera validation this turn",
+      "Recovery depends on retained installation capability; no account or cross-device synchronization"
+    ]
+  },
+  "rollback": {
+    "ios_previous_build": 20,
+    "android_previous_build": 20,
+    "artifacts": "Current and immediately previous signed packages retained privately; builds remain in store history",
+    "classic_auspice": "Unchanged"
+  },
+  "status_checked_at": "2026-10-03T10:17:29+00:00"
+}

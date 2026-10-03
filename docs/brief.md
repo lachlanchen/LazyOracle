@@ -44,11 +44,12 @@ unit tests pass, and the shared SwiftUI screen compiles on the Mac mini.
 The owner confirmed a concise free BaZi summary inside the current USD 0.99
 app, followed by an optional one-time USD 4.99 purchase for each detailed
 report. The summary now leads with the computed Day Master, strength and
-favourable elements before the full chart. Do not change the app's price. No
-in-app purchase is wired or store product configured yet: Apple and Google
-products, platform transaction handling, Google purchase verification, and a
-web purchase route need a separate implementation and review. Keep the current
-store releases in review unchanged until that work is ready. See the
+favourable elements before the full chart. Do not change the app's price.
+StoreKit 2, Play Billing and Stripe purchases now have verified delivery,
+interrupted-purchase recovery, offline history and export. Apple and Google
+products are configured; release status and qualification limits are recorded
+in the [purchase release receipt](../store/artifacts/bazi-report-purchases-2026-10-03.json).
+The implementation and deployment contract is in [BaZi reports](billing/bazi-reports.md). See the
 [follow-up handoff](handoffs/2026-10-03-product-followup.md).
 
 ## Current owner decisions — 2026-09-24, native LazyOracle
